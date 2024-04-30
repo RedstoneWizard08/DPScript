@@ -1,0 +1,260 @@
+[
+    Import(
+        "some_module",
+    ),
+    Var(
+        Var {
+            name: "TEXT_PREFIX",
+            ty: Some(
+                "Component",
+            ),
+            value: Operation(
+                Operation {
+                    lhs: Component(
+                        Component {
+                            from_expr: None,
+                            values: {
+                                "text": String(
+                                    "Hello, ",
+                                ),
+                            },
+                        },
+                    ),
+                    op: "+",
+                    rhs: Nbt(
+                        Nbt {
+                            ty: Some(
+                                "component",
+                            ),
+                            data: {
+                                "color": String(
+                                    "blue",
+                                ),
+                            },
+                        },
+                    ),
+                },
+            ),
+            is_const: true,
+        },
+    ),
+    Var(
+        Var {
+            name: "PLAYER",
+            ty: Some(
+                "Entity",
+            ),
+            value: Selector(
+                Selector {
+                    entity: "@s",
+                    params: {},
+                },
+            ),
+            is_const: true,
+        },
+    ),
+    Func(
+        Func {
+            name: "say_something",
+            custom_name: None,
+            args: [],
+            ret: None,
+            body: [
+                Command(
+                    Call {
+                        func: "tellraw",
+                        args: [
+                            Selector(
+                                Selector {
+                                    entity: "@a",
+                                    params: {},
+                                },
+                            ),
+                            Array(
+                                [
+                                    Ident(
+                                        "TEXT_PREFIX",
+                                    ),
+                                    Operation(
+                                        Operation {
+                                            lhs: Component(
+                                                Component {
+                                                    from_expr: Some(
+                                                        Ident(
+                                                            "PLAYER",
+                                                        ),
+                                                    ),
+                                                    values: {},
+                                                },
+                                            ),
+                                            op: "+",
+                                            rhs: Nbt(
+                                                Nbt {
+                                                    ty: Some(
+                                                        "component",
+                                                    ),
+                                                    data: {
+                                                        "color": String(
+                                                            "red",
+                                                        ),
+                                                    },
+                                                },
+                                            ),
+                                        },
+                                    ),
+                                    Component(
+                                        Component {
+                                            from_expr: None,
+                                            values: {
+                                                "text": String(
+                                                    "!",
+                                                ),
+                                            },
+                                        },
+                                    ),
+                                ],
+                            ),
+                        ],
+                        is_command: true,
+                    },
+                ),
+            ],
+        },
+    ),
+    Func(
+        Func {
+            name: "say_hi",
+            custom_name: Some(
+                "_:say_hi",
+            ),
+            args: [],
+            ret: None,
+            body: [
+                Call(
+                    Call {
+                        func: "say_something",
+                        args: [],
+                        is_command: false,
+                    },
+                ),
+            ],
+        },
+    ),
+    Func(
+        Func {
+            name: "test_floats",
+            custom_name: None,
+            args: [],
+            ret: Some(
+                "float",
+            ),
+            body: [
+                Var(
+                    Var {
+                        name: "result",
+                        ty: None,
+                        value: Operation(
+                            Operation {
+                                lhs: Float(
+                                    0.1,
+                                ),
+                                op: "+",
+                                rhs: Float(
+                                    0.2,
+                                ),
+                            },
+                        ),
+                        is_const: false,
+                    },
+                ),
+                Command(
+                    Call {
+                        func: "tellraw",
+                        args: [
+                            Selector(
+                                Selector {
+                                    entity: "@a",
+                                    params: {},
+                                },
+                            ),
+                            Array(
+                                [
+                                    Component(
+                                        Component {
+                                            from_expr: Some(
+                                                Ident(
+                                                    "result",
+                                                ),
+                                            ),
+                                            values: {},
+                                        },
+                                    ),
+                                ],
+                            ),
+                        ],
+                        is_command: true,
+                    },
+                ),
+                Return(
+                    Ident(
+                        "result",
+                    ),
+                ),
+            ],
+        },
+    ),
+    Func(
+        Func {
+            name: "test_return",
+            custom_name: Some(
+                "_:test_return",
+            ),
+            args: [],
+            ret: None,
+            body: [
+                Var(
+                    Var {
+                        name: "result",
+                        ty: None,
+                        value: Call(
+                            Call {
+                                func: "test_floats",
+                                args: [],
+                                is_command: false,
+                            },
+                        ),
+                        is_const: false,
+                    },
+                ),
+                Command(
+                    Call {
+                        func: "tellraw",
+                        args: [
+                            Selector(
+                                Selector {
+                                    entity: "@a",
+                                    params: {},
+                                },
+                            ),
+                            Array(
+                                [
+                                    Component(
+                                        Component {
+                                            from_expr: Some(
+                                                Ident(
+                                                    "result",
+                                                ),
+                                            ),
+                                            values: {},
+                                        },
+                                    ),
+                                ],
+                            ),
+                        ],
+                        is_command: true,
+                    },
+                ),
+            ],
+        },
+    ),
+]

@@ -1,0 +1,74 @@
+plugins {
+	id 'maven-publish'
+	id("org.quiltmc.loom") version "1.6.5"
+}
+
+base {
+	archivesName = project.archives_base_name
+}
+
+version = "$project.version+${libs.versions.minecraft.get()}"
+group = project.maven_group
+
+repositories {
+	mavenCentral()
+}
+
+loom {
+	mods {
+		"jline4mcdsrv" {
+			sourceSet("main")
+		}
+	}
+}
+
+dependencies {
+	minecraft libs.minecraft
+	mappings variantOf(libs.quilt.mappings) { classifier 'intermediary-v2' }
+	modImplementation libs.quilt.loader
+
+	modImplementation include("org.jline:jline:3.26.1")
+	modImplementation include("org.jline:jline-terminal-jansi:3.26.1")
+    modImplementation "org.quiltmc:qsl:8.0.0-alpha.13+1.20.4"
+
+	include modApi("com.moandjiezana.toml:toml4j:0.7.2") {
+		exclude(module: "gson")
+	}
+}
+
+processResources {
+	inputs.properties 'version': version, 'group': project.group
+
+	filesMatching('quilt.mod.json') {
+		expand 'version': version, 'group': project.group
+	}
+}
+
+tasks.withType(JavaCompile).configureEach {
+	it.options.encoding = 'UTF-8'
+	it.options.release = 17
+}
+
+java {
+	sourceCompatibility = JavaVersion.VERSION_17
+	targetCompatibility = JavaVersion.VERSION_17
+
+	withSourcesJar()
+}
+
+jar {
+	from('LICENSE.md') {
+		rename { "${it}_${base.archivesName.get()}" }
+	}
+}
+
+publishing {
+	publications {
+		mavenJava(MavenPublication) {
+			from components.java
+		}
+	}
+
+	repositories {
+	}
+}

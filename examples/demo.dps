@@ -1,0 +1,68 @@
+// Datapack metadata is defined in the `pack.toml` file in the source root.
+
+// This is an import. It will include code from other
+// files in your datapack.
+import some_module;
+
+// This is a constant value. This is evaluated at compile-time
+// and its usages will be replaced with its result.
+// Components can be created from string literals by adding
+// the `c#` prefix.
+const TEXT_PREFIX: Component = c#"Hello, " + nbt(component) { color: "blue" };
+// By adding NBT data (created using `nbt(...) { ... }`) to a component,
+// it will apply the data in it, overwriting any existing values.
+// When creating NBT data like this, you can omit the type (the `(component)` part),
+// but you won't get key/value checking at compile-time and you won't
+// get auto-completion (when I get around to making a language server).
+// The type above (the `: Component` part) is optional, it can be inferred.
+
+const PLAYER: Entity = entity(@s) {};
+// This entity selector is used to replace all usages of the variable
+// at compile-time.
+// The `{}` at the end would represent the `[...]` part of a normal
+// entity selector (like `@e[...]`). This `{}` can be omitted.
+
+// This function will not actually have this name.
+// It will be renamed to something like `__dpscript_fn__[file name]__[function name]`
+// to avoid issues with multiple functions.
+fn say_something() {
+    // Commands can be run by adding the `/` prefix and calling
+    // them like functions.
+    // Creating a component from an entity will display its name.
+    /tellraw(@a, [TEXT_PREFIX, component(PLAYER) + nbt(component) { color: "red" }, c#"!"]);
+}
+
+// This function will be named `[namespace]:say_hi`.
+// The `"_:"` in the `name` attribute will be expanded to `"namespace:"`.
+#[name = "_:say_hi"]
+fn say_hi() {
+    // Calling other functions works like this.
+    say_something();
+}
+
+fn test_floats() -> float {
+    // You can use floats! They are stored in /data and work*!
+    // Variables are stored and retrieved from data storage.
+    let result = 0.1 + 0.2; // JS can't do this, but can Minecraft?
+
+    // Components can be created from variables to display their value.
+    /tellraw(@a, [component(result)]);
+
+    // This is returned as a reference to another position in storage.
+    return result;
+}
+
+#[name = "_:test_return"]
+fn test_return() {
+    // Getting return values is this easy!
+    let result = test_floats();
+
+    // Tellraw it!
+    /tellraw(@a, [component(result)]);
+}
+
+// Other syntax:
+// - Identifiers: `id#"namespace:id"`
+// - Interpret variable as value: `@[expr]@`
+
+// *NOTE: Floats/doubles operations require a mod. This is not implemented in vanilla... yet!
