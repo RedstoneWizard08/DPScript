@@ -1,0 +1,209 @@
+(
+    file: "examples/demo.dps",
+    source: "// Datapack metadata is defined in the `pack.toml` file in the source root.\n\n// This is an import. It will include code from other\n// files in your datapack.\nimport some_module;\n\n// This is a constant value. This is evaluated at compile-time\n// and its usages will be replaced with its result.\n// Components can be created from string literals by adding\n// the `c#` prefix.\nconst TEXT_PREFIX: Component = c#\"Hello, \" + nbt(component) { color: \"blue\" };\n// By adding NBT data (created using `nbt(...) { ... }`) to a component,\n// it will apply the data in it, overwriting any existing values.\n// When creating NBT data like this, you can omit the type (the `(component)` part),\n// but you won\'t get key/value checking at compile-time and you won\'t\n// get auto-completion (when I get around to making a language server).\n// The type above (the `: Component` part) is optional, it can be inferred.\n\nconst PLAYER: Entity = entity(@s) {};\n// This entity selector is used to replace all usages of the variable\n// at compile-time.\n// The `{}` at the end would represent the `[...]` part of a normal\n// entity selector (like `@e[...]`). This `{}` can be omitted.\n\n// This function will not actually have this name.\n// It will be renamed to something like `__dpscript_fn__[file name]__[function name]`\n// to avoid issues with multiple functions.\nfn say_something() {\n    // Commands can be run by adding the `/` prefix and calling\n    // them like functions.\n    // Creating a component from an entity will display its name.\n    /tellraw(@a, [TEXT_PREFIX, component(PLAYER) + nbt(component) { color: \"red\" }, c#\"!\"]);\n}\n\n// This function will be named `[namespace]:say_hi`.\n// The `\"_:\"` in the `name` attribute will be expanded to `\"namespace:\"`.\n#[name = \"_:say_hi\"]\nfn say_hi() {\n    // Calling other functions works like this.\n    say_something();\n}\n\nfn test_floats() -> float {\n    // You can use floats! They are stored in /data and work*!\n    // Variables are stored and retrieved from data storage.\n    let result = 0.1 + 0.2; // JS can\'t do this, but can Minecraft?\n\n    // Components can be created from variables to display their value.\n    /tellraw(@a, [component(result)]);\n\n    // This is returned as a reference to another position in storage.\n    return result;\n}\n\n#[name = \"_:test_return\"]\nfn test_return() {\n    // Getting return values is this easy!\n    let result = test_floats();\n\n    // Tellraw it!\n    /tellraw(@a, [component(result)]);\n}\n\n// Other syntax:\n// - Identifiers: `id#\"namespace:id\"`\n// - Interpret variable as value: `@[expr]@`\n\n// *NOTE: Floats/doubles operations require a mod. This is not implemented in vanilla... yet!\n",
+    config: (
+        pack: (
+            name: "My Pack",
+            namespace: "my_pack",
+        ),
+        version: (
+            minecraft: "1.20.4",
+        ),
+    ),
+    functions: {
+        "say_something": ("my_pack:examples/demo.dps_say_something", (
+            name: "say_something",
+            custom_name: None,
+            args: [],
+            ret: None,
+            body: [
+                Command((
+                    func: "tellraw",
+                    args: [
+                        Selector((
+                            entity: "@a",
+                            params: {},
+                        )),
+                        Array([
+                            Ident("TEXT_PREFIX"),
+                            Operation((
+                                lhs: Component((
+                                    from_expr: Some(Ident("PLAYER")),
+                                    values: {},
+                                )),
+                                op: "+",
+                                rhs: Nbt((
+                                    ty: Some("component"),
+                                    data: {
+                                        "color": String("red"),
+                                    },
+                                )),
+                            )),
+                            Component((
+                                from_expr: None,
+                                values: {
+                                    "text": String("!"),
+                                },
+                            )),
+                        ]),
+                    ],
+                    is_command: true,
+                )),
+            ],
+        )),
+        "say_hi": ("_:say_hi", (
+            name: "say_hi",
+            custom_name: Some("_:say_hi"),
+            args: [],
+            ret: None,
+            body: [
+                Call((
+                    func: "say_something",
+                    args: [],
+                    is_command: false,
+                )),
+            ],
+        )),
+        "test_floats": ("my_pack:examples/demo.dps_test_floats", (
+            name: "test_floats",
+            custom_name: None,
+            args: [],
+            ret: Some("float"),
+            body: [
+                Var((
+                    name: "result",
+                    ty: None,
+                    value: Operation((
+                        lhs: Float(0.1),
+                        op: "+",
+                        rhs: Float(0.2),
+                    )),
+                    is_const: false,
+                )),
+                Command((
+                    func: "tellraw",
+                    args: [
+                        Selector((
+                            entity: "@a",
+                            params: {},
+                        )),
+                        Array([
+                            Component((
+                                from_expr: Some(Ident("result")),
+                                values: {},
+                            )),
+                        ]),
+                    ],
+                    is_command: true,
+                )),
+                Return(Ident("result")),
+            ],
+        )),
+        "test_return": ("_:test_return", (
+            name: "test_return",
+            custom_name: Some("_:test_return"),
+            args: [],
+            ret: None,
+            body: [
+                Var((
+                    name: "result",
+                    ty: None,
+                    value: Call((
+                        func: "test_floats",
+                        args: [],
+                        is_command: false,
+                    )),
+                    is_const: false,
+                )),
+                Command((
+                    func: "tellraw",
+                    args: [
+                        Selector((
+                            entity: "@a",
+                            params: {},
+                        )),
+                        Array([
+                            Component((
+                                from_expr: Some(Ident("result")),
+                                values: {},
+                            )),
+                        ]),
+                    ],
+                    is_command: true,
+                )),
+            ],
+        )),
+    },
+    globals: {
+        "PLAYER": ("my_pack:examples/demo.dps_PLAYER", (
+            name: "PLAYER",
+            ty: Some("Entity"),
+            value: Selector((
+                entity: "@s",
+                params: {},
+            )),
+            is_const: true,
+        )),
+        "TEXT_PREFIX": ("my_pack:examples/demo.dps_TEXT_PREFIX", (
+            name: "TEXT_PREFIX",
+            ty: Some("Component"),
+            value: Operation((
+                lhs: Component((
+                    from_expr: None,
+                    values: {
+                        "text": String("Hello, "),
+                    },
+                )),
+                op: "+",
+                rhs: Nbt((
+                    ty: Some("component"),
+                    data: {
+                        "color": String("blue"),
+                    },
+                )),
+            )),
+            is_const: true,
+        )),
+    },
+    locals: {
+        "result": ("result", (
+            name: "result",
+            ty: None,
+            value: Call((
+                func: "test_floats",
+                args: [],
+                is_command: false,
+            )),
+            is_const: false,
+        )),
+        "TEXT_PREFIX": ("TEXT_PREFIX", (
+            name: "TEXT_PREFIX",
+            ty: Some("Component"),
+            value: Operation((
+                lhs: Component((
+                    from_expr: None,
+                    values: {
+                        "text": String("Hello, "),
+                    },
+                )),
+                op: "+",
+                rhs: Nbt((
+                    ty: Some("component"),
+                    data: {
+                        "color": String("blue"),
+                    },
+                )),
+            )),
+            is_const: true,
+        )),
+        "PLAYER": ("PLAYER", (
+            name: "PLAYER",
+            ty: Some("Entity"),
+            value: Selector((
+                entity: "@s",
+                params: {},
+            )),
+            is_const: true,
+        )),
+    },
+)

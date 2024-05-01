@@ -104,3 +104,10 @@ function my_pack:__dpscript_gen/load/branches/1/join
 # Nothing happens after, but the function exists for ease of codegen.
 # In a future version, I might get rid of these unnecessary functions.
 ```
+
+## Specifics
+
+When an Expr is compiled, it will require an ID, and it will place its result
+in the temp storage at that ID.
+
+Function return values will be placed in the variable storage at `__return_val`.

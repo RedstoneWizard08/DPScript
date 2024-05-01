@@ -15,6 +15,7 @@ use crate::{
     var::Var,
 };
 
+// TODO: Booleans
 parser! {
     pub grammar dpscript() for str {
         rule _() = quiet!{ [' ' | '\t' | '\n']* }

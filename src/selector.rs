@@ -1,8 +1,10 @@
 use std::collections::HashMap;
 
-use crate::nbt::NbtItem;
+use serde::{Deserialize, Serialize};
 
-#[derive(Debug, Clone, PartialEq)]
+use crate::{compiler::Compilable, nbt::NbtItem, state::State, Result};
+
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct Selector {
     pub entity: String,
     pub params: HashMap<String, NbtItem>,
@@ -14,5 +16,17 @@ impl Selector {
             entity: entity.as_ref().into(),
             params: HashMap::new(),
         }
+    }
+}
+
+impl Compilable for Selector {
+    fn compile(&self, state: &mut State) -> Result<String> {
+        let mut params = String::new();
+
+        for (k, v) in &self.params {
+            params.push_str(&format!("{}={},", k, v.compile(state)?));
+        }
+
+        Ok(format!("[{}]", params.trim_end_matches(',')))
     }
 }

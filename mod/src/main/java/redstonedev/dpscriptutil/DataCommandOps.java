@@ -7,7 +7,6 @@ import com.mojang.brigadier.suggestion.SuggestionProvider;
 import net.minecraft.command.CommandSource;
 import net.minecraft.command.DataCommandStorage;
 import net.minecraft.command.argument.IdentifierArgumentType;
-import net.minecraft.command.argument.NbtElementArgumentType;
 import net.minecraft.command.argument.NbtPathArgumentType;
 import net.minecraft.nbt.NbtDouble;
 import net.minecraft.nbt.NbtFloat;
@@ -40,53 +39,78 @@ public class DataCommandOps {
                         .then(argument("path", NbtPathArgumentType.nbtPath()).then(argument("operation",
                                 new EnumArgumentType("add", "subtract", "sub", "multiply", "mul", "divide", "div",
                                         "power", "pow", "and", "or", "xor"))
-                                .then(argument("value", NbtElementArgumentType.nbtElement()).executes(ctx -> {
-                                    var storageId = IdentifierArgumentType.getIdentifier(ctx, "storage");
-                                    var path = NbtPathArgumentType.getNbtPath(ctx, "path");
-                                    var operation = EnumArgumentType.getEnum(ctx, "operation");
-                                    var value = NbtElementArgumentType.getNbtElement(ctx, "value");
-                                    var server = ctx.getSource().getServer();
-                                    var storage = server.getDataCommandStorage().get(storageId);
-                                    var objects = path.get(storage);
-                                    var object = objects.get(objects.size() - 1);
-                                    float originalValue;
-                                    float added;
+                                .then(argument("storage2", IdentifierArgumentType.identifier())
+                                        .then(argument("path2", NbtPathArgumentType.nbtPath()).executes(ctx -> {
+                                            var storageId = IdentifierArgumentType.getIdentifier(ctx, "storage");
+                                            var path = NbtPathArgumentType.getNbtPath(ctx, "path");
+                                            var rhsStorageId = IdentifierArgumentType.getIdentifier(ctx, "storage2");
+                                            var rhsPath = NbtPathArgumentType.getNbtPath(ctx, "path2");
+                                            var operation = EnumArgumentType.getEnum(ctx, "operation");
 
-                                    if (object instanceof NbtFloat) {
-                                        originalValue = ((NbtFloat) object).floatValue();
-                                    } else if (object instanceof NbtDouble) {
-                                        originalValue = (float) ((NbtDouble) object).doubleValue();
-                                    } else if (object instanceof NbtInt) {
-                                        originalValue = (float) ((NbtInt) object).intValue();
-                                    } else {
-                                        return -1;
-                                    }
+                                            var server = ctx.getSource().getServer();
+                                            var storage = server.getDataCommandStorage().get(storageId);
+                                            var objects = path.get(storage);
+                                            var object = objects.get(objects.size() - 1);
 
-                                    if (value instanceof NbtFloat) {
-                                        added = ((NbtFloat) value).floatValue();
-                                    } else if (value instanceof NbtDouble) {
-                                        added = (float) ((NbtDouble) value).doubleValue();
-                                    } else if (value instanceof NbtInt) {
-                                        added = (float) ((NbtInt) value).intValue();
-                                    } else {
-                                        return -1;
-                                    }
+                                            var storage2 = server.getDataCommandStorage().get(rhsStorageId);
+                                            var objects2 = rhsPath.get(storage2);
+                                            var value = objects2.get(objects2.size() - 1);
 
-                                    switch (operation) {
-                                        case "add" -> { originalValue += added; }
-                                        case "subtract", "sub" -> { originalValue -= added; }
-                                        case "multiply", "mul" -> { originalValue *= added; }
-                                        case "divide", "div" -> { originalValue /= added; }
-                                        case "power", "pow" -> { originalValue = (float) Math.pow((double) originalValue, (double) added); }
-                                        case "and" -> { originalValue = (int) originalValue & (int) added; }
-                                        case "or" -> { originalValue = (int) originalValue | (int) added; }
-                                        case "xor" -> { originalValue = (int) originalValue ^ (int) added; }
-                                    }
+                                            float originalValue;
+                                            float added;
 
-                                    path.set(storage, NbtFloat.of(originalValue));
-                                    server.getDataCommandStorage().set(storageId, storage);
+                                            if (object instanceof NbtFloat) {
+                                                originalValue = ((NbtFloat) object).floatValue();
+                                            } else if (object instanceof NbtDouble) {
+                                                originalValue = (float) ((NbtDouble) object).doubleValue();
+                                            } else if (object instanceof NbtInt) {
+                                                originalValue = (float) ((NbtInt) object).intValue();
+                                            } else {
+                                                return -1;
+                                            }
 
-                                    return (int) originalValue;
-                                }))))))));
+                                            if (value instanceof NbtFloat) {
+                                                added = ((NbtFloat) value).floatValue();
+                                            } else if (value instanceof NbtDouble) {
+                                                added = (float) ((NbtDouble) value).doubleValue();
+                                            } else if (value instanceof NbtInt) {
+                                                added = (float) ((NbtInt) value).intValue();
+                                            } else {
+                                                return -1;
+                                            }
+
+                                            switch (operation) {
+                                                case "add" -> {
+                                                    originalValue += added;
+                                                }
+                                                case "subtract", "sub" -> {
+                                                    originalValue -= added;
+                                                }
+                                                case "multiply", "mul" -> {
+                                                    originalValue *= added;
+                                                }
+                                                case "divide", "div" -> {
+                                                    originalValue /= added;
+                                                }
+                                                case "power", "pow" -> {
+                                                    originalValue = (float) Math.pow((double) originalValue,
+                                                            (double) added);
+                                                }
+                                                case "and" -> {
+                                                    originalValue = (int) originalValue & (int) added;
+                                                }
+                                                case "or" -> {
+                                                    originalValue = (int) originalValue | (int) added;
+                                                }
+                                                case "xor" -> {
+                                                    originalValue = (int) originalValue ^ (int) added;
+                                                }
+                                            }
+
+                                            path.set(storage, NbtFloat.of(originalValue));
+                                            server.getDataCommandStorage().set(storageId, storage);
+
+                                            return (int) originalValue;
+                                        })))))))));
     }
 }
