@@ -8,6 +8,24 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+      
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+
+          sudo apt-get install -y \
+            gcc \
+            clang \
+            build-essential
+          
+          mkdir -p ~/.zig
+          
+          curl -fsSL \
+            "https://ziglang.org/builds/zig-linux-$(uname -m)-0.13.0-dev.46+3648d7df1.tar.xz" | \
+            tar -xJ -C ~/.zig --strip-components 1
+          
+          chmod a+rx ~/.zig/zig
+          sudo ln -sf ~/.zig/zig /usr/local/bin/zig
 
       - name: Cache
         uses: actions/cache@v4
