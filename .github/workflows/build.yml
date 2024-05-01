@@ -16,10 +16,7 @@ jobs:
           sudo apt-get install -y \
             gcc \
             clang \
-            build-essential \
-            gcc-aarch64-linux-gnu \
-            gcc-arm-linux-gnueabi \
-            gcc-arm-linux-gnueabihf
+            build-essential
           
           mkdir -p ~/.zig
           
@@ -60,6 +57,14 @@ jobs:
           rustup target add aarch64-unknown-linux-musl
           rustup target add arm-unknown-linux-musleabi
           rustup target add arm-unknown-linux-musleabihf
+
+          rustup target add x86_64-apple-darwin
+          rustup target add aarch64-apple-darwin
+
+          rustup target add x86_64-pc-windows-gnu
+          rustup target add x86_64-pc-windows-msvc
+          rustup target add i686-pc-windows-gnu
+          rustup target add i686-pc-windows-msvc
         
       - name: Install cargo-binstall
         uses: cargo-bins/cargo-binstall@main
@@ -70,14 +75,20 @@ jobs:
 
       - name: Build
         run: |
-          cargo build --release --target x86_64-unknown-linux-gnu
-          cargo build --release --target aarch64-unknown-linux-gnu
-          cargo build --release --target arm-unknown-linux-gnueabi
-          cargo build --release --target arm-unknown-linux-gnueabihf
-          cargo build --release --target x86_64-unknown-linux-musl
-          cargo build --release --target aarch64-unknown-linux-musl
-          cargo build --release --target arm-unknown-linux-musleabi
-          cargo build --release --target arm-unknown-linux-musleabihf
+          cargo zigbuild --release --target x86_64-unknown-linux-gnu
+          cargo zigbuild --release --target aarch64-unknown-linux-gnu
+          cargo zigbuild --release --target arm-unknown-linux-gnueabi
+          cargo zigbuild --release --target arm-unknown-linux-gnueabihf
+          cargo zigbuild --release --target x86_64-unknown-linux-musl
+          cargo zigbuild --release --target aarch64-unknown-linux-musl
+          cargo zigbuild --release --target arm-unknown-linux-musleabi
+          cargo zigbuild --release --target arm-unknown-linux-musleabihf
+          cargo zigbuild --release --target x86_64-apple-darwin
+          cargo zigbuild --release --target aarch64-apple-darwin
+          cargo zigbuild --release --target x86_64-pc-windows-gnu
+          cargo zigbuild --release --target x86_64-pc-windows-msvc
+          cargo zigbuild --release --target i686-pc-windows-gnu
+          cargo zigbuild --release --target i686-pc-windows-msvc
 
           mkdir bin
 
@@ -89,6 +100,12 @@ jobs:
           cp -v target/aarch64-unknown-linux-musl/release/dsc bin/dsc-aarch64-unknown-linux-musl
           cp -v target/arm-unknown-linux-musleabi/release/dsc bin/dsc-arm-unknown-linux-musleabi
           cp -v target/arm-unknown-linux-musleabihf/release/dsc bin/dsc-arm-unknown-linux-musleabihf
+          cp -v target/x86_64-apple-darwin/release/dsc bin/dsc-x86_64-apple-darwin
+          cp -v target/aarch64-apple-darwin/release/dsc bin/dsc-aarch64-apple-darwin
+          cp -v target/x86_64-pc-windows-gnu/release/dsc bin/dsc-x86_64-pc-windows-gnu
+          cp -v target/x86_64-pc-windows-msvc/release/dsc bin/dsc-x86_64-pc-windows-msvc
+          cp -v target/i686-pc-windows-gnu/release/dsc bin/dsc-i686-pc-windows-gnu
+          cp -v target/i686-pc-windows-msvc/release/dsc bin/dsc-i686-pc-windows-msvc
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
