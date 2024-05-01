@@ -49,13 +49,11 @@ jobs:
           rustup default nightly
 
           rustup target add x86_64-unknown-linux-gnu
-          rustup target add i686-unknown-linux-gnu
           rustup target add aarch64-unknown-linux-gnu
           rustup target add arm-unknown-linux-gnueabi
           rustup target add arm-unknown-linux-gnueabihf
 
           rustup target add x86_64-unknown-linux-musl
-          rustup target add i686-unknown-linux-musl
           rustup target add aarch64-unknown-linux-musl
           rustup target add arm-unknown-linux-musleabi
           rustup target add arm-unknown-linux-musleabihf
@@ -78,12 +76,10 @@ jobs:
       - name: Build
         run: |
           cargo build --release --target x86_64-unknown-linux-gnu
-          cargo build --release --target i686-unknown-linux-gnu
           cargo build --release --target aarch64-unknown-linux-gnu
           cargo build --release --target arm-unknown-linux-gnueabi
           cargo build --release --target arm-unknown-linux-gnueabihf
           cargo build --release --target x86_64-unknown-linux-musl
-          cargo build --release --target i686-unknown-linux-musl
           cargo build --release --target aarch64-unknown-linux-musl
           cargo build --release --target arm-unknown-linux-musleabi
           cargo build --release --target arm-unknown-linux-musleabihf
@@ -97,12 +93,10 @@ jobs:
           mkdir bin
 
           cp -v target/x86_64-unknown-linux-gnu/release/dsc bin/dsc-x86_64-unknown-linux-gnu
-          cp -v target/i686-unknown-linux-gnu/release/dsc bin/dsc-i686-unknown-linux-gnu
           cp -v target/aarch64-unknown-linux-gnu/release/dsc bin/dsc-aarch64-unknown-linux-gnu
           cp -v target/arm-unknown-linux-gnueabi/release/dsc bin/dsc-arm-unknown-linux-gnueabi
           cp -v target/arm-unknown-linux-gnueabihf/release/dsc bin/dsc-arm-unknown-linux-gnueabihf
           cp -v target/x86_64-unknown-linux-musl/release/dsc bin/dsc-x86_64-unknown-linux-musl
-          cp -v target/i686-unknown-linux-musl/release/dsc bin/dsc-i686-unknown-linux-musl
           cp -v target/aarch64-unknown-linux-musl/release/dsc bin/dsc-aarch64-unknown-linux-musl
           cp -v target/arm-unknown-linux-musleabi/release/dsc bin/dsc-arm-unknown-linux-musleabi
           cp -v target/arm-unknown-linux-musleabihf/release/dsc bin/dsc-arm-unknown-linux-musleabihf
