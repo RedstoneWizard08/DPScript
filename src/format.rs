@@ -32,6 +32,7 @@ pub fn generate_manifest(config: &PackToml) -> Result<String> {
         .description
         .clone()
         .unwrap_or(config.pack.name.clone());
+
     let format = get_format(Version::parse(&config.version.minecraft)?)?;
 
     let json = json!({

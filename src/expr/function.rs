@@ -2,7 +2,9 @@ use std::fs;
 
 use serde::{Deserialize, Serialize};
 
-use crate::{expr::Expr, lines::LineBuilder, state::State, var::Var, Result, DPSCRIPT_RETURN_VAR};
+use crate::{expr::Expr, lines::LineBuilder, state::State, Result, DPSCRIPT_RETURN_VAR};
+
+use super::variable::Var;
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct Func {
@@ -36,16 +38,18 @@ impl Func {
             b.push(expr.compile(state, DPSCRIPT_RETURN_VAR)?);
         }
 
+        let fn_path = if let Some(custom) = &self.custom_name {
+            format!("{}.mcfunction", custom)
+        } else {
+            format!("{}_{}.mcfunction", state.file, self.name)
+        };
+
         let fp = state
             .out_dir
             .join("data")
             .join(&state.config.pack.namespace)
             .join("functions")
-            .join(format!(
-                "{}_{}.mcfunction",
-                state.file,
-                self.custom_name.clone().unwrap_or(self.name.clone())
-            ));
+            .join(fn_path);
 
         let dir = fp.parent().unwrap();
 

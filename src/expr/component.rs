@@ -2,13 +2,9 @@ use std::collections::HashMap;
 
 use serde::{Deserialize, Serialize};
 
-use crate::{
-    compiler::Compilable,
-    expr::Expr,
-    nbt::{Nbt, NbtItem},
-    state::State,
-    Result,
-};
+use crate::{compiler::Compilable, expr::Expr, state::State, Result};
+
+use super::nbt::{Nbt, NbtItem};
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct Component {

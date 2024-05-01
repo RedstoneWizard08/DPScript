@@ -1,21 +1,28 @@
+pub mod call;
+pub mod component;
+pub mod function;
+pub mod nbt;
+pub mod operation;
+pub mod selector;
+pub mod variable;
+
 use std::collections::HashMap;
 
 use serde::{Deserialize, Serialize};
 
 use crate::{
-    call::Call,
-    comp::Component,
-    compiler::Compilable,
-    error::CompilationError,
-    func::Func,
-    lines::LineBuilder,
-    nbt::{Nbt, NbtItem},
-    op::Operation,
-    selector::Selector,
-    source,
-    state::State,
-    var::Var,
+    compiler::Compilable, error::CompilationError, lines::LineBuilder, source, state::State,
     Result, DPSCRIPT_RETURN_VAR, DPSCRIPT_TEMP_STORE, DPSCRIPT_VAR_STORE,
+};
+
+use self::{
+    call::Call,
+    component::Component,
+    function::Func,
+    nbt::{Nbt, NbtItem},
+    operation::Operation,
+    selector::Selector,
+    variable::Var,
 };
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]

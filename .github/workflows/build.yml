@@ -1,0 +1,102 @@
+on: [push]
+name: build
+
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Cache
+        uses: actions/cache@v4
+        env:
+          cache-name: rust-cache
+        with:
+          path: |
+            ~/.cargo
+            ~/.rustup
+            target
+          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/Cargo.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-build-${{ env.cache-name }}-
+            ${{ runner.os }}-build-
+            ${{ runner.os }}-
+      
+      - name: Install Rust toolchain
+        run: |
+          rustup update --no-self-update nightly
+          rustup component add --toolchain nightly rustfmt rust-src
+          rustup default nightly
+
+          rustup target add x86_64-unknown-linux-gnu
+          rustup target add i686-unknown-linux-gnu
+          rustup target add aarch64-unknown-linux-gnu
+          rustup target add arm-unknown-linux-gnueabi
+          rustup target add arm-unknown-linux-gnueabihf
+
+          rustup target add x86_64-unknown-linux-musl
+          rustup target add i686-unknown-linux-musl
+          rustup target add aarch64-unknown-linux-musl
+          rustup target add arm-unknown-linux-musleabi
+          rustup target add arm-unknown-linux-musleabihf
+
+          rustup target add x86_64-apple-darwin
+          rustup target add aarch64-apple-darwin
+
+          rustup target add x86_64-pc-windows-gnu
+          rustup target add x86_64-pc-windows-msvc
+          rustup target add i686-pc-windows-gnu
+          rustup target add i686-pc-windows-msvc
+        
+      - name: Install cargo-binstall
+        uses: cargo-bins/cargo-binstall@main
+
+      - name: Install cargo-zigbuild
+        run: |
+          cargo binstall cargo-zigbuild -y
+
+      - name: Build
+        run: |
+          cargo build --release --target x86_64-unknown-linux-gnu
+          cargo build --release --target i686-unknown-linux-gnu
+          cargo build --release --target aarch64-unknown-linux-gnu
+          cargo build --release --target arm-unknown-linux-gnueabi
+          cargo build --release --target arm-unknown-linux-gnueabihf
+          cargo build --release --target x86_64-unknown-linux-musl
+          cargo build --release --target i686-unknown-linux-musl
+          cargo build --release --target aarch64-unknown-linux-musl
+          cargo build --release --target arm-unknown-linux-musleabi
+          cargo build --release --target arm-unknown-linux-musleabihf
+          cargo build --release --target x86_64-apple-darwin
+          cargo build --release --target aarch64-apple-darwin
+          cargo build --release --target x86_64-pc-windows-gnu
+          cargo build --release --target x86_64-pc-windows-msvc
+          cargo build --release --target i686-pc-windows-gnu
+          cargo build --release --target i686-pc-windows-msvc
+
+          mkdir bin
+
+          cp -v target/x86_64-unknown-linux-gnu/release/dsc bin/dsc-x86_64-unknown-linux-gnu
+          cp -v target/i686-unknown-linux-gnu/release/dsc bin/dsc-i686-unknown-linux-gnu
+          cp -v target/aarch64-unknown-linux-gnu/release/dsc bin/dsc-aarch64-unknown-linux-gnu
+          cp -v target/arm-unknown-linux-gnueabi/release/dsc bin/dsc-arm-unknown-linux-gnueabi
+          cp -v target/arm-unknown-linux-gnueabihf/release/dsc bin/dsc-arm-unknown-linux-gnueabihf
+          cp -v target/x86_64-unknown-linux-musl/release/dsc bin/dsc-x86_64-unknown-linux-musl
+          cp -v target/i686-unknown-linux-musl/release/dsc bin/dsc-i686-unknown-linux-musl
+          cp -v target/aarch64-unknown-linux-musl/release/dsc bin/dsc-aarch64-unknown-linux-musl
+          cp -v target/arm-unknown-linux-musleabi/release/dsc bin/dsc-arm-unknown-linux-musleabi
+          cp -v target/arm-unknown-linux-musleabihf/release/dsc bin/dsc-arm-unknown-linux-musleabihf
+          cp -v target/x86_64-apple-darwin/release/dsc bin/dsc-x86_64-apple-darwin
+          cp -v target/aarch64-apple-darwin/release/dsc bin/dsc-aarch64-apple-darwin
+          cp -v target/x86_64-pc-windows-gnu/release/dsc bin/dsc-x86_64-pc-windows-gnu
+          cp -v target/x86_64-pc-windows-msvc/release/dsc bin/dsc-x86_64-pc-windows-msvc
+          cp -v target/i686-pc-windows-gnu/release/dsc bin/dsc-i686-pc-windows-gnu
+          cp -v target/i686-pc-windows-msvc/release/dsc bin/dsc-i686-pc-windows-msvc
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: binaries
+          path: bin/*

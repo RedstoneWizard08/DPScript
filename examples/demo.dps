@@ -39,6 +39,7 @@ fn say_hi() {
     say_something();
 }
 
+#[name = "test_floats"]
 fn test_floats() -> float {
     // You can use floats! They are stored in /data and work*!
     // Variables are stored and retrieved from data storage.

@@ -61,7 +61,14 @@ impl Compilable for Call {
                     }
                 }
 
-                b.push(format!("function {}", name));
+                if let Some(custom) = &func.custom_name {
+                    b.push(format!(
+                        "function {}:{}",
+                        state.config.pack.namespace, custom
+                    ));
+                } else {
+                    b.push(format!("function {}", name));
+                }
 
                 if func.ret.is_some() {
                     b.push(format!(

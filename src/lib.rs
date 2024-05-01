@@ -1,21 +1,15 @@
 use error::Error;
 
-pub mod call;
-pub mod comp;
+pub mod cli;
 pub mod compiler;
 pub mod config;
 pub mod error;
 pub mod expr;
 pub mod format;
-pub mod func;
 pub mod lines;
 pub mod macros;
-pub mod nbt;
-pub mod op;
 pub mod parser;
-pub mod selector;
 pub mod state;
-pub mod var;
 
 pub const DPSCRIPT_VAR_STORE: &str = "dpscript:builtin/stores/vars";
 pub const DPSCRIPT_TEMP_STORE: &str = "dpscript:builtin/stores/temp";

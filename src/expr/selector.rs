@@ -2,7 +2,9 @@ use std::collections::HashMap;
 
 use serde::{Deserialize, Serialize};
 
-use crate::{compiler::Compilable, nbt::NbtItem, state::State, Result};
+use crate::{compiler::Compilable, state::State, Result};
+
+use super::nbt::NbtItem;
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct Selector {

@@ -19,6 +19,11 @@ impl LineBuilder {
     }
 
     pub fn build(self) -> String {
-        self.lines.join("\n")
+        self.lines
+            .iter()
+            .filter(|v| !v.is_empty())
+            .cloned()
+            .collect::<Vec<_>>()
+            .join("\n")
     }
 }

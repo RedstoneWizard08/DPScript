@@ -12,6 +12,10 @@ pub struct Var {
 
 impl Compilable for Var {
     fn compile(&self, state: &mut State) -> Result<String> {
+        if self.is_const {
+            return Ok(String::new());
+        }
+
         let data = if self.value.is_value() {
             Ok(format!(
                 "data modify storage {} {} set value {}",

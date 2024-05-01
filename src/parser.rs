@@ -4,15 +4,17 @@ use miette::{NamedSource, SourceOffset, SourceSpan};
 use peg::parser;
 
 use crate::{
-    call::Call,
-    comp::Component,
     error::ParseError,
-    expr::Expr,
-    func::Func,
-    nbt::{Nbt, NbtItem},
-    op::Operation,
-    selector::Selector,
-    var::Var,
+    expr::{
+        call::Call,
+        component::Component,
+        function::Func,
+        nbt::{Nbt, NbtItem},
+        operation::Operation,
+        selector::Selector,
+        variable::Var,
+        Expr,
+    },
 };
 
 // TODO: Booleans

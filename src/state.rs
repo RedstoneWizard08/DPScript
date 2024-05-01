@@ -1,7 +1,11 @@
 use serde::{Deserialize, Serialize};
-use std::{collections::HashMap, fs, path::PathBuf};
+use std::{collections::HashMap, path::PathBuf};
 
-use crate::{config::PackToml, expr::Expr, func::Func, var::Var, Result};
+use crate::{
+    config::PackToml,
+    expr::{function::Func, variable::Var, Expr},
+    Result,
+};
 
 #[derive(Debug, Clone, PartialEq, Default, Serialize, Deserialize)]
 pub struct State {
@@ -24,33 +28,29 @@ pub struct State {
 }
 
 impl State {
-    pub fn from_root(
-        config: PackToml,
+    pub fn new(config: PackToml, root: PathBuf) -> Self {
+        Self {
+            out_dir: root.join(&config.build.output),
+            config,
+            ..Default::default()
+        }
+    }
+
+    pub fn update(
+        &mut self,
         file: impl AsRef<str>,
         source: impl AsRef<str>,
         items: Vec<Expr>,
-    ) -> Result<Self> {
-        let mut me = State::default();
-        let prefix = format!("{}:{}_", config.pack.namespace, file.as_ref());
+    ) -> Result<()> {
+        self.file = file.as_ref().to_string();
+        self.source = source.as_ref().to_string();
 
-        let out_dir = PathBuf::from(file.as_ref())
-            .parent()
-            .unwrap()
-            .join(&config.build.output);
-
-        if !out_dir.exists() {
-            fs::create_dir_all(&out_dir)?;
-        }
-
-        me.file = file.as_ref().to_string();
-        me.source = source.as_ref().to_string();
-        me.config = config;
-        me.out_dir = out_dir;
+        let prefix = format!("{}:{}_", self.config.pack.namespace, self.file);
 
         for item in items {
             match item {
                 Expr::Func(func) => {
-                    me.functions.insert(
+                    self.functions.insert(
                         func.name.clone(),
                         (
                             func.custom_name
@@ -63,7 +63,7 @@ impl State {
 
                 Expr::Var(var) => {
                     if var.is_const {
-                        me.globals
+                        self.globals
                             .insert(var.name.clone(), (format!("{}{}", prefix, var.name), var));
                     }
                 }
@@ -72,6 +72,6 @@ impl State {
             };
         }
 
-        Ok(me)
+        Ok(())
     }
 }
