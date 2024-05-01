@@ -60,7 +60,8 @@ impl Compilable for NbtItem {
                     Err(CompilationError {
                         src: source!(state),
                         err: format!("Cannot find a variable named {}!", s),
-                    })
+                    }
+                    .into())
                 }
             }
 

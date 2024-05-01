@@ -2,7 +2,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::{
     error::CompilationError, expr::Expr, lines::LineBuilder, source, state::State, Result,
-    DPSCRIPT_TEMP_STORE, DPSCRIPT_VAR_STORE,
+    DPSCRIPT_TEMP_STORE,
 };
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
@@ -32,7 +32,8 @@ impl Operation {
                     "Cannot perform operation {} on {:?} and {:?}!",
                     self.op, self.lhs, self.rhs
                 ),
-            })
+            }
+            .into())
         }
     }
 
@@ -47,14 +48,14 @@ impl Operation {
         {
             b.push(format!(
                 "data modify storage {} {} set value {}",
-                DPSCRIPT_VAR_STORE,
+                DPSCRIPT_TEMP_STORE,
                 temp.as_ref(),
                 self.lhs.compile(state, "")?
             ));
 
             b.push(format!(
                 "data merge storage {} {{\"{}\": {}}}",
-                DPSCRIPT_VAR_STORE,
+                DPSCRIPT_TEMP_STORE,
                 temp.as_ref(),
                 self.rhs.compile(state, "")?
             ));
@@ -107,7 +108,7 @@ impl Operation {
 
             b.push(format!(
                 "data modify storage {} {} set from storage {} {}",
-                DPSCRIPT_VAR_STORE,
+                DPSCRIPT_TEMP_STORE,
                 temp.as_ref(),
                 DPSCRIPT_TEMP_STORE,
                 lhs_id

@@ -15,15 +15,27 @@ pub struct Call {
 impl Compilable for Call {
     fn compile(&self, state: &mut State) -> Result<String> {
         if self.is_command {
-            Ok(format!(
-                "{} {}",
-                self.func,
-                self.args
-                    .iter()
-                    .map(|v| v.compile(state, "").unwrap())
-                    .collect::<Vec<_>>()
-                    .join(" ")
-            ))
+            let mut b = LineBuilder::new();
+            let mut args = Vec::new();
+
+            for (i, arg) in self.args.iter().enumerate() {
+                if arg.is_value() {
+                    args.push(arg.compile(state, "")?);
+                } else {
+                    let temp = format!("__cmd_arg_{}", i);
+
+                    b.push(arg.compile(state, &temp)?);
+
+                    args.push(format!(
+                        "{{\"storage\": \"{}\", \"nbt\": \"{}\", \"interpret\": true}}",
+                        DPSCRIPT_VAR_STORE, temp
+                    ));
+                }
+            }
+
+            b.push(format!("{} {}", self.func, args.join(" ")));
+
+            Ok(b.build())
         } else {
             if let Some((name, func)) = state.functions.clone().get(&self.func) {
                 let mut b = LineBuilder::new();
@@ -44,7 +56,8 @@ impl Compilable for Call {
                         return Err(CompilationError {
                             src: source!(state),
                             err: format!("Missing argument for call: {} (index {})", name, i),
-                        });
+                        }
+                        .into());
                     }
                 }
 
@@ -65,7 +78,8 @@ impl Compilable for Call {
                 Err(CompilationError {
                     src: source!(state),
                     err: format!("Cannot find a function named {}!", self.func),
-                })
+                }
+                .into())
             }
         }
     }

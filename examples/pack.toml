@@ -4,3 +4,6 @@ namespace = "my_pack"
 
 [version]
 minecraft = "1.20.4"
+
+[build]
+output = "./out"

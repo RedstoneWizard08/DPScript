@@ -57,7 +57,8 @@ impl Expr {
                     return Err(CompilationError {
                         src: source!(state),
                         err: format!("Array elements must all be of the same type!"),
-                    });
+                    }
+                    .into());
                 }
 
                 Ok(ty)
@@ -70,7 +71,8 @@ impl Expr {
                     Err(CompilationError {
                         src: source!(state),
                         err: format!("Cannot find a function named {}!", call.func),
-                    })
+                    }
+                    .into())
                 }
             }
 
@@ -83,7 +85,8 @@ impl Expr {
                     Err(CompilationError {
                         src: source!(state),
                         err: format!("Cannot find a variable named {}!", id),
-                    })
+                    }
+                    .into())
                 }
             }
 
@@ -110,7 +113,8 @@ impl Expr {
                     Err(CompilationError {
                         src: source!(state),
                         err: format!("Cannot find a variable named {}!", v),
-                    })
+                    }
+                    .into())
                 }
             }
 
@@ -121,7 +125,8 @@ impl Expr {
             v => Err(CompilationError {
                 err: format!("Cannot convert Expr {:?} into a component!", v),
                 src: source!(state),
-            }),
+            }
+            .into()),
         }
     }
 
@@ -220,20 +225,45 @@ impl Expr {
             Expr::Int(v) => Ok(v.to_string()),
             Expr::String(v) => Ok(format!("\"{}\"", v)),
 
-            Expr::Ident(v) => Ok(format!(
-                "data modify storage {} {} set from storage {} {}",
-                DPSCRIPT_VAR_STORE,
-                id.as_ref(),
-                DPSCRIPT_VAR_STORE,
-                v
-            )),
+            Expr::Ident(v) => {
+                if let Some((n, _)) = state.locals.get(&v) {
+                    Ok(format!(
+                        "data modify storage {} {} set from storage {} {}",
+                        DPSCRIPT_TEMP_STORE,
+                        id.as_ref(),
+                        DPSCRIPT_VAR_STORE,
+                        n
+                    ))
+                } else if let Some((_, v)) = state.globals.clone().get(&v) {
+                    let temp = "__global_ref_temp";
+                    let mut b = LineBuilder::new();
+
+                    b.push(v.value.compile(state, temp)?);
+
+                    b.push(format!(
+                        "data modify storage {} {} set from storage {} {}",
+                        DPSCRIPT_TEMP_STORE,
+                        id.as_ref(),
+                        DPSCRIPT_TEMP_STORE,
+                        temp,
+                    ));
+
+                    Ok(b.build())
+                } else {
+                    Err(CompilationError {
+                        src: source!(state),
+                        err: format!("Cannot find a variable named {}!", v),
+                    }
+                    .into())
+                }
+            }
 
             Expr::Call(call) => {
                 let mut out = LineBuilder::from_str(call.compile(state)?);
 
                 out.push(format!(
                     "data modify storage {} {} set from storage {} {}",
-                    DPSCRIPT_VAR_STORE,
+                    DPSCRIPT_TEMP_STORE,
                     id.as_ref(),
                     DPSCRIPT_TEMP_STORE,
                     DPSCRIPT_RETURN_VAR
@@ -247,7 +277,7 @@ impl Expr {
 
                 out.push(format!(
                     "data modify storage {} {} set from storage {} {}",
-                    DPSCRIPT_VAR_STORE,
+                    DPSCRIPT_TEMP_STORE,
                     id.as_ref(),
                     DPSCRIPT_TEMP_STORE,
                     DPSCRIPT_RETURN_VAR
@@ -261,7 +291,7 @@ impl Expr {
 
                 b.push(format!(
                     "data modify storage {} {} set value []",
-                    DPSCRIPT_VAR_STORE,
+                    DPSCRIPT_TEMP_STORE,
                     id.as_ref()
                 ));
 
@@ -269,7 +299,7 @@ impl Expr {
                     if item.is_value() {
                         b.push(format!(
                             "data modify storage {} {} append value {}",
-                            DPSCRIPT_VAR_STORE,
+                            DPSCRIPT_TEMP_STORE,
                             id.as_ref(),
                             item.compile(state, "")?
                         ));
@@ -280,9 +310,9 @@ impl Expr {
 
                         b.push(format!(
                             "data modify storage {} {} append from storage {} {}",
-                            DPSCRIPT_VAR_STORE,
+                            DPSCRIPT_TEMP_STORE,
                             id.as_ref(),
-                            DPSCRIPT_VAR_STORE,
+                            DPSCRIPT_TEMP_STORE,
                             temp
                         ));
                     }
@@ -310,7 +340,7 @@ impl Expr {
 
                     b.push(format!(
                         "data modify storage {} {} set from storage {} {}",
-                        DPSCRIPT_TEMP_STORE, DPSCRIPT_RETURN_VAR, DPSCRIPT_VAR_STORE, temp,
+                        DPSCRIPT_TEMP_STORE, DPSCRIPT_RETURN_VAR, DPSCRIPT_TEMP_STORE, temp,
                     ));
 
                     Ok(b.build())
@@ -323,7 +353,7 @@ impl Expr {
 
                 out.push(format!(
                     "data modify storage {} {} set from storage {} {}",
-                    DPSCRIPT_VAR_STORE,
+                    DPSCRIPT_TEMP_STORE,
                     id.as_ref(),
                     DPSCRIPT_TEMP_STORE,
                     temp,
@@ -335,8 +365,13 @@ impl Expr {
             Expr::Nbt(nbt) => nbt.compile(state),
             Expr::Component(comp) => comp.compile(state),
             Expr::Selector(sel) => sel.compile(state),
-            Expr::Func(func) => func.compile(state),
             Expr::Var(var) => var.compile(state),
+
+            Expr::Func(func) => {
+                func.compile(state)?;
+
+                Ok(String::new())
+            }
 
             Expr::None => unreachable!(),
         }

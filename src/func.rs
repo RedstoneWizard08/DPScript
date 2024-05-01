@@ -1,6 +1,8 @@
+use std::fs;
+
 use serde::{Deserialize, Serialize};
 
-use crate::{compiler::Compilable, expr::Expr, lines::LineBuilder, state::State, var::Var, Result};
+use crate::{expr::Expr, lines::LineBuilder, state::State, var::Var, Result, DPSCRIPT_RETURN_VAR};
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct Func {
@@ -11,8 +13,8 @@ pub struct Func {
     pub body: Vec<Expr>,
 }
 
-impl Compilable for Func {
-    fn compile(&self, state: &mut State) -> Result<String> {
+impl Func {
+    pub fn compile(&self, state: &mut State) -> Result<()> {
         let mut b = LineBuilder::new();
 
         for (k, v) in &self.args {
@@ -31,9 +33,28 @@ impl Compilable for Func {
         }
 
         for expr in &self.body {
-            b.push(expr.compile(state, "")?);
+            b.push(expr.compile(state, DPSCRIPT_RETURN_VAR)?);
         }
 
-        Ok(b.build())
+        let fp = state
+            .out_dir
+            .join("data")
+            .join(&state.config.pack.namespace)
+            .join("functions")
+            .join(format!(
+                "{}_{}.mcfunction",
+                state.file,
+                self.custom_name.clone().unwrap_or(self.name.clone())
+            ));
+
+        let dir = fp.parent().unwrap();
+
+        if !dir.exists() {
+            fs::create_dir_all(dir)?;
+        }
+
+        fs::write(fp, b.build())?;
+
+        Ok(())
     }
 }

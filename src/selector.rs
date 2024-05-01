@@ -27,6 +27,6 @@ impl Compilable for Selector {
             params.push_str(&format!("{}={},", k, v.compile(state)?));
         }
 
-        Ok(format!("[{}]", params.trim_end_matches(',')))
+        Ok(format!("{}[{}]", self.entity, params.trim_end_matches(',')))
     }
 }

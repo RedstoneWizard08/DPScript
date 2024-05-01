@@ -26,15 +26,14 @@ const PLAYER: Entity = entity(@s) {};
 // It will be renamed to something like `__dpscript_fn__[file name]__[function name]`
 // to avoid issues with multiple functions.
 fn say_something() {
-    // Commands can be run by adding the `/` prefix and calling
-    // them like functions.
+    // Commands can be run by calling them like functions, but
+    // with the `/` prefix.
     // Creating a component from an entity will display its name.
     /tellraw(@a, [TEXT_PREFIX, component(PLAYER) + nbt(component) { color: "red" }, c#"!"]);
 }
 
 // This function will be named `[namespace]:say_hi`.
-// The `"_:"` in the `name` attribute will be expanded to `"namespace:"`.
-#[name = "_:say_hi"]
+#[name = "say_hi"]
 fn say_hi() {
     // Calling other functions works like this.
     say_something();
@@ -52,7 +51,7 @@ fn test_floats() -> float {
     return result;
 }
 
-#[name = "_:test_return"]
+#[name = "test_return"]
 fn test_return() {
     // Getting return values is this easy!
     let result = test_floats();
