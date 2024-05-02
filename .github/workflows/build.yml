@@ -8,19 +8,31 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        target:
-          - x86_64-unknown-linux-gnu
-          - aarch64-unknown-linux-gnu
-          - arm-unknown-linux-gnueabi
-          - arm-unknown-linux-gnueabihf
-          - x86_64-unknown-linux-musl
-          - aarch64-unknown-linux-musl
-          - arm-unknown-linux-musleabi
-          - arm-unknown-linux-musleabihf
-          - x86_64-apple-darwin
-          - aarch64-apple-darwin
-          - x86_64-pc-windows-gnu
-          - i686-pc-windows-gnu
+        include:
+          - target: x86_64-unknown-linux-gnu
+            cross: false
+          - target: aarch64-unknown-linux-gnu
+            cross: false
+          - target: arm-unknown-linux-gnueabi
+            cross: false
+          - target: arm-unknown-linux-gnueabihf
+            cross: false
+          - target: x86_64-unknown-linux-musl
+            cross: false
+          - target: aarch64-unknown-linux-musl
+            cross: false
+          - target: arm-unknown-linux-musleabi
+            cross: false
+          - target: arm-unknown-linux-musleabihf
+            cross: false
+          - target: x86_64-apple-darwin
+            cross: false
+          - target: aarch64-apple-darwin
+            cross: false
+          - target: x86_64-pc-windows-gnu
+            cross: true
+          - target: i686-pc-windows-gnu
+            cross: true
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -76,11 +88,27 @@ jobs:
       - name: Install cargo-zigbuild
         run: |
           cargo binstall cargo-zigbuild -y
+      
+      - name: Install cross
+        run: |
+          cargo binstall cross -y
 
       - name: Build
+        if: matrix.cross == false
         run: |
           cargo zigbuild --target ${{ matrix.target }}
           cargo zigbuild --release --target ${{ matrix.target }}
+
+          mkdir bin
+
+          cp -v target/${{ matrix.target }}/debug/dsc bin/dsc-debug
+          cp -v target/${{ matrix.target }}/release/dsc bin/dsc
+      
+      - name: Build (cross)
+        if: matrix.cross == true
+        run: |
+          cross build --target ${{ matrix.target }}
+          cross build --release --target ${{ matrix.target }}
 
           mkdir bin
 
