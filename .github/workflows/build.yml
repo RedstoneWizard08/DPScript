@@ -96,7 +96,7 @@ jobs:
           cargo binstall cross -y
 
       - name: Build
-        if: !matrix.windows
+        if: matrix.windows != true
         run: |
           cargo zigbuild --target ${{ matrix.target }}
           cargo zigbuild --release --target ${{ matrix.target }}
@@ -107,7 +107,7 @@ jobs:
           cp -v target/${{ matrix.target }}/release/dsc bin/dsc
 
       - name: Build (windows)
-        if: matrix.windows
+        if: matrix.windows == true
         run: |
           export RUSTFLAGS="-L/usr/${{ matrix.prefix }}/lib"
               
