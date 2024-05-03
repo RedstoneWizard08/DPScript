@@ -134,7 +134,7 @@ jobs:
 
                 cp -v "$file" "$newpath"
               else
-                newpath="$file-$targetname"
+                newpath="bin/$file-$targetname"
 
                 cp -v "$file" "$newpath"
               fi
