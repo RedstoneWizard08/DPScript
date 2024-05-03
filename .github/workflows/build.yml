@@ -116,11 +116,12 @@ jobs:
 
           mkdir bin
 
-          cp -v target/${{ matrix.target }}/debug/dsc bin/dsc-debug
-          cp -v target/${{ matrix.target }}/release/dsc bin/dsc
+          cp -v target/${{ matrix.target }}/debug/dsc.exe bin/dsc-debug.exe
+          cp -v target/${{ matrix.target }}/release/dsc.exe bin/dsc.exe
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
           name: binaries-${{ matrix.target }}
           path: bin/*
+
