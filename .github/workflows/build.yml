@@ -10,33 +10,35 @@ jobs:
       matrix:
         include:
           - target: x86_64-unknown-linux-gnu
-            cross: false
+            windows: false
           - target: aarch64-unknown-linux-gnu
-            cross: false
+            windows: false
           - target: arm-unknown-linux-gnueabi
-            cross: false
+            windows: false
           - target: arm-unknown-linux-gnueabihf
-            cross: false
+            windows: false
           - target: x86_64-unknown-linux-musl
-            cross: false
+            windows: false
           - target: aarch64-unknown-linux-musl
-            cross: false
+            windows: false
           - target: arm-unknown-linux-musleabi
-            cross: false
+            windows: false
           - target: arm-unknown-linux-musleabihf
-            cross: false
+            windows: false
           - target: x86_64-apple-darwin
-            cross: false
+            windows: false
           - target: aarch64-apple-darwin
-            cross: false
+            windows: false
           - target: x86_64-pc-windows-gnu
-            cross: true
+            windows: true
+            prefix: x86_64-w64-mingw32
           - target: i686-pc-windows-gnu
-            cross: true
+            windows: true
+            prefix: i686-w64-mingw32
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-      
+
       - name: Install dependencies
         run: |
           sudo apt-get update
@@ -49,13 +51,13 @@ jobs:
             mingw-w64-i686-dev \
             gcc-mingw-w64-x86-64 \
             gcc-mingw-w64-i686
-          
+
           mkdir -p ~/.zig
-          
+
           curl -fsSL \
             "https://ziglang.org/builds/zig-linux-$(uname -m)-0.13.0-dev.46+3648d7df1.tar.xz" | \
             tar -xJ -C ~/.zig --strip-components 1
-          
+
           chmod a+rx ~/.zig/zig
           sudo ln -sf ~/.zig/zig /usr/local/bin/zig
 
@@ -73,7 +75,7 @@ jobs:
             ${{ runner.os }}-build-${{ env.cache-name }}-${{ matrix.target }}-
             ${{ runner.os }}-build-${{ matrix.target }}-
             ${{ runner.os }}-${{ matrix.target }}-
-      
+
       - name: Install Rust toolchain
         run: |
           rustup update --no-self-update nightly
@@ -81,20 +83,20 @@ jobs:
           rustup default nightly
 
           rustup target add ${{ matrix.target }}
-        
+
       - name: Install cargo-binstall
         uses: cargo-bins/cargo-binstall@main
 
       - name: Install cargo-zigbuild
         run: |
           cargo binstall cargo-zigbuild -y
-      
+
       - name: Install cross
         run: |
           cargo binstall cross -y
 
       - name: Build
-        if: matrix.cross == false
+        if: !matrix.windows
         run: |
           cargo zigbuild --target ${{ matrix.target }}
           cargo zigbuild --release --target ${{ matrix.target }}
@@ -103,12 +105,14 @@ jobs:
 
           cp -v target/${{ matrix.target }}/debug/dsc bin/dsc-debug
           cp -v target/${{ matrix.target }}/release/dsc bin/dsc
-      
-      - name: Build (cross)
-        if: matrix.cross == true
+
+      - name: Build (windows)
+        if: matrix.windows
         run: |
-          cross build --target ${{ matrix.target }}
-          cross build --release --target ${{ matrix.target }}
+          export RUSTFLAGS="-L/usr/${{ matrix.prefix }}/lib"
+              
+          cargo zigbuild --target ${{ matrix.target }}
+          cargo zigbuild --release --target ${{ matrix.target }}
 
           mkdir bin
 
