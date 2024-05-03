@@ -31,23 +31,14 @@ jobs:
             windows: false
           - target: x86_64-pc-windows-gnu
             windows: true
-            prefix: x86_64-w64-mingw32
           - target: i686-pc-windows-gnu
             windows: true
-            prefix: i686-w64-mingw32
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
       - name: Install dependencies
         run: |
-          sudo apt-get update
-
-          sudo apt-get install -y \
-            gcc \
-            clang \
-            build-essential
-
           mkdir -p ~/.zig
 
           curl -fsSL \
@@ -139,11 +130,11 @@ jobs:
 
             for file in $target/*; do
               if [[ "$file" == *".exe" ]]; then
-                $newpath="${file/\.exe/"-$targetname.exe"}"
+                newpath="${file/\.exe/"-$targetname.exe"}"
 
                 cp "$file" "$newpath"
               else
-                $newpath="$file-$targetname"
+                newpath="$file-$targetname"
 
                 cp "$file" "$newpath"
               fi
