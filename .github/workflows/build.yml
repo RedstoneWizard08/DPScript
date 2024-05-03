@@ -140,7 +140,8 @@ jobs:
           mkdir bin
 
           for target in ./artifacts/*; do
-            targetname="${target/binaries-/}"
+            targetname="$(basename "$target")"
+            targetname="${targetname/binaries-/}"
 
             for file in $target/*; do
               if [[ "$file" == *".exe" ]]; then
