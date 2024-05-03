@@ -46,11 +46,7 @@ jobs:
           sudo apt-get install -y \
             gcc \
             clang \
-            build-essential \
-            mingw-w64-x86-64-dev \
-            mingw-w64-i686-dev \
-            gcc-mingw-w64-x86-64 \
-            gcc-mingw-w64-i686
+            build-essential
 
           mkdir -p ~/.zig
 
@@ -109,10 +105,8 @@ jobs:
       - name: Build (windows)
         if: matrix.windows == true
         run: |
-          export RUSTFLAGS="-L/usr/${{ matrix.prefix }}/lib"
-              
-          cargo zigbuild --target ${{ matrix.target }}
-          cargo zigbuild --release --target ${{ matrix.target }}
+          cross build --target ${{ matrix.target }}
+          cross build --release --target ${{ matrix.target }}
 
           mkdir bin
 
