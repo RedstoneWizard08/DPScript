@@ -130,21 +130,13 @@ jobs:
 
             for file in $target/*; do
               if [[ "$file" == *".exe" ]]; then
-                newfile="${file/\.\/artifacts/\.\/bin}"
-                newpath="${newfile/\.exe/"-$targetname.exe"}"
-
-                if [[ ! -f "$(dirname "$newfile")" ]]; then
-                  mkdir -p "$(dirname "$newfile")"
-                fi
+                newpath="${file/\.exe/"-$targetname.exe"}"
+                newpath="./bin/$(basename "$newpath")"
 
                 cp -v "$file" "$newpath"
               else
-                newfile="${file/\.\/artifacts/\.\/bin}"
-                newpath="$newfile-$targetname"
-
-                if [[ ! -f "$(dirname "$newfile")" ]]; then
-                  mkdir -p "$(dirname "$newfile")"
-                fi
+                newpath="$file-$targetname"
+                newpath="./bin/$(basename "$newpath")"
 
                 cp -v "$file" "$newpath"
               fi
