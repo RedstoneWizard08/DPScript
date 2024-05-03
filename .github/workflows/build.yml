@@ -132,11 +132,11 @@ jobs:
               if [[ "$file" == *".exe" ]]; then
                 newpath="${file/\.exe/"-$targetname.exe"}"
 
-                cp "$file" "$newpath"
+                cp -v "$file" "$newpath"
               else
                 newpath="$file-$targetname"
 
-                cp "$file" "$newpath"
+                cp -v "$file" "$newpath"
               fi
             done
           done
