@@ -1,6 +1,6 @@
 package redstonedev.dpscriptutil;
 
-import net.minecraft.server.dedicated.MinecraftDedicatedServer;
+import net.minecraft.server.dedicated.DedicatedServer;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.core.Logger;
 import org.apache.logging.log4j.core.LoggerContext;
@@ -28,14 +28,14 @@ public class Console {
 	public static final Set<String> DEOBFUSCATING_APPENDERS = Stream.of("NotEnoughCrashesDeobfuscatingAppender", "StackDeobfAppender")
 		.collect(collectingAndThen(toCollection(HashSet::new), Collections::unmodifiableSet));
 
-	public static MinecraftDedicatedServer server;
+	public static DedicatedServer server;
 
 	public static void run() {
-		MinecraftDedicatedServer srv = Objects.requireNonNull(server); // captureServer() happens-before
+		DedicatedServer srv = Objects.requireNonNull(server); // captureServer() happens-before
 
 		LineReader lr = LineReaderBuilder.builder()
-				.completer(new MinecraftCommandCompleter(srv.getCommandManager().getDispatcher(), srv.getCommandSource()))
-				.highlighter(new MinecraftCommandHighlighter(srv.getCommandManager().getDispatcher(), srv.getCommandSource()))
+				.completer(new MinecraftCommandCompleter(srv.getCommands().getDispatcher(), srv.createCommandSourceStack()))
+				.highlighter(new MinecraftCommandHighlighter(srv.getCommands().getDispatcher(), srv.createCommandSourceStack()))
 				.variable(LineReader.SECONDARY_PROMPT_PATTERN, "/")
 				.option(LineReader.Option.DISABLE_EVENT_EXPANSION, true)
 				.build();
@@ -71,13 +71,13 @@ public class Console {
 					if (cmd.isEmpty())
 						continue;
 
-					srv.enqueueCommand(cmd, srv.getCommandSource());
+					srv.handleConsoleInput(cmd, srv.createCommandSourceStack());
 
 					if (cmd.equals("stop"))
 						return;
 				}
 			} catch (EndOfFileException | UserInterruptException e) {
-				srv.enqueueCommand("stop", srv.getCommandSource());
+				srv.handleConsoleInput("stop", srv.createCommandSourceStack());
 				return;
 			}
 		}

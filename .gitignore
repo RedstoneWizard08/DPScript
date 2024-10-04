@@ -1,2 +1,4 @@
 /target
 /test
+node_modules
+*.vsix

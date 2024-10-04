@@ -1,0 +1,10 @@
+[pack]
+name = "DPScript Standard Library"
+namespace = "dpscript_std"
+
+[version]
+minecraft = "1.21.1"
+mods = ["dpscriptutil"]
+
+[build]
+output = "./out"

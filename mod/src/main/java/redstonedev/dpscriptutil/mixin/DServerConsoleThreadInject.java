@@ -5,7 +5,7 @@ import redstonedev.dpscriptutil.DPScriptUtil;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 
-@Mixin(targets = "net.minecraft.server.dedicated.MinecraftDedicatedServer$C_bixbyrmi")
+@Mixin(targets = "net.minecraft.server.dedicated.DedicatedServer$1")
 public class DServerConsoleThreadInject {
     /**
      * @author Fourmisain

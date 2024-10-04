@@ -4,77 +4,79 @@ import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.suggestion.SuggestionProvider;
 
-import net.minecraft.command.CommandSource;
-import net.minecraft.command.DataCommandStorage;
-import net.minecraft.command.argument.IdentifierArgumentType;
-import net.minecraft.command.argument.NbtPathArgumentType;
-import net.minecraft.nbt.NbtDouble;
-import net.minecraft.nbt.NbtFloat;
-import net.minecraft.nbt.NbtInt;
-import net.minecraft.server.command.ServerCommandSource;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.commands.SharedSuggestionProvider;
+import net.minecraft.commands.arguments.NbtPathArgument;
+import net.minecraft.commands.arguments.ResourceLocationArgument;
+import net.minecraft.nbt.DoubleTag;
+import net.minecraft.nbt.FloatTag;
+import net.minecraft.nbt.IntTag;
+import net.minecraft.util.Mth;
+import net.minecraft.world.level.storage.CommandStorage;
 
 import org.quiltmc.qsl.command.api.EnumArgumentType;
+import java.util.function.Function;
 
-import static net.minecraft.server.command.CommandManager.literal;
-import static net.minecraft.server.command.CommandManager.argument;
+import static net.minecraft.commands.Commands.literal;
+import static net.minecraft.commands.Commands.argument;
 
 public class DataCommandOps {
-    public static final SuggestionProvider<ServerCommandSource> SUGGESTION_PROVIDER = (context,
-            builder) -> CommandSource.suggestIdentifiers(
-                    of(context).getIds(), builder);
+    public static final SuggestionProvider<CommandSourceStack> SUGGESTION_PROVIDER = (context,
+            builder) -> SharedSuggestionProvider.suggestResource(
+                    of(context).keys(), builder);
 
-    static DataCommandStorage of(CommandContext<ServerCommandSource> context) {
-        return context.getSource().getServer().getDataCommandStorage();
+    private static CommandStorage of(CommandContext<CommandSourceStack> context) {
+        return context.getSource().getServer().getCommandStorage();
     }
 
-    public static void register(CommandDispatcher<ServerCommandSource> dispatcher) {
+    public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
         var builder = literal("data")
                 .requires((serverCommandSource) -> {
                     return serverCommandSource.hasPermission(2);
                 });
 
-        dispatcher.register(builder.then(literal("operation").then(
-                literal("storage").then(argument("storage", IdentifierArgumentType.identifier())
+        dispatcher.register(builder.then(literal("ops").then(
+                literal("storage").then(argument("storage", ResourceLocationArgument.id())
                         .suggests(SUGGESTION_PROVIDER)
-                        .then(argument("path", NbtPathArgumentType.nbtPath()).then(argument("operation",
+                        .then(argument("path", NbtPathArgument.nbtPath()).then(argument("operation",
                                 new EnumArgumentType("add", "subtract", "sub", "multiply", "mul", "divide", "div",
                                         "power", "pow", "and", "or", "xor"))
-                                .then(argument("storage2", IdentifierArgumentType.identifier())
-                                        .then(argument("path2", NbtPathArgumentType.nbtPath()).executes(ctx -> {
-                                            var storageId = IdentifierArgumentType.getIdentifier(ctx, "storage");
-                                            var path = NbtPathArgumentType.getNbtPath(ctx, "path");
-                                            var rhsStorageId = IdentifierArgumentType.getIdentifier(ctx, "storage2");
-                                            var rhsPath = NbtPathArgumentType.getNbtPath(ctx, "path2");
+                                .then(argument("storage2", ResourceLocationArgument.id())
+                                        .then(argument("path2", NbtPathArgument.nbtPath()).executes(ctx -> {
+                                            var storageId = ResourceLocationArgument.getId(ctx, "storage");
+                                            var path = NbtPathArgument.getPath(ctx, "path");
+                                            var rhsStorageId = ResourceLocationArgument.getId(ctx, "storage2");
+                                            var rhsPath = NbtPathArgument.getPath(ctx, "path2");
                                             var operation = EnumArgumentType.getEnum(ctx, "operation");
 
                                             var server = ctx.getSource().getServer();
-                                            var storage = server.getDataCommandStorage().get(storageId);
+                                            var storage = server.getCommandStorage().get(storageId);
                                             var objects = path.get(storage);
                                             var object = objects.get(objects.size() - 1);
 
-                                            var storage2 = server.getDataCommandStorage().get(rhsStorageId);
+                                            var storage2 = server.getCommandStorage().get(rhsStorageId);
                                             var objects2 = rhsPath.get(storage2);
                                             var value = objects2.get(objects2.size() - 1);
 
                                             float originalValue;
                                             float added;
 
-                                            if (object instanceof NbtFloat) {
-                                                originalValue = ((NbtFloat) object).floatValue();
-                                            } else if (object instanceof NbtDouble) {
-                                                originalValue = (float) ((NbtDouble) object).doubleValue();
-                                            } else if (object instanceof NbtInt) {
-                                                originalValue = (float) ((NbtInt) object).intValue();
+                                            if (object instanceof FloatTag) {
+                                                originalValue = ((FloatTag) object).getAsFloat();
+                                            } else if (object instanceof DoubleTag) {
+                                                originalValue = (float) ((DoubleTag) object).getAsDouble();
+                                            } else if (object instanceof IntTag) {
+                                                originalValue = (float) ((IntTag) object).getAsInt();
                                             } else {
                                                 return -1;
                                             }
 
-                                            if (value instanceof NbtFloat) {
-                                                added = ((NbtFloat) value).floatValue();
-                                            } else if (value instanceof NbtDouble) {
-                                                added = (float) ((NbtDouble) value).doubleValue();
-                                            } else if (value instanceof NbtInt) {
-                                                added = (float) ((NbtInt) value).intValue();
+                                            if (value instanceof FloatTag) {
+                                                added = ((FloatTag) value).getAsFloat();
+                                            } else if (value instanceof DoubleTag) {
+                                                added = (float) ((DoubleTag) value).getAsDouble();
+                                            } else if (value instanceof IntTag) {
+                                                added = (float) ((IntTag) value).getAsInt();
                                             } else {
                                                 return -1;
                                             }
@@ -107,10 +109,71 @@ public class DataCommandOps {
                                                 }
                                             }
 
-                                            path.set(storage, NbtFloat.of(originalValue));
-                                            server.getDataCommandStorage().set(storageId, storage);
+                                            path.set(storage, FloatTag.valueOf(originalValue));
+                                            server.getCommandStorage().set(storageId, storage);
 
                                             return (int) originalValue;
                                         })))))))));
+
+        dispatcher.register(builder.then(literal("advops").then(
+                literal("storage").then(argument("storage", ResourceLocationArgument.id())
+                        .suggests(SUGGESTION_PROVIDER)
+                        .then(argument("path", NbtPathArgument.nbtPath()).then(argument("operation",
+                                new EnumArgumentType("sqrt", "sin", "cos", "tan", "asin", "acos", "atan"))
+                                .executes(ctx -> {
+                                    var storageId = ResourceLocationArgument.getId(ctx, "storage");
+                                    var path = NbtPathArgument.getPath(ctx, "path");
+                                    var operation = EnumArgumentType.getEnum(ctx, "operation");
+
+                                    var server = ctx.getSource().getServer();
+                                    var storage = server.getCommandStorage().get(storageId);
+                                    var objects = path.get(storage);
+                                    var object = objects.get(objects.size() - 1);
+
+                                    float originalValue;
+
+                                    if (object instanceof FloatTag) {
+                                        originalValue = ((FloatTag) object).getAsFloat();
+                                    } else if (object instanceof DoubleTag) {
+                                        originalValue = (float) ((DoubleTag) object).getAsDouble();
+                                    } else if (object instanceof IntTag) {
+                                        originalValue = (float) ((IntTag) object).getAsInt();
+                                    } else {
+                                        return -1;
+                                    }
+
+                                    Function<Float, Float> func = (f) -> f;
+
+                                    switch (operation) {
+                                        case "sqrt" -> {
+                                            func = Mth::sqrt;
+                                        }
+                                        case "sin" -> {
+                                            func = Mth::sin;
+                                        }
+                                        case "cos" -> {
+                                            func = Mth::cos;
+                                        }
+                                        case "tan" -> {
+                                            func = (f) -> (float) Math.tan((double) f);
+                                        }
+                                        case "asin" -> {
+                                            func = (f) -> (float) Math.asin((double) f);
+                                        }
+                                        case "acos" -> {
+                                            func = (f) -> (float) Math.acos((double) f);
+                                        }
+                                        case "atan" -> {
+                                            func = (f) -> (float) Math.atan((double) f);
+                                        }
+                                    }
+
+                                    originalValue = func.apply(originalValue);
+
+                                    path.set(storage, FloatTag.valueOf(originalValue));
+                                    server.getCommandStorage().set(storageId, storage);
+
+                                    return (int) originalValue;
+                                })))))));
     }
 }

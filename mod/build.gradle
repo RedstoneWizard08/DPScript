@@ -1,6 +1,6 @@
 plugins {
 	id 'maven-publish'
-	id("org.quiltmc.loom") version "1.6.5"
+	id("org.quiltmc.loom") version "1.7.4"
 }
 
 base {
@@ -12,6 +12,11 @@ group = project.maven_group
 
 repositories {
 	mavenCentral()
+
+    maven {
+        name = 'ParchmentMC'
+        url = 'https://maven.parchmentmc.org'
+    }
 }
 
 loom {
@@ -24,12 +29,17 @@ loom {
 
 dependencies {
 	minecraft libs.minecraft
-	mappings variantOf(libs.quilt.mappings) { classifier 'intermediary-v2' }
 	modImplementation libs.quilt.loader
+
+    mappings loom.layered() {
+        // variantOf(libs.quilt.mappings) { classifier 'intermediary-v2' }
+        officialMojangMappings()
+		parchment("org.parchmentmc.data:parchment-1.21:2024.07.28@zip")
+    }
 
 	modImplementation include("org.jline:jline:3.26.1")
 	modImplementation include("org.jline:jline-terminal-jansi:3.26.1")
-    modImplementation "org.quiltmc:qsl:8.0.0-alpha.13+1.20.4"
+    modImplementation "org.quiltmc:qsl:10.0.0-alpha.3+1.21.1"
 
 	include modApi("com.moandjiezana.toml:toml4j:0.7.2") {
 		exclude(module: "gson")
@@ -46,12 +56,12 @@ processResources {
 
 tasks.withType(JavaCompile).configureEach {
 	it.options.encoding = 'UTF-8'
-	it.options.release = 17
+	it.options.release = 21
 }
 
 java {
-	sourceCompatibility = JavaVersion.VERSION_17
-	targetCompatibility = JavaVersion.VERSION_17
+	sourceCompatibility = JavaVersion.VERSION_21
+	targetCompatibility = JavaVersion.VERSION_21
 
 	withSourcesJar()
 }

@@ -1,0 +1,76 @@
+module std/array;
+
+import std/{
+    core/{
+        set_data,
+        get_data,
+        stores,
+        players,
+        keyof,
+        storeof,
+    },
+    scoreboard,
+};
+
+objective tempArrayLength: dummy = "__dpscript_tmp_array_add_length";
+objective tempArrayPos: dummy = "__dpscript_tmp_array_add_pos";
+objective tempInputLen: dummy = "__dpscript_tmp_array_input_len";
+objective tempOutputLen: dummy = "__dpscript_tmp_array_output_len";
+
+pub fn array_add(arr: NBT[], add: NBT) {
+    const store = storeof(arr);
+    const key = keyof(arr);
+    const path = path: "{store}/{key}";
+    
+    tempArrayLength.set(players.temp, stores.arrayLength.get(path));
+
+    store.append(key, add);
+    
+    tempArrayLength.add(players.temp, 1);
+
+    stores.arrayLength.set(path, tempArrayLength.get(players.temp));
+}
+
+pub fn array_add_all(arr: NBT[], add: NBT[]) {
+    const store = storeof(arr);
+    const key = keyof(arr);
+    const path = path: "{store}/{key}";
+
+    const addStore = storeof(add);
+    const addKey = keyof(add);
+    const addPath = path: "{addStore}/{addKey}";
+    
+    tempArrayLength.set(players.temp, stores.arrayLength.get(path));
+    tempOutputLen.set(players.temp, stores.arrayLength.get(path));
+    tempInputLen.set(players.temp, stores.arrayLength.get(addPath));
+    tempArrayPos.set(players.temp, 0);
+
+    let arrCopy = arr.cloneToTemp();
+    let addCopy = add.cloneToTemp();
+
+    array_add_all_sub(arrCopy, addCopy);
+    store.set(key, arrCopy);
+
+    tempArrayLength.reset(players.temp);
+    tempArrayPos.reset(players.temp);
+
+    tempOutputLen.operation(ScoreboardOps::Add, players.temp, tempInputLen, players.temp);
+
+    stores.arrayLength.set(path, tempOutputLen.get(players.temp));
+
+    tempOutputLen.reset(players.temp);
+    tempInputLen.reset(players.temp);
+}
+
+fn array_add_all_sub(arr: NBT[], add: NBT[]) {
+    let addKey = keyof(add);
+    
+    storeof(arr).append(keyof(arr), add[0]);
+    storeof(add).remove("{addKey}[0]");
+
+    tempArrayPos.add(players.temp, 1);
+
+    if tempArrayPos.lessThan(players.temp, tempArrayLength, players.temp) {
+        array_add_all_sub(arr, add);
+    }
+}
