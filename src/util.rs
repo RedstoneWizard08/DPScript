@@ -1,5 +1,6 @@
 use miette::{NamedSource, SourceOffset, SourceSpan};
 
+#[derive(Clone)]
 pub struct Cursor {
     src: String,
     inner: Vec<char>,

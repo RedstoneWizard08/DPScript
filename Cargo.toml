@@ -10,7 +10,6 @@ console = "0.15.8"
 indicatif = "0.17.8"
 lazy_static = "1.4.0"
 miette = { version = "7.2.0", features = ["fancy", "serde"] }
-peg = "0.8.2"
 ron = "0.8.1"
 semver = { version = "1.0.22", features = ["serde"] }
 serde = { version = "1.0.199", features = ["derive"] }

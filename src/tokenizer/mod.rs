@@ -1,3 +1,4 @@
+use miette::SourceSpan;
 use token::Token;
 
 use crate::{
@@ -10,7 +11,7 @@ pub mod token;
 fn tokenize_inner(
     ch: char,
     cursor: &mut Cursor,
-    tokens: &mut Vec<Token>,
+    tokens: &mut Vec<(Token, SourceSpan)>,
 ) -> Result<(), TokenizerError> {
     if ch.is_whitespace() {
         return Ok(());
@@ -31,33 +32,34 @@ fn tokenize_inner(
     }
 
     let sym = match ch {
-        ':' => Some(Token::Colon),
-        ',' => Some(Token::Comma),
-        '[' => Some(Token::LeftBracket),
-        ']' => Some(Token::RightBracket),
-        '{' => Some(Token::LeftBrace),
-        '}' => Some(Token::RightBrace),
-        '(' => Some(Token::LeftParen),
-        ')' => Some(Token::RightParen),
-        '<' => Some(Token::LeftAngle),
-        '>' => Some(Token::RightAngle),
-        ';' => Some(Token::Semi),
-        '=' => Some(Token::Equal),
-        '-' => Some(Token::Minus),
-        '+' => Some(Token::Plus),
-        '*' => Some(Token::Star),
-        '/' => Some(Token::Slash),
-        '&' => Some(Token::And),
-        '#' => Some(Token::Hash),
+        ':' => Some((Token::Colon, cursor.span(1))),
+        ',' => Some((Token::Comma, cursor.span(1))),
+        '[' => Some((Token::LeftBracket, cursor.span(1))),
+        ']' => Some((Token::RightBracket, cursor.span(1))),
+        '{' => Some((Token::LeftBrace, cursor.span(1))),
+        '}' => Some((Token::RightBrace, cursor.span(1))),
+        '(' => Some((Token::LeftParen, cursor.span(1))),
+        ')' => Some((Token::RightParen, cursor.span(1))),
+        '<' => Some((Token::LeftAngle, cursor.span(1))),
+        '>' => Some((Token::RightAngle, cursor.span(1))),
+        ';' => Some((Token::Semi, cursor.span(1))),
+        '=' => Some((Token::Equal, cursor.span(1))),
+        '-' => Some((Token::Minus, cursor.span(1))),
+        '+' => Some((Token::Plus, cursor.span(1))),
+        '*' => Some((Token::Star, cursor.span(1))),
+        '/' => Some((Token::Slash, cursor.span(1))),
+        '&' => Some((Token::And, cursor.span(1))),
+        '#' => Some((Token::Hash, cursor.span(1))),
 
         '.' => {
             if cursor.peek().is_some_and(|v| v == '.')
                 && cursor.peek_ahead(1).is_some_and(|v| v == '.')
             {
+                let span = cursor.span(3);
                 cursor.skip(2);
-                Some(Token::Ellipsis)
+                Some((Token::Ellipsis, span))
             } else {
-                Some(Token::Dot)
+                Some((Token::Dot, cursor.span(1)))
             }
         }
 
@@ -73,17 +75,18 @@ fn tokenize_inner(
         'i' => {
             if let Some(next) = cursor.peek() {
                 let it = match next {
-                    'f' => Some(Token::If),
-                    'd' => Some(Token::Id),
+                    'f' => Some((Token::If, cursor.span(2))),
+                    'd' => Some((Token::Id, cursor.span(2))),
 
                     'n' => {
                         if cursor.peek_ahead(1).is_some_and(|v| v.is_not_ident()) {
-                            Some(Token::In)
+                            Some((Token::In, cursor.span(2)))
                         } else if cursor.peek_str(1, 2).is_some_and(|v| v == "it")
                             && cursor.peek_ahead(3).is_some_and(|v| v.is_not_ident())
                         {
+                            let span = cursor.span(4);
                             cursor.skip(2);
-                            Some(Token::Init)
+                            Some((Token::Init, span))
                         } else {
                             None
                         }
@@ -93,8 +96,9 @@ fn tokenize_inner(
                         if cursor.peek_str(1, 4).is_some_and(|v| v == "port")
                             && cursor.peek_ahead(5).is_some_and(|v| v.is_not_ident())
                         {
+                            let span = cursor.span(6);
                             cursor.skip(4);
-                            Some(Token::Import)
+                            Some((Token::Import, span))
                         } else {
                             None
                         }
@@ -117,13 +121,15 @@ fn tokenize_inner(
             if cursor.peek_str(0, 4).is_some_and(|v| v == "tore")
                 && cursor.peek_ahead(4).is_some_and(|v| v.is_not_ident())
             {
+                let span = cursor.span(5);
                 cursor.skip(4);
-                Some(Token::Store)
+                Some((Token::Store, span))
             } else if cursor.peek_str(0, 7).is_some_and(|v| v == "elector")
                 && cursor.peek_ahead(7).is_some_and(|v| v.is_not_ident())
             {
+                let span = cursor.span(8);
                 cursor.skip(7);
-                Some(Token::Selector)
+                Some((Token::Selector, span))
             } else {
                 None
             }
@@ -133,13 +139,15 @@ fn tokenize_inner(
             if cursor.peek_str(0, 5).is_some_and(|v| v == "xport")
                 && cursor.peek_ahead(5).is_some_and(|v| v.is_not_ident())
             {
+                let span = cursor.span(6);
                 cursor.skip(5);
-                Some(Token::Export)
+                Some((Token::Export, span))
             } else if cursor.peek_str(0, 3).is_some_and(|v| v == "num")
                 && cursor.peek_ahead(3).is_some_and(|v| v.is_not_ident())
             {
+                let span = cursor.span(4);
                 cursor.skip(3);
-                Some(Token::Enum)
+                Some((Token::Enum, span))
             } else {
                 None
             }
@@ -149,23 +157,27 @@ fn tokenize_inner(
             if cursor.peek_str(0, 1).is_some_and(|v| v == "n")
                 && cursor.peek_ahead(1).is_some_and(|v| v.is_not_ident())
             {
+                let span = cursor.span(2);
                 cursor.skip(1);
-                Some(Token::Fn)
+                Some((Token::Fn, span))
             } else if cursor.peek_str(0, 2).is_some_and(|v| v == "or")
                 && cursor.peek_ahead(2).is_some_and(|v| v.is_not_ident())
             {
+                let span = cursor.span(3);
                 cursor.skip(2);
-                Some(Token::For)
+                Some((Token::For, span))
             } else if cursor.peek_str(0, 5).is_some_and(|v| v == "acade")
                 && cursor.peek_ahead(5).is_some_and(|v| v.is_not_ident())
             {
+                let span = cursor.span(6);
                 cursor.skip(5);
-                Some(Token::Facade)
+                Some((Token::Facade, span))
             } else if cursor.peek_str(0, 4).is_some_and(|v| v == "alse")
                 && cursor.peek_ahead(4).is_some_and(|v| v.is_not_ident())
             {
+                let span = cursor.span(5);
                 cursor.skip(4);
-                Some(Token::Bool(false))
+                Some((Token::Bool(false), span))
             } else {
                 None
             }
@@ -175,18 +187,21 @@ fn tokenize_inner(
             if cursor.peek_str(0, 2).is_some_and(|v| v == "ub")
                 && cursor.peek_ahead(2).is_some_and(|v| v.is_not_ident())
             {
+                let span = cursor.span(3);
                 cursor.skip(2);
-                Some(Token::Pub)
+                Some((Token::Pub, span))
             } else if cursor.peek_str(0, 3).is_some_and(|v| v == "ath")
                 && cursor.peek_ahead(3).is_some_and(|v| v.is_not_ident())
             {
+                let span = cursor.span(4);
                 cursor.skip(3);
-                Some(Token::Path)
+                Some((Token::Path, span))
             } else if cursor.peek_str(0, 5).is_some_and(|v| v == "layer")
                 && cursor.peek_ahead(5).is_some_and(|v| v.is_not_ident())
             {
+                let span = cursor.span(6);
                 cursor.skip(5);
-                Some(Token::Player)
+                Some((Token::Player, span))
             } else {
                 None
             }
@@ -196,18 +211,21 @@ fn tokenize_inner(
             if cursor.peek_str(0, 4).is_some_and(|v| v == "onst")
                 && cursor.peek_ahead(4).is_some_and(|v| v.is_not_ident())
             {
+                let span = cursor.span(5);
                 cursor.skip(4);
-                Some(Token::Const)
+                Some((Token::Const, span))
             } else if cursor.peek_str(0, 7).is_some_and(|v| v == "ompiler")
                 && cursor.peek_ahead(7).is_some_and(|v| v.is_not_ident())
             {
+                let span = cursor.span(8);
                 cursor.skip(7);
-                Some(Token::Compiler)
+                Some((Token::Compiler, span))
             } else if cursor.peek_str(0, 8).is_some_and(|v| v == "omponent")
                 && cursor.peek_ahead(8).is_some_and(|v| v.is_not_ident())
             {
+                let span = cursor.span(9);
                 cursor.skip(8);
-                Some(Token::Component)
+                Some((Token::Component, span))
             } else {
                 None
             }
@@ -217,8 +235,9 @@ fn tokenize_inner(
             if cursor.peek_str(0, 2).is_some_and(|v| v == "et")
                 && cursor.peek_ahead(2).is_some_and(|v| v.is_not_ident())
             {
+                let span = cursor.span(3);
                 cursor.skip(2);
-                Some(Token::Let)
+                Some((Token::Let, span))
             } else {
                 None
             }
@@ -228,8 +247,9 @@ fn tokenize_inner(
             if cursor.peek_str(0, 5).is_some_and(|v| v == "eturn")
                 && cursor.peek_ahead(5).is_some_and(|v| v.is_not_ident())
             {
+                let span = cursor.span(6);
                 cursor.skip(5);
-                Some(Token::Return)
+                Some((Token::Return, span))
             } else {
                 None
             }
@@ -239,8 +259,9 @@ fn tokenize_inner(
             if cursor.peek_str(0, 8).is_some_and(|v| v == "bjective")
                 && cursor.peek_ahead(8).is_some_and(|v| v.is_not_ident())
             {
+                let span = cursor.span(9);
                 cursor.skip(8);
-                Some(Token::Objective)
+                Some((Token::Objective, span))
             } else {
                 None
             }
@@ -250,8 +271,9 @@ fn tokenize_inner(
             if cursor.peek_str(0, 5).is_some_and(|v| v == "odule")
                 && cursor.peek_ahead(5).is_some_and(|v| v.is_not_ident())
             {
+                let span = cursor.span(6);
                 cursor.skip(5);
-                Some(Token::Module)
+                Some((Token::Module, span))
             } else {
                 None
             }
@@ -261,13 +283,15 @@ fn tokenize_inner(
             if cursor.peek_str(0, 3).is_some_and(|v| v == "ick")
                 && cursor.peek_ahead(3).is_some_and(|v| v.is_not_ident())
             {
+                let span = cursor.span(4);
                 cursor.skip(3);
-                Some(Token::Tick)
+                Some((Token::Tick, span))
             } else if cursor.peek_str(0, 3).is_some_and(|v| v == "rue")
                 && cursor.peek_ahead(3).is_some_and(|v| v.is_not_ident())
             {
+                let span = cursor.span(4);
                 cursor.skip(3);
-                Some(Token::Bool(true))
+                Some((Token::Bool(true), span))
             } else {
                 None
             }
@@ -284,6 +308,7 @@ fn tokenize_inner(
 
     if ch == '"' {
         let mut s = Vec::new();
+        let c2 = cursor.clone();
 
         while let Some(tkn) = cursor.next() {
             if tkn == '"' {
@@ -293,13 +318,14 @@ fn tokenize_inner(
             }
         }
 
-        tokens.push(Token::String(s.iter().collect()));
+        tokens.push((Token::String(s.iter().collect()), c2.span(s.len() + 2)));
 
         return Ok(());
     }
 
     if ch.is_ascii_digit() {
         let mut buf = Vec::new();
+        let c2 = cursor.clone();
 
         buf.push(ch);
 
@@ -312,13 +338,15 @@ fn tokenize_inner(
             }
         }
 
+        let span = c2.span(buf.len());
+
         if buf.contains(&'.') {
             if let Ok(it) = buf.iter().collect::<String>().parse() {
-                tokens.push(Token::Float(it));
+                tokens.push((Token::Float(it), span));
             } else {
                 return Err(TokenizerError {
                     src: cursor.source(),
-                    at: cursor.span(buf.len()),
+                    at: span,
                     err: format!(
                         "Could not parse as a float: {}",
                         buf.iter().collect::<String>()
@@ -327,11 +355,11 @@ fn tokenize_inner(
             }
         } else {
             if let Ok(it) = buf.iter().collect::<String>().parse() {
-                tokens.push(Token::Int(it));
+                tokens.push((Token::Int(it), span));
             } else {
                 return Err(TokenizerError {
                     src: cursor.source(),
-                    at: cursor.span(buf.len()),
+                    at: span,
                     err: format!(
                         "Could not parse as an int: {}",
                         buf.iter().collect::<String>()
@@ -345,6 +373,7 @@ fn tokenize_inner(
 
     if ch.is_ascii_alphabetic() {
         let mut ident = Vec::new();
+        let c2 = cursor.clone();
 
         ident.push(ch);
 
@@ -357,7 +386,7 @@ fn tokenize_inner(
             }
         }
 
-        tokens.push(Token::Ident(ident.iter().collect()));
+        tokens.push((Token::Ident(ident.iter().collect()), c2.span(ident.len())));
 
         return Ok(());
     }
@@ -372,7 +401,7 @@ fn tokenize_inner(
 pub fn tokenize(
     file: impl AsRef<str>,
     data: impl AsRef<str>,
-) -> Result<Vec<Token>, TokenizerError> {
+) -> Result<Vec<(Token, SourceSpan)>, TokenizerError> {
     let mut tokens = Vec::new();
     let mut cursor = Cursor::new(file, data);
 

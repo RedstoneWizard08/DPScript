@@ -1,6 +1,8 @@
 use std::fmt;
 
-#[derive(Debug, Clone)]
+use serde::{Deserialize, Serialize};
+
+#[derive(Debug, Serialize, Deserialize, Clone)]
 pub enum Token {
     // =============== LITERALS ===============
     /// n
