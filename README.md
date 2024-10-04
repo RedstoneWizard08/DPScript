@@ -5,10 +5,10 @@ inspired by CBScript.
 
 ## TODO List
 
-- [x] Functions
-- [x] Variables
-- [x] Codegen
-- [x] Build system
+- [ ] Functions
+- [ ] Variables
+- [ ] Codegen
+- [ ] Build system
 - [ ] Code formatter
 - [ ] Imports
 - [ ] If/Else statements
