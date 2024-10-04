@@ -10,7 +10,7 @@ enum AdvOps {
     Atan,
 }
 
-#[cmd = "data advops storage %% %% %%"]
+#[cmd("data advops storage %% %% %%")]
 facade fn advops(#[id(storage)] storage: Identifier, pat: NBTPath, op: AdvOps);
 
 pub fn sqrt(num: float) -> float {

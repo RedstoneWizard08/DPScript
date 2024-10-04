@@ -4,6 +4,14 @@ version = "0.1.0"
 edition = "2021"
 repository = "https://github.com/RedstoneWizard08/DPScript"
 
+[[bin]]
+name = "dps"
+path = "src/main.rs"
+
+[[bin]]
+name = "testing"
+path = "src/testing.rs"
+
 [dependencies]
 anyhow = "1.0.82"
 clap = { version = "4.5.4", features = ["derive"] }
@@ -22,4 +30,3 @@ walkdir = "2.5.0"
 [package.metadata.binstall]
 pkg-url = "{ repo }/releases/download/v{ version }/dsc-{ target }"
 pkg-fmt = "bin"
-disabled-strategies = ["quick-install", "compile"]

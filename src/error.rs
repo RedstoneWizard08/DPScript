@@ -3,8 +3,8 @@ use thiserror::Error;
 
 #[derive(Debug, Error, Diagnostic)]
 #[error("An error occured while parsing!")]
-#[diagnostic(code(dpscript::error::tokenizer), url(docsrs))]
-pub struct TokenizerError {
+#[diagnostic(code(dpscript::error::parser), url(docsrs))]
+pub struct ParserError {
     #[source_code]
     pub src: NamedSource<String>,
 
