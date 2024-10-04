@@ -20,6 +20,6 @@ toml = "0.8.12"
 walkdir = "2.5.0"
 
 [package.metadata.binstall]
-pkg-url = "{ repo }/releases/download/v{ version }/{ name }-{ target }"
+pkg-url = "{ repo }/releases/download/v{ version }/dsc-{ target }"
 pkg-fmt = "bin"
-disabled-strategies = []
+disabled-strategies = ["quick-install", "compile"]
