@@ -58,6 +58,10 @@ fn tokenize_inner(
                 let span = cursor.span(3);
                 cursor.skip(2);
                 Some((Token::Ellipsis, span))
+            } else if cursor.peek().is_some_and(|v| v == '.') {
+                let span = cursor.span(2);
+                cursor.skip(1);
+                Some((Token::Range, span))
             } else {
                 Some((Token::Dot, cursor.span(1)))
             }

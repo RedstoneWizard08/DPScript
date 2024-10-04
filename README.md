@@ -5,19 +5,27 @@ inspired by CBScript.
 
 ## TODO List
 
+### Core
+
+- [x] Tokenizer
+- [ ] AST
+- [ ] Lexer
+- [ ] AST Validator
+- [ ] Codegen
+- [ ] Build System
+
+### Language Features
+
 - [ ] Functions
 - [ ] Variables
-- [ ] Codegen
-- [ ] Build system
-- [ ] Code formatter
 - [ ] Imports
 - [ ] If/Else statements
-- [ ] For loops
-- [ ] For each loops
-- [ ] For range loop unrolling
+- [ ] `for ... in ...` loops
+- [ ] `for ... in [0..3]` loop unrolling
+
+### QoL
+
+- [x] Syntax highlighting
 - [ ] More CLI commands and options
-- [ ] Syntax highlighting
 - [ ] Language server
-- [ ] Stability improvements
-- [ ] Robustness improvements
-- [ ] Better codegen
+- [ ] Code formatter

@@ -82,6 +82,9 @@ pub enum Token {
     /// "..."
     Ellipsis,
 
+    /// ".."
+    Range,
+
     // =============== KEYWORDS ===============
     /// "if"
     If,
@@ -187,6 +190,7 @@ impl fmt::Display for Token {
             Self::Slash => write!(f, "/"),
             Self::Hash => write!(f, "#"),
             Self::Ellipsis => write!(f, "..."),
+            Self::Range => write!(f, ".."),
             Self::If => write!(f, "if"),
             Self::In => write!(f, "in"),
             Self::Id => write!(f, "id"),
