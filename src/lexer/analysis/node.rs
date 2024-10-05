@@ -92,7 +92,7 @@ impl Analyzer<Node> for Node {
             None => {}
         }
 
-        // TODO: conditionals, enum value, return
+        // TODO: conditionals, enum value, return, export, selector, objective
 
         Err(ParserError {
             src: cursor.source(),
