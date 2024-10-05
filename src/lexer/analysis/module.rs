@@ -1,20 +1,36 @@
 use super::Analyzer;
-use crate::{AddSpan, Cursor, Module, Node, ParserResult, Spanned, Token, TokenCursor};
+use crate::{AddSpan, Cursor, Module, Node, Result, Spanned, Token, TokenCursor};
 
 impl Analyzer<Module> for Module {
     fn analyze(
-        item: Spanned<Token>,
+        mut item: Spanned<Token>,
         cursor: &mut TokenCursor,
         _nodes: &mut Vec<Node>,
-    ) -> ParserResult<Option<Module>> {
-        if item.0 != Token::Module {
-            return Ok(None);
+    ) -> Result<Option<Module>> {
+        let mut is_pub = match item.0 {
+            Token::Module => false,
+            Token::Pub => true,
+            _ => return Ok(None),
+        };
+
+        if is_pub {
+            if !cursor.peek().is_some_and(|(v, _)| v == Token::Module) {
+                return Ok(None);
+            }
+
+            item = cursor.next().unwrap();
         }
 
         let mut name = Vec::new();
+        let mut is_block = false;
 
         while let Some((tkn, span)) = cursor.next() {
             if tkn == Token::Semi {
+                break;
+            }
+
+            if tkn == Token::LeftBrace {
+                is_block = true;
                 break;
             }
 
@@ -27,11 +43,29 @@ impl Analyzer<Module> for Module {
             }
         }
 
-        let mut buf = Vec::new();
+        if !is_block {
+            is_pub = true;
+        }
 
-        while let Some(tkn) = cursor.next() {
-            // We want ALL of the tokens.
-            buf.push(tkn);
+        let mut buf = Vec::new();
+        let mut opens = 0;
+
+        while let Some((tkn, span)) = cursor.next() {
+            if is_block {
+                if tkn == Token::RightBrace {
+                    if opens == 0 {
+                        break;
+                    } else {
+                        opens -= 1;
+                    }
+                }
+
+                if tkn == Token::LeftBrace {
+                    opens += 1;
+                }
+            }
+
+            buf.push((tkn, span));
         }
 
         let mut span = item.1;
@@ -48,6 +82,13 @@ impl Analyzer<Module> for Module {
             Node::analyze(item, &mut buf_cursor, &mut body)?;
         }
 
-        Ok(Some(Self { name, body, span }))
+        Ok(Some(Self {
+            is_pub,
+            name,
+            body,
+            span,
+            top_level: None,
+            source: cursor.source(),
+        }))
     }
 }

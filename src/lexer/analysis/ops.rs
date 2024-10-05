@@ -1,5 +1,5 @@
 use crate::{
-    Node, Operation, OperationKind, ParserError, ParserResult, Spanned, Token, TokenCursor,
+    AddSpan, Node, Operation, OperationKind, ParserError, Result, Spanned, Token, TokenCursor,
 };
 
 use super::Analyzer;
@@ -9,9 +9,7 @@ impl Analyzer<Operation> for Operation {
         item: Spanned<Token>,
         cursor: &mut TokenCursor,
         nodes: &mut Vec<Node>,
-    ) -> ParserResult<Option<Operation>> {
-        debug!("Trying to resolve an operation kind...");
-
+    ) -> Result<Option<Operation>> {
         let kind = match item.0 {
             Token::And => OperationKind::And,
             Token::Plus => OperationKind::Add,
@@ -27,27 +25,27 @@ impl Analyzer<Operation> for Operation {
             return Ok(None);
         }
 
-        debug!("Resolving the LHS operand...");
-
         let lhs = nodes.remove(nodes.len() - 1);
+        let mut span = lhs.get_span();
         let tkn = cursor.next_or_die(item.1)?;
-
-        debug!("Resolving the RHS operand...");
-
         let rhs = Node::analyze(tkn.clone(), cursor, &mut Vec::new())?;
 
         if let Some(rhs) = rhs {
+            span = span.add(rhs.get_span());
+
             Ok(Some(Self {
                 lhs: Box::new(lhs),
                 rhs: Box::new(rhs),
                 kind,
+                span,
             }))
         } else {
             Err(ParserError {
                 src: cursor.source(),
                 at: tkn.1,
-                err: format!("Could not parse a right-hand side operation: {}", tkn.0),
-            })
+                err: format!("Could not parse an RHS operand: {}", tkn.0),
+            }
+            .into())
         }
     }
 }

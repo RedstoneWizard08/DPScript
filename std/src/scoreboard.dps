@@ -1,7 +1,0 @@
-module std/scoreboard;
-
-module objectives {
-    module types {
-        pub const DUMMY: str = "dummy";
-    }
-}

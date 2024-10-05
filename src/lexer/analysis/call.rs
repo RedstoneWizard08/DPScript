@@ -1,21 +1,54 @@
 use super::Analyzer;
-use crate::{check_token, AddSpan, Call, Cursor, Node, ParserResult, Spanned, Token, TokenCursor};
+use crate::{
+    check_token, AddSpan, Call, Cursor, Node, ParserError, Result, Spanned, Token, TokenCursor,
+};
 
 impl Analyzer<Call> for Call {
     fn analyze(
-        item: Spanned<Token>,
+        mut item: Spanned<Token>,
         cursor: &mut TokenCursor,
         nodes: &mut Vec<Node>,
-    ) -> ParserResult<Option<Call>> {
-        if cursor.peek().is_some_and(|(v, _)| v != Token::LeftParen) || cursor.peek().is_none() {
+    ) -> Result<Option<Call>> {
+        let mut span = item.1.clone();
+
+        let is_nested = match item.0 {
+            Token::Ident(_) => true,
+            _ => false,
+        } && cursor.peek().is_some_and(|(v, _)| v == Token::Dot)
+            && cursor.peek_ahead(1).is_some_and(|(v, _)| match v {
+                Token::Ident(_) => true,
+                _ => false,
+            })
+            && cursor
+                .peek_ahead(2)
+                .is_some_and(|(v, _)| v == Token::LeftParen);
+
+        if !is_nested && !cursor.peek().is_some_and(|(v, _)| v == Token::LeftParen) {
             return Ok(None);
+        }
+
+        let mut parent = None;
+
+        if is_nested {
+            parent = match item.0 {
+                Token::Ident(id) => Some((id, item.1)),
+                _ => {
+                    return Err(ParserError {
+                        src: cursor.source(),
+                        at: item.1,
+                        err: format!("Unexpected token while parsing a nested call: {}", item.0),
+                    }
+                    .into())
+                }
+            };
+
+            check_token!(remove cursor == Dot);
+            item = cursor.next().unwrap();
         }
 
         let Some(function) = String::analyze(item, cursor, nodes)? else {
             return Ok(None);
         };
-
-        let mut span = function.1.clone();
 
         check_token!(remove cursor == LeftParen);
 
@@ -95,6 +128,7 @@ impl Analyzer<Call> for Call {
             function,
             args,
             span,
+            parent,
         }))
     }
 }

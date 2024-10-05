@@ -1,8 +1,7 @@
 use super::Analyzer;
 
 use crate::{
-    check_token, AddSpan, Cursor, Loop, Node, ParserError, ParserResult, Spanned, Token,
-    TokenCursor,
+    check_token, AddSpan, Cursor, Loop, Node, ParserError, Result, Spanned, Token, TokenCursor,
 };
 
 impl Analyzer<Loop> for Loop {
@@ -10,7 +9,7 @@ impl Analyzer<Loop> for Loop {
         item: Spanned<Token>,
         cursor: &mut TokenCursor,
         _nodes: &mut Vec<Node>,
-    ) -> ParserResult<Option<Loop>> {
+    ) -> Result<Option<Loop>> {
         if item.0 != Token::For {
             return Ok(None);
         }
@@ -25,7 +24,8 @@ impl Analyzer<Loop> for Loop {
                     src: cursor.source(),
                     at: var_name_span,
                     err: format!("Unexpected token while parsing a loop: {}", var_name),
-                })
+                }
+                .into())
             }
         };
 
@@ -41,7 +41,8 @@ impl Analyzer<Loop> for Loop {
                     src: cursor.source(),
                     at: array_span,
                     err: format!("Unexpected token while parsing a loop: {}", array),
-                })
+                }
+                .into())
             }
         };
 

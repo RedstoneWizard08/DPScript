@@ -1,5 +1,5 @@
 use crate::{
-    check_token, Cursor, Node, ParserError, ParserResult, Spanned, Token, TokenCursor, Type,
+    check_token, AddSpan, Cursor, Node, ParserError, Result, Spanned, Token, TokenCursor, Type,
     Variable,
 };
 
@@ -7,10 +7,29 @@ use super::Analyzer;
 
 impl Analyzer<Variable> for Variable {
     fn analyze(
-        item: Spanned<Token>,
+        mut item: Spanned<Token>,
         cursor: &mut TokenCursor,
         nodes: &mut Vec<Node>,
-    ) -> ParserResult<Option<Variable>> {
+    ) -> Result<Option<Variable>> {
+        let mut span = item.1;
+
+        let is_pub = match item.0 {
+            Token::Let | Token::Const => false,
+            Token::Pub => true,
+            _ => return Ok(None),
+        };
+
+        if is_pub {
+            if !cursor
+                .peek()
+                .is_some_and(|(v, _)| v == Token::Let || v == Token::Const)
+            {
+                return Ok(None);
+            }
+
+            item = cursor.next().unwrap();
+        }
+
         let is_const = match item.0 {
             Token::Let => false,
             Token::Const => true,
@@ -27,7 +46,8 @@ impl Analyzer<Variable> for Variable {
                     src: cursor.source(),
                     at: name_span,
                     err: format!("Unexpected token while parsing a variable: {}", name),
-                })
+                }
+                .into())
             }
         };
 
@@ -65,18 +85,25 @@ impl Analyzer<Variable> for Variable {
         let value = nodes.first();
 
         match value {
-            Some(value) => Ok(Some(Self {
-                is_const,
-                name,
-                ty,
-                value: Box::new(value.clone()),
-            })),
+            Some(value) => {
+                span = span.add(value.get_span());
+
+                Ok(Some(Self {
+                    is_pub,
+                    is_const,
+                    name,
+                    ty,
+                    span,
+                    value: Box::new(value.clone()),
+                }))
+            }
 
             None => Err(ParserError {
                 src: cursor.source(),
                 at: it.1,
-                err: format!("Could not parse a node: {}", it.0),
-            }),
+                err: format!("Could not parse a variable value: {}", it.0),
+            }
+            .into()),
         }
     }
 }

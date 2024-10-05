@@ -1,6 +1,6 @@
 pub mod analysis;
 
-use crate::{Cursor, Node, ParserResult, Spanned, Token, AST};
+use crate::{Cursor, Node, Result, Spanned, Token, AST};
 use analysis::Analyzer;
 use miette::NamedSource;
 
@@ -29,7 +29,7 @@ impl Lexer {
         }
     }
 
-    pub fn run(mut self) -> ParserResult<Self> {
+    pub fn run(mut self) -> Result<Self> {
         let mut cursor =
             Cursor::new_from_src(&self.file, self.source.inner().clone(), self.tokens.clone());
 
@@ -41,6 +41,17 @@ impl Lexer {
     }
 
     pub fn get_ast(self) -> AST {
-        AST { nodes: self.nodes }
+        AST {
+            nodes: self.nodes,
+            modules: None,
+            top_level: None,
+            blocks: None,
+            enums: None,
+            exports: None,
+            funcs: None,
+            imports: None,
+            objectives: None,
+            vars: None,
+        }
     }
 }

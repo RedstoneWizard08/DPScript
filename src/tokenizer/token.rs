@@ -112,6 +112,9 @@ pub enum Token {
     /// "enum"
     Enum,
 
+    /// "else"
+    Else,
+
     // ========================================
     /// "fn"
     Fn,
@@ -202,6 +205,7 @@ impl fmt::Display for Token {
             Self::Selector => write!(f, "selector"),
             Self::Export => write!(f, "export"),
             Self::Enum => write!(f, "enum"),
+            Self::Else => write!(f, "else"),
             Self::Fn => write!(f, "fn"),
             Self::For => write!(f, "for"),
             Self::Facade => write!(f, "facade"),

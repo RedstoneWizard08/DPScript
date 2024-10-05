@@ -3,9 +3,10 @@ use miette::SourceSpan;
 use serde::Serialize;
 
 #[derive(Debug, Clone, Serialize)]
-pub struct Block {
-    pub is_init: bool,
-    pub is_tick: bool,
+pub struct Return {
+    /// The return value
+    pub value: Option<Box<Node>>,
+
+    /// The span
     pub span: SourceSpan,
-    pub body: Vec<Node>,
 }

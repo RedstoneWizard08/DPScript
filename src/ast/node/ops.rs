@@ -1,12 +1,13 @@
+use super::Node;
+use miette::SourceSpan;
 use serde::{Deserialize, Serialize};
 
-use super::Node;
-
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize)]
 pub struct Operation {
     pub lhs: Box<Node>,
     pub rhs: Box<Node>,
     pub kind: OperationKind,
+    pub span: SourceSpan,
 }
 
 #[derive(Debug, Clone, Copy, Serialize, Deserialize, PartialEq, Eq, PartialOrd, Ord, Hash)]

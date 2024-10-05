@@ -1,6 +1,5 @@
 use crate::{
-    check_token, AddSpan, Cursor, Literal, Node, ParserError, ParserResult, Spanned, Token,
-    TokenCursor,
+    check_token, AddSpan, Cursor, Literal, Node, ParserError, Result, Spanned, Token, TokenCursor,
 };
 
 use super::Analyzer;
@@ -10,7 +9,7 @@ impl Analyzer<Literal> for Literal {
         item: Spanned<Token>,
         cursor: &mut TokenCursor,
         _nodes: &mut Vec<Node>,
-    ) -> ParserResult<Option<Literal>> {
+    ) -> Result<Option<Literal>> {
         Ok(match item.0 {
             Token::Int(i) => Some(Literal::Int((i, item.1))),
             Token::Float(f) => Some(Literal::Float((f, item.1))),
@@ -30,7 +29,8 @@ impl Analyzer<Literal> for Literal {
                                 src: cursor.source(),
                                 at: span,
                                 err: format!("Expected string, got: {}", tkn),
-                            })
+                            }
+                            .into())
                         }
                     },
                     span,
@@ -50,7 +50,8 @@ impl Analyzer<Literal> for Literal {
                                 src: cursor.source(),
                                 at: span,
                                 err: format!("Expected string, got: {}", tkn),
-                            })
+                            }
+                            .into())
                         }
                     },
                     span,
@@ -70,7 +71,71 @@ impl Analyzer<Literal> for Literal {
                                 src: cursor.source(),
                                 at: span,
                                 err: format!("Expected string, got: {}", tkn),
-                            })
+                            }
+                            .into())
+                        }
+                    },
+                    span,
+                )))
+            }
+
+            Token::Store => {
+                let (_, s) = check_token!(remove cursor == Colon).unwrap();
+                let (tkn, span) = cursor.next_or_die(s)?;
+
+                Some(Literal::Store((
+                    match tkn {
+                        Token::String(s) => s,
+
+                        _ => {
+                            return Err(ParserError {
+                                src: cursor.source(),
+                                at: span,
+                                err: format!("Expected string, got: {}", tkn),
+                            }
+                            .into())
+                        }
+                    },
+                    span,
+                )))
+            }
+
+            Token::Player => {
+                let (_, s) = check_token!(remove cursor == Colon).unwrap();
+                let (tkn, span) = cursor.next_or_die(s)?;
+
+                Some(Literal::Player((
+                    match tkn {
+                        Token::String(s) => s,
+
+                        _ => {
+                            return Err(ParserError {
+                                src: cursor.source(),
+                                at: span,
+                                err: format!("Expected string, got: {}", tkn),
+                            }
+                            .into())
+                        }
+                    },
+                    span,
+                )))
+            }
+
+            Token::Selector => {
+                let (_, s) = check_token!(remove cursor == Colon).unwrap();
+                let (tkn, span) = cursor.next_or_die(s)?;
+
+                Some(Literal::Selector((
+                    match tkn {
+                        Token::String(s) => s,
+
+                        _ => {
+                            return Err(ParserError {
+                                src: cursor.source(),
+                                at: span,
+                                err: format!("Expected string, got: {}", tkn),
+                            }
+                            .into())
                         }
                     },
                     span,
@@ -180,6 +245,35 @@ impl Analyzer<Literal> for Literal {
                 }
 
                 Some(Literal::Array((items, span)))
+            }
+
+            Token::Ident(name) => {
+                if cursor.peek().is_some_and(|(v, _)| v == Token::Colon)
+                    && cursor.peek_ahead(1).is_some_and(|(v, _)| v == Token::Colon)
+                {
+                    cursor.skip(2);
+
+                    let tkn = cursor.next_or_die(item.1)?;
+
+                    let val = match tkn.0 {
+                        Token::Ident(id) => (id, tkn.1),
+                        _ => {
+                            return Err(ParserError {
+                                src: cursor.source(),
+                                at: tkn.1,
+                                err: format!(
+                                    "Unexpected token while parsing an enum value: {}",
+                                    tkn.0
+                                ),
+                            }
+                            .into())
+                        }
+                    };
+
+                    Some(Literal::EnumValue((name, item.1), val))
+                } else {
+                    None
+                }
             }
 
             _ => None,

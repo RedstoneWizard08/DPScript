@@ -1,4 +1,4 @@
-use crate::{Node, ParserResult, Spanned, Token, TokenCursor};
+use crate::{Node, Result, Spanned, Token, TokenCursor};
 
 use super::Analyzer;
 
@@ -7,7 +7,7 @@ impl Analyzer<Spanned<String>> for String {
         item: Spanned<Token>,
         _cursor: &mut TokenCursor,
         _nodes: &mut Vec<Node>,
-    ) -> ParserResult<Option<Spanned<String>>> {
+    ) -> Result<Option<Spanned<String>>> {
         Ok(match item.0 {
             Token::Ident(id) => Some((id, item.1)),
             _ => None,

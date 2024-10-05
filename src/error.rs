@@ -2,6 +2,22 @@ use miette::{Diagnostic, NamedSource, SourceSpan};
 use thiserror::Error;
 
 #[derive(Debug, Error, Diagnostic)]
+pub enum Error {
+    #[error(transparent)]
+    #[diagnostic(transparent)]
+    Parser(#[from] ParserError),
+
+    #[error(transparent)]
+    Io(#[from] std::io::Error),
+
+    #[error(transparent)]
+    Ron(#[from] ron::Error),
+
+    #[error(transparent)]
+    Toml(#[from] toml::de::Error),
+}
+
+#[derive(Debug, Error, Diagnostic)]
 #[error("An error occured while parsing!")]
 #[diagnostic(code(dpscript::error::parser), url(docsrs))]
 pub struct ParserError {

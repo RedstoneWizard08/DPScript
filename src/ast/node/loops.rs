@@ -1,9 +1,9 @@
 use super::Node;
 use crate::Spanned;
 use miette::SourceSpan;
-use serde::{Deserialize, Serialize};
+use serde::Serialize;
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize)]
 pub struct Loop {
     /// The variable name for the loop entry
     pub var_name: Spanned<String>,

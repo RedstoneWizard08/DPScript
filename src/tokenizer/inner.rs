@@ -1,11 +1,11 @@
 use super::{StringCursor, Token};
-use crate::{error::ParserError, util::IsNotIdent, ParserResult, Spanned};
+use crate::{error::ParserError, util::IsNotIdent, Result, Spanned};
 
 pub(crate) fn tokenize_inner(
     ch: char,
     cursor: &mut StringCursor,
     tokens: &mut Vec<Spanned<Token>>,
-) -> ParserResult<()> {
+) -> Result<()> {
     if ch.is_whitespace() {
         return Ok(());
     }
@@ -145,6 +145,12 @@ pub(crate) fn tokenize_inner(
                 let span = cursor.span(4);
                 cursor.skip(3);
                 Some((Token::Enum, span))
+            } else if cursor.peek_many(0, 3).is_some_and(|v| v == "lse")
+                && cursor.peek_ahead(3).is_some_and(|v| v.is_not_ident())
+            {
+                let span = cursor.span(4);
+                cursor.skip(3);
+                Some((Token::Else, span))
             } else {
                 None
             }
@@ -360,7 +366,8 @@ pub(crate) fn tokenize_inner(
                         "Could not parse as a float: {}",
                         buf.iter().collect::<String>()
                     ),
-                });
+                }
+                .into());
             }
         } else {
             if let Ok(it) = buf.iter().collect::<String>().parse() {
@@ -373,7 +380,8 @@ pub(crate) fn tokenize_inner(
                         "Could not parse as an int: {}",
                         buf.iter().collect::<String>()
                     ),
-                });
+                }
+                .into());
             }
         }
 
@@ -404,5 +412,6 @@ pub(crate) fn tokenize_inner(
         src: cursor.source(),
         at: cursor.span(1),
         err: format!("Unexpected character during tokenization: {}", ch),
-    })
+    }
+    .into())
 }

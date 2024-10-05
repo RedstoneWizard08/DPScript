@@ -4,5 +4,4 @@ export advops/*;
 export array/*;
 export base/*;
 export core/*;
-export scoreboard/*;
 export selectors/*;

@@ -13,7 +13,8 @@ macro_rules! check_token {
                         token,
                         $crate::Token::$tkn
                     ),
-                });
+                }
+                .into());
             }
         }
 
@@ -30,7 +31,8 @@ macro_rules! check_token {
                     src: $cursor.source(),
                     at: span.clone(),
                     err: format!("Unexpected token: {}", token),
-                });
+                }
+                .into());
             }
         }
 
@@ -50,7 +52,8 @@ macro_rules! check_token {
                         token,
                         $crate::Token::$tkn
                     ),
-                });
+                }
+                .into());
             }
         }
 
@@ -67,7 +70,8 @@ macro_rules! check_token {
                     $tkn.0,
                     $crate::Token::$expected
                 ),
-            });
+            }
+            .into());
         }
     }};
 
@@ -81,7 +85,8 @@ macro_rules! check_token {
                     src: $cursor.source(),
                     at: span.clone(),
                     err: format!("Unexpected token: {}", token),
-                });
+                }
+                .into());
             }
         }
 
@@ -101,7 +106,8 @@ macro_rules! check_token {
                         token,
                         $crate::Token::$tkn
                     ),
-                });
+                }
+                .into());
             }
         }
 
@@ -121,7 +127,8 @@ macro_rules! check_token {
                         token,
                         $crate::Token::$tkn
                     ),
-                });
+                }
+                .into());
             }
         }
 
@@ -135,7 +142,8 @@ macro_rules! check_token {
                 src: $cursor.source(),
                 at: $tkn.1.clone(),
                 err: format!("Unexpected token: {}", $tkn.0),
-            });
+            }
+            .into());
         }
     }};
 }
@@ -147,4 +155,47 @@ macro_rules! add_return {
         $arr.push(node.clone());
         return Ok(Some(node));
     }};
+}
+
+#[macro_export]
+macro_rules! module_top_level_getter {
+    ($fn: ident -> $ty: ident) => {
+        impl $crate::Module {
+            pub fn $fn(&self) -> Vec<$crate::$ty> {
+                let mut items = Vec::new();
+
+                if let Some(nodes) = &self.top_level {
+                    for node in nodes {
+                        if let $crate::TopLevelNode::$ty(item) = node {
+                            items.push(item.clone());
+                        }
+                    }
+                }
+
+                items
+            }
+        }
+    };
+}
+
+#[macro_export]
+macro_rules! module_indexer_add {
+    ($id: ident += ($name: ident, $module: ident)) => {
+        if let Some(it) = $id.get_mut(&$name) {
+            it.extend($module.$id());
+        } else {
+            $id.insert($name.clone(), $module.$id());
+        }
+    };
+}
+
+#[macro_export]
+macro_rules! dump_ast_part {
+    ($ast: ident.$id: ident => $dir: ident) => {
+        if let Some(it) = $ast.$id {
+            let path = $dir.join(format!("{}.ron", stringify!($id)));
+
+            fs::write(path, ron::ser::to_string_pretty(&it, PrettyConfig::new())?)?;
+        }
+    };
 }

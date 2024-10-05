@@ -4,3 +4,4 @@ node_modules
 *.vsix
 *.ast.ron
 *.tokens.ron
+std/out

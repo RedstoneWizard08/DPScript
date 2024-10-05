@@ -1,11 +1,9 @@
+use super::{attr::Attribute, Node, Type};
+use crate::Spanned;
 use miette::SourceSpan;
 use serde::{Deserialize, Serialize};
 
-use crate::Spanned;
-
-use super::{attr::Attribute, Node, Type};
-
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize)]
 pub struct Function {
     /// The function attributes.
     pub attrs: Vec<Attribute>,

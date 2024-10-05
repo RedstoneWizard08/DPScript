@@ -1,4 +1,4 @@
-use crate::{ExpandSpan, Node, ParserResult, Spanned, Token, TokenCursor, Type, TypeKind};
+use crate::{ExpandSpan, Node, Result, Spanned, Token, TokenCursor, Type, TypeKind};
 
 use super::Analyzer;
 
@@ -7,15 +7,17 @@ impl Analyzer<Type> for Type {
         item: Spanned<Token>,
         cursor: &mut TokenCursor,
         _nodes: &mut Vec<Node>,
-    ) -> ParserResult<Option<Type>> {
+    ) -> Result<Option<Type>> {
         let id = match item.0 {
             Token::Ident(id) => (id, item.1),
             _ => return Ok(None),
         };
 
-        let is_array = cursor.peek().is_some_and(|(v, _)| v == Token::LeftBracket)
+        let is_array = cursor
+            .peek_ahead(1)
+            .is_some_and(|(v, _)| v == Token::LeftBracket)
             && cursor
-                .peek_ahead(1)
+                .peek_ahead(2)
                 .is_some_and(|(v, _)| v == Token::RightBracket);
 
         if is_array {
@@ -38,14 +40,14 @@ impl Analyzer<Type> for Type {
             it => TypeKind::Ident(it.into()),
         };
 
-        let mut ty = Type { kind, span: id.1 };
-
-        if is_array {
-            ty = Type {
-                span: ty.span.expand(2),
-                kind: TypeKind::Array(Box::new(ty)),
-            };
-        }
+        let ty = if is_array {
+            Type {
+                span: id.1.expand(2),
+                kind: TypeKind::Array(Box::new(Type { kind, span: id.1 })),
+            }
+        } else {
+            Type { kind, span: id.1 }
+        };
 
         Ok(Some(ty))
     }

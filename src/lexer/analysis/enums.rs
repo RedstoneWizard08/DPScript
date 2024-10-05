@@ -1,6 +1,5 @@
 use crate::{
-    check_token, AddSpan, Cursor, Enum, Node, ParserError, ParserResult, Spanned, Token,
-    TokenCursor,
+    check_token, AddSpan, Cursor, Enum, Node, ParserError, Result, Spanned, Token, TokenCursor,
 };
 
 use super::Analyzer;
@@ -10,7 +9,7 @@ impl Analyzer<Enum> for Enum {
         item: Spanned<Token>,
         cursor: &mut TokenCursor,
         _nodes: &mut Vec<Node>,
-    ) -> ParserResult<Option<Enum>> {
+    ) -> Result<Option<Enum>> {
         let is_pub: bool = match item.0 {
             Token::Pub => true,
             Token::Enum => false,
@@ -64,7 +63,8 @@ impl Analyzer<Enum> for Enum {
                     src: cursor.source(),
                     at: item.1,
                     err: format!("Unexpected token while parsing enum: {}", item.0),
-                });
+                }
+                .into());
             }
         }
 

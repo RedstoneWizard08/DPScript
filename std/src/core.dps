@@ -1,18 +1,18 @@
 module std/core;
 
-pub compiler fn keyof(obj: NBT);
-pub compiler fn storeof(obj: NBT);
+pub compiler fn keyof(obj: Any);
+pub compiler fn storeof(obj: Any);
 
 #[cmd("data modify storage %% %% set value %%")]
-pub facade fn set_data(storage: Storage, path: NBTPath, value: NBT);
+pub facade fn set_data(storage: Storage, pat: NBTPath, value: Any);
 
 #[cmd("data get storage %% %%")]
-pub facade fn get_data(storage: Storage, path: NBTPath) -> NBT;
+pub facade fn get_data(storage: Storage, pat: NBTPath) -> Any;
 
 pub module stores {
-    const arrayLength = store: "dpscript:arrays/length";
+    pub const arrayLength = store: "dpscript:arrays/length";
 }
 
 pub module players {
-    const temp = player: "__dpscript_temp";
+    pub const temp = player: "__dpscript_temp";
 }

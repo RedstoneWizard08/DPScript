@@ -1,6 +1,6 @@
 use crate::{
-    add_return, Block, Call, Enum, Function, Import, Literal, Loop, Module, Node, Operation,
-    ParserError, ParserResult, Spanned, Token, TokenCursor, Variable,
+    add_return, Block, Call, Conditional, Enum, Export, Function, Import, Literal, Loop, Module,
+    Node, Objective, Operation, ParserError, Result, Return, Spanned, Token, TokenCursor, Variable,
 };
 
 use super::Analyzer;
@@ -10,7 +10,7 @@ impl Analyzer<Node> for Node {
         item: Spanned<Token>,
         cursor: &mut TokenCursor,
         nodes: &mut Vec<Node>,
-    ) -> ParserResult<Option<Node>> {
+    ) -> Result<Option<Node>> {
         if item.0 == Token::Semi {
             return Ok(None);
         }
@@ -26,6 +26,13 @@ impl Analyzer<Node> for Node {
 
         match Import::analyze(item.clone(), cursor, nodes)? {
             Some(v) => add_return!(nodes += Import(v)),
+            None => {}
+        };
+
+        debug!("Trying to parse an export...");
+
+        match Export::analyze(item.clone(), cursor, nodes)? {
+            Some(v) => add_return!(nodes += Export(v)),
             None => {}
         };
 
@@ -57,6 +64,13 @@ impl Analyzer<Node> for Node {
             None => {}
         };
 
+        debug!("Trying to parse a conditional...");
+
+        match Conditional::analyze(item.clone(), cursor, nodes)? {
+            Some(v) => add_return!(nodes += Conditional(v)),
+            None => {}
+        };
+
         debug!("Trying to parse an enum...");
 
         match Enum::analyze(item.clone(), cursor, nodes)? {
@@ -85,6 +99,20 @@ impl Analyzer<Node> for Node {
             None => {}
         };
 
+        debug!("Trying to parse a return...");
+
+        match Return::analyze(item.clone(), cursor, nodes)? {
+            Some(v) => add_return!(nodes += Return(v)),
+            None => {}
+        };
+
+        debug!("Trying to parse an objective...");
+
+        match Objective::analyze(item.clone(), cursor, nodes)? {
+            Some(v) => add_return!(nodes += Objective(v)),
+            None => {}
+        };
+
         debug!("Trying to parse an identifier...");
 
         match String::analyze(item.clone(), cursor, nodes)? {
@@ -92,12 +120,11 @@ impl Analyzer<Node> for Node {
             None => {}
         }
 
-        // TODO: conditionals, enum value, return, export, selector, objective
-
         Err(ParserError {
             src: cursor.source(),
             at: item.1,
             err: format!("Unexpected token while parsing a node: {}", item.0),
-        })
+        }
+        .into())
     }
 }

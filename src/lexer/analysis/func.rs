@@ -1,6 +1,6 @@
 use crate::{
-    check_token, AddSpan, Attribute, Cursor, Function, FunctionArg, Node, ParserError,
-    ParserResult, Spanned, Token, TokenCursor, Type,
+    check_token, AddSpan, Attribute, Cursor, Function, FunctionArg, Node, ParserError, Result,
+    Spanned, Token, TokenCursor, Type,
 };
 
 use super::Analyzer;
@@ -10,7 +10,7 @@ impl Analyzer<Function> for Function {
         mut item: Spanned<Token>,
         cursor: &mut TokenCursor,
         nodes: &mut Vec<Node>,
-    ) -> ParserResult<Option<Function>> {
+    ) -> Result<Option<Function>> {
         match item.0 {
             Token::Fn | Token::Pub | Token::Facade | Token::Component | Token::Hash => {}
             _ => return Ok(None),
@@ -31,8 +31,6 @@ impl Analyzer<Function> for Function {
             _ => return Ok(None),
         };
 
-        debug!("is_pub: {}", is_pub);
-
         if is_pub {
             if !cursor
                 .peek()
@@ -50,8 +48,6 @@ impl Analyzer<Function> for Function {
             _ => return Ok(None),
         };
 
-        debug!("is_facade: {}", is_facade);
-
         if is_facade {
             check_token!(cursor == Fn);
             item = cursor.next().unwrap();
@@ -62,8 +58,6 @@ impl Analyzer<Function> for Function {
             Token::Fn => false,
             _ => return Ok(None),
         };
-
-        debug!("is_compiler: {}", is_compiler);
 
         if is_compiler {
             check_token!(cursor == Fn);
@@ -82,11 +76,10 @@ impl Analyzer<Function> for Function {
                     src: cursor.source(),
                     at: name_span,
                     err: format!("Unexpected token while parsing a function: {}", name),
-                })
+                }
+                .into())
             }
         };
-
-        debug!("Found function with name: {}", name.0);
 
         let it = check_token!(remove cursor == LeftParen).unwrap();
 
@@ -154,8 +147,6 @@ impl Analyzer<Function> for Function {
                 .peek_ahead(1)
                 .is_some_and(|(v, _)| v == Token::RightAngle)
         {
-            debug!("Parsing a return type...");
-
             let (_, span_) = cursor.next_or_die(item.1)?;
             let (_, span_) = cursor.next_or_die(span_)?;
 
@@ -221,7 +212,7 @@ impl Analyzer<FunctionArg> for FunctionArg {
         mut item: Spanned<Token>,
         cursor: &mut TokenCursor,
         nodes: &mut Vec<Node>,
-    ) -> ParserResult<Option<FunctionArg>> {
+    ) -> Result<Option<FunctionArg>> {
         let attr = match item.0 {
             Token::Hash => {
                 let it = Some(Attribute::analyze(item, cursor, nodes)?);
@@ -240,7 +231,8 @@ impl Analyzer<FunctionArg> for FunctionArg {
                     src: cursor.source(),
                     at: item.1,
                     err: format!("Unexpected token while parsing a function: {}", item.0),
-                })
+                }
+                .into())
             }
         };
 
@@ -254,7 +246,8 @@ impl Analyzer<FunctionArg> for FunctionArg {
                         src: cursor.source(),
                         at: item.1,
                         err: "Function arguments require a type!".into(),
-                    })
+                    }
+                    .into())
                 }
             },
 
@@ -263,7 +256,8 @@ impl Analyzer<FunctionArg> for FunctionArg {
                     src: cursor.source(),
                     at: colon.1,
                     err: "Unexpected end of file!".into(),
-                })
+                }
+                .into())
             }
         };
 

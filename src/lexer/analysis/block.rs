@@ -1,4 +1,4 @@
-use crate::{check_token, AddSpan, Block, Cursor, Node, ParserResult, Spanned, Token, TokenCursor};
+use crate::{check_token, AddSpan, Block, Cursor, Node, Result, Spanned, Token, TokenCursor};
 
 use super::Analyzer;
 
@@ -7,7 +7,7 @@ impl Analyzer<Block> for Block {
         item: Spanned<Token>,
         cursor: &mut TokenCursor,
         _nodes: &mut Vec<Node>,
-    ) -> ParserResult<Option<Block>> {
+    ) -> Result<Option<Block>> {
         let is_init = match item.0 {
             Token::Init => true,
             Token::Tick => false,

@@ -1,14 +1,14 @@
-use crate::{AddSpan, Import, ImportNode, Node, ParserError, Result, Spanned, Token, TokenCursor};
+use crate::{AddSpan, Export, ImportNode, Node, ParserError, Result, Spanned, Token, TokenCursor};
 
 use super::Analyzer;
 
-impl Analyzer<Import> for Import {
+impl Analyzer<Export> for Export {
     fn analyze(
         item: Spanned<Token>,
         cursor: &mut TokenCursor,
         _nodes: &mut Vec<Node>,
-    ) -> Result<Option<Import>> {
-        if item.0 != Token::Import {
+    ) -> Result<Option<Export>> {
+        if item.0 != Token::Export {
             return Ok(None);
         }
 
@@ -22,15 +22,21 @@ impl Analyzer<Import> for Import {
             buf.push(tkn);
         }
 
-        let mut base = Vec::new();
-        let mut imports = Vec::new();
+        let mut module = Vec::new();
+        let mut items = Vec::new();
         let mut open = false;
+        let mut all = false;
 
         for (i, (item, span)) in buf.iter().enumerate() {
             match item.clone() {
                 Token::Slash | Token::Comma => continue,
                 _ => {}
             };
+
+            if item.clone() == Token::Star {
+                all = true;
+                break;
+            }
 
             if item.clone() == Token::LeftBrace {
                 open = true;
@@ -43,7 +49,7 @@ impl Analyzer<Import> for Import {
             }
 
             if open {
-                // TODO: Nested import modules (`import a/b/c/{a, b, c/d/e, d/e/{f, g}};`)
+                // TODO: Nested import modules (`export a/b/c/{a, b, c/d/e, d/e/{f, g}};`)
 
                 let name = match item.clone() {
                     Token::Ident(id) => id,
@@ -51,13 +57,13 @@ impl Analyzer<Import> for Import {
                         return Err(ParserError {
                             src: cursor.source(),
                             at: span.clone(),
-                            err: format!("Unexpected token while parsing an import: {}", item),
+                            err: format!("Unexpected token while parsing an export: {}", item),
                         }
                         .into())
                     }
                 };
 
-                imports.push(ImportNode::Object((name, span.clone())));
+                items.push(ImportNode::Object((name, span.clone())));
 
                 continue;
             }
@@ -69,13 +75,13 @@ impl Analyzer<Import> for Import {
                         return Err(ParserError {
                             src: cursor.source(),
                             at: span.clone(),
-                            err: format!("Unexpected token while parsing an import: {}", item),
+                            err: format!("Unexpected token while parsing an export: {}", item),
                         }
                         .into())
                     }
                 };
 
-                imports.push(ImportNode::Object((name, span.clone())));
+                items.push(ImportNode::Object((name, span.clone())));
 
                 break;
             }
@@ -87,13 +93,13 @@ impl Analyzer<Import> for Import {
                         return Err(ParserError {
                             src: cursor.source(),
                             at: span.clone(),
-                            err: format!("Unexpected token while parsing an import: {}", item),
+                            err: format!("Unexpected token while parsing an export: {}", item),
                         }
                         .into())
                     }
                 };
 
-                base.push((name, span.clone()));
+                module.push((name, span.clone()));
 
                 continue;
             }
@@ -102,8 +108,9 @@ impl Analyzer<Import> for Import {
         let span = item.1.add(buf.last().unwrap().1);
 
         Ok(Some(Self {
-            base,
-            imports,
+            all,
+            items,
+            module,
             span,
         }))
     }

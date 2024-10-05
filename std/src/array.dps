@@ -1,16 +1,14 @@
 module std/array;
 
-import std/{
-    core/{
-        set_data,
-        get_data,
-        stores,
-        players,
-        keyof,
-        storeof,
-    },
-    scoreboard,
+import std/core/{
+    set_data,
+    get_data,
+    keyof,
+    storeof,
 };
+
+import std/core/stores/arrayLength;
+import std/core/players/temp;
 
 objective tempArrayLength: dummy = "__dpscript_tmp_array_add_length";
 objective tempArrayPos: dummy = "__dpscript_tmp_array_add_pos";
@@ -18,59 +16,61 @@ objective tempInputLen: dummy = "__dpscript_tmp_array_input_len";
 objective tempOutputLen: dummy = "__dpscript_tmp_array_output_len";
 
 pub fn array_add(arr: NBT[], add: NBT) {
-    const store = storeof(arr);
+    const stor = storeof(arr);
     const key = keyof(arr);
-    const path = path: "{store}/{key}";
+    const pat = path: "{store}/{key}";
     
-    tempArrayLength.set(players.temp, stores.arrayLength.get(path));
+    tempArrayLength.set(temp, arrayLength.get(pat));
 
-    store.append(key, add);
+    stor.append(key, add);
     
-    tempArrayLength.add(players.temp, 1);
+    tempArrayLength.add(temp, 1);
 
-    stores.arrayLength.set(path, tempArrayLength.get(players.temp));
+    arrayLength.set(pat, tempArrayLength.get(temp));
 }
 
 pub fn array_add_all(arr: NBT[], add: NBT[]) {
-    const store = storeof(arr);
+    const stor = storeof(arr);
     const key = keyof(arr);
-    const path = path: "{store}/{key}";
+    const pat = path: "{stor}/{key}";
 
     const addStore = storeof(add);
     const addKey = keyof(add);
     const addPath = path: "{addStore}/{addKey}";
     
-    tempArrayLength.set(players.temp, stores.arrayLength.get(path));
-    tempOutputLen.set(players.temp, stores.arrayLength.get(path));
-    tempInputLen.set(players.temp, stores.arrayLength.get(addPath));
-    tempArrayPos.set(players.temp, 0);
+    tempArrayLength.set(temp, arrayLength.get(pat));
+    tempOutputLen.set(temp, arrayLength.get(pat));
+    tempInputLen.set(temp, arrayLength.get(addPath));
+    tempArrayPos.set(temp, 0);
 
     let arrCopy = arr.cloneToTemp();
     let addCopy = add.cloneToTemp();
 
     array_add_all_sub(arrCopy, addCopy);
-    store.set(key, arrCopy);
+    stor.set(key, arrCopy);
 
-    tempArrayLength.reset(players.temp);
-    tempArrayPos.reset(players.temp);
+    tempArrayLength.reset(temp);
+    tempArrayPos.reset(temp);
 
-    tempOutputLen.operation(ScoreboardOps::Add, players.temp, tempInputLen, players.temp);
+    tempOutputLen.operation(ScoreboardOps::Add, temp, tempInputLen, temp);
 
-    stores.arrayLength.set(path, tempOutputLen.get(players.temp));
+    arrayLength.set(pat, tempOutputLen.get(temp));
 
-    tempOutputLen.reset(players.temp);
-    tempInputLen.reset(players.temp);
+    tempOutputLen.reset(temp);
+    tempInputLen.reset(temp);
 }
 
 fn array_add_all_sub(arr: NBT[], add: NBT[]) {
     let addKey = keyof(add);
+    let s1 = storeof(arr);
+    let s2 = storeof(add);
     
-    storeof(arr).append(keyof(arr), add[0]);
-    storeof(add).remove("{addKey}[0]");
+    s1.append(keyof(arr), add[0]);
+    s2.remove("{addKey}[0]");
 
-    tempArrayPos.add(players.temp, 1);
+    tempArrayPos.add(temp, 1);
 
-    if tempArrayPos.lessThan(players.temp, tempArrayLength, players.temp) {
+    if tempArrayPos.lessThan(temp, tempArrayLength, temp) {
         array_add_all_sub(arr, add);
     }
 }
