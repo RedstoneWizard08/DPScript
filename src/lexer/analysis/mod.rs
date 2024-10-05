@@ -1,6 +1,7 @@
 pub mod attr;
 pub mod block;
 pub mod call;
+pub mod enums;
 pub mod func;
 pub mod ident;
 pub mod import;

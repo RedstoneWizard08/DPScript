@@ -14,71 +14,71 @@ enum AdvOps {
 facade fn advops(#[id(storage)] storage: Identifier, pat: NBTPath, op: AdvOps);
 
 pub fn sqrt(num: float) -> float {
-    const store = id: "dpscript:temp/ops/sqrt";
+    const stor = id: "dpscript:temp/ops/sqrt";
     const pat = path: "temp_val";
 
-    set_data(store, pat, num);
-    advops(store, pat, AdvOps::Sqrt);
+    set_data(stor, pat, num);
+    advops(stor, pat, AdvOps::Sqrt);
 
-    return get_data(store, pat);
+    return get_data(stor, pat);
 }
 
 pub fn sin(num: float) -> float {
-    const store = id: "dpscript:temp/ops/sin";
+    const stor = id: "dpscript:temp/ops/sin";
     const pat = path: "temp_val";
 
-    set_data(store, pat, num);
-    advops(store, pat, AdvOps::Sin);
+    set_data(stor, pat, num);
+    advops(stor, pat, AdvOps::Sin);
 
-    return get_data(store, pat);
+    return get_data(stor, pat);
 }
 
 pub fn cos(num: float) -> float {
-    const store = id: "dpscript:temp/ops/cos";
+    const stor = id: "dpscript:temp/ops/cos";
     const pat = path: "temp_val";
 
-    set_data(store, pat, num);
-    advops(store, pat, AdvOps::Cos);
+    set_data(stor, pat, num);
+    advops(stor, pat, AdvOps::Cos);
 
-    return get_data(store, pat);
+    return get_data(stor, pat);
 }
 
 pub fn tan(num: float) -> float {
-    const store = id: "dpscript:temp/ops/tan";
+    const stor = id: "dpscript:temp/ops/tan";
     const pat = path: "temp_val";
 
-    set_data(store, pat, num);
-    advops(store, pat, AdvOps::Tan);
+    set_data(stor, pat, num);
+    advops(stor, pat, AdvOps::Tan);
 
-    return get_data(store, pat);
+    return get_data(stor, pat);
 }
 
 pub fn asin(num: float) -> float {
-    const store = id: "dpscript:temp/ops/asin";
+    const stor = id: "dpscript:temp/ops/asin";
     const pat = path: "temp_val";
 
-    set_data(store, pat, num);
-    advops(store, pat, AdvOps::Asin);
+    set_data(stor, pat, num);
+    advops(stor, pat, AdvOps::Asin);
 
-    return get_data(store, pat);
+    return get_data(stor, pat);
 }
 
 pub fn acos(num: float) -> float {
-    const store = id: "dpscript:temp/ops/acos";
+    const stor = id: "dpscript:temp/ops/acos";
     const pat = path: "temp_val";
 
-    set_data(store, pat, num);
-    advops(store, pat, AdvOps::Acos);
+    set_data(stor, pat, num);
+    advops(stor, pat, AdvOps::Acos);
 
-    return get_data(store, pat);
+    return get_data(stor, pat);
 }
 
 pub fn atan(num: float) -> float {
-    const store = id: "dpscript:temp/ops/atan";
+    const stor = id: "dpscript:temp/ops/atan";
     const pat = path: "temp_val";
 
-    set_data(store, pat, num);
-    advops(store, pat, AdvOps::Atan);
+    set_data(stor, pat, num);
+    advops(stor, pat, AdvOps::Atan);
 
-    return get_data(store, pat);
+    return get_data(stor, pat);
 }

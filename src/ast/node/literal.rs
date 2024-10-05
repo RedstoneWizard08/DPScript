@@ -12,6 +12,8 @@ pub enum Literal {
     String(Spanned<String>),
     Component(Spanned<String>),
     Array(Spanned<Vec<Node>>),
+    Identifier(Spanned<String>),
+    Path(Spanned<String>),
 
     /// TODO: HashMap
     Nbt(Spanned<Vec<Spanned<Token>>>),

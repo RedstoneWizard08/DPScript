@@ -37,6 +37,7 @@ impl Analyzer<Attribute> for Attribute {
 
             let name = match name {
                 Token::Ident(id) => (id, name_span),
+                Token::Id => ("id".into(), name_span),
 
                 _ => {
                     return Err(ParserError {

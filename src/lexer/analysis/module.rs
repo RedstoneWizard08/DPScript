@@ -1,9 +1,5 @@
-use crate::{
-    check_token, AddSpan, Cursor, Module, Node, ParserError, ParserResult, Spanned, Token,
-    TokenCursor,
-};
-
 use super::Analyzer;
+use crate::{AddSpan, Cursor, Module, Node, ParserResult, Spanned, Token, TokenCursor};
 
 impl Analyzer<Module> for Module {
     fn analyze(
@@ -15,29 +11,21 @@ impl Analyzer<Module> for Module {
             return Ok(None);
         }
 
-        debug!("This is a module node, trying to parse...");
+        let mut name = Vec::new();
 
-        let (name, name_span) = cursor.next_or_die(item.1)?;
-
-        debug!("Checking name...");
-
-        let name = match name {
-            Token::Ident(id) => (id, name_span),
-
-            _ => {
-                return Err(ParserError {
-                    src: cursor.source(),
-                    at: name_span,
-                    err: format!("Unexpected token while parsing a module: {}", name),
-                })
+        while let Some((tkn, span)) = cursor.next() {
+            if tkn == Token::Semi {
+                break;
             }
-        };
 
-        debug!("Checking semi...");
+            if tkn == Token::Slash {
+                continue;
+            }
 
-        check_token!(remove cursor == Semi);
-
-        debug!("Building a buffer...");
+            if let Token::Ident(id) = tkn {
+                name.push((id, span));
+            }
+        }
 
         let mut buf = Vec::new();
 

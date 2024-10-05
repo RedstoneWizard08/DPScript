@@ -1,13 +1,11 @@
+use crate::Spanned;
 use miette::SourceSpan;
 use serde::{Deserialize, Serialize};
 
-use crate::Spanned;
-
-use super::Node;
-
 #[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct Module {
-    pub name: Vec<Spanned<String>>,
+pub struct Enum {
+    pub is_pub: bool,
+    pub name: Spanned<String>,
     pub span: SourceSpan,
-    pub body: Vec<Node>,
+    pub entries: Vec<Spanned<String>>,
 }

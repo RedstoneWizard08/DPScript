@@ -12,7 +12,7 @@ impl Analyzer<Function> for Function {
         nodes: &mut Vec<Node>,
     ) -> ParserResult<Option<Function>> {
         match item.0 {
-            Token::Fn | Token::Pub | Token::Facade | Token::Component => {}
+            Token::Fn | Token::Pub | Token::Facade | Token::Component | Token::Hash => {}
             _ => return Ok(None),
         }
 
@@ -97,6 +97,7 @@ impl Analyzer<Function> for Function {
             // cursor.skip(1);
 
             let mut buf = Vec::new();
+            let mut cur = Vec::new();
             let mut opens = 0;
 
             while let Some((token, span)) = cursor.next() {
@@ -106,23 +107,35 @@ impl Analyzer<Function> for Function {
 
                 if token == Token::RightParen {
                     if opens == 0 {
+                        if !cur.is_empty() {
+                            buf.push(cur);
+                        }
+
                         break;
                     } else {
                         opens -= 1;
                     }
                 }
 
-                buf.push((token, span));
+                if token == Token::Comma {
+                    buf.push(cur);
+                    cur = Vec::new();
+                    continue;
+                }
+
+                cur.push((token, span));
             }
 
-            let mut arg_cursor = TokenCursor::new_from_src(
-                cursor.source().name(),
-                cursor.source().inner().clone(),
-                buf,
-            );
+            for buf in buf {
+                let mut arg_cursor = TokenCursor::new_from_src(
+                    cursor.source().name(),
+                    cursor.source().inner().clone(),
+                    buf,
+                );
 
-            while let Some(token) = arg_cursor.next() {
-                while let Some(arg) = FunctionArg::analyze(token.clone(), &mut arg_cursor, nodes)? {
+                if let Some(arg) =
+                    FunctionArg::analyze(arg_cursor.next().unwrap(), &mut arg_cursor, nodes)?
+                {
                     args.push(arg);
                 }
             }

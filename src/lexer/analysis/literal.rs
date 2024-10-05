@@ -37,6 +37,46 @@ impl Analyzer<Literal> for Literal {
                 )))
             }
 
+            Token::Id => {
+                let (_, s) = check_token!(remove cursor == Colon).unwrap();
+                let (tkn, span) = cursor.next_or_die(s)?;
+
+                Some(Literal::Identifier((
+                    match tkn {
+                        Token::String(s) => s,
+
+                        _ => {
+                            return Err(ParserError {
+                                src: cursor.source(),
+                                at: span,
+                                err: format!("Expected string, got: {}", tkn),
+                            })
+                        }
+                    },
+                    span,
+                )))
+            }
+
+            Token::Path => {
+                let (_, s) = check_token!(remove cursor == Colon).unwrap();
+                let (tkn, span) = cursor.next_or_die(s)?;
+
+                Some(Literal::Path((
+                    match tkn {
+                        Token::String(s) => s,
+
+                        _ => {
+                            return Err(ParserError {
+                                src: cursor.source(),
+                                at: span,
+                                err: format!("Expected string, got: {}", tkn),
+                            })
+                        }
+                    },
+                    span,
+                )))
+            }
+
             Token::Nbt => {
                 check_token!(remove cursor == Colon);
                 check_token!(remove cursor == LeftBrace);

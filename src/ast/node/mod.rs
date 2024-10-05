@@ -1,8 +1,9 @@
-// TODO: conditionals, loops
+// TODO: conditionals, enum value, return
 
 pub mod attr;
 pub mod block;
 pub mod call;
+pub mod enums;
 pub mod func;
 pub mod import;
 pub mod literal;
@@ -15,6 +16,7 @@ pub mod var;
 pub use attr::*;
 pub use block::*;
 pub use call::*;
+pub use enums::*;
 pub use func::*;
 pub use import::*;
 pub use literal::*;
@@ -39,4 +41,5 @@ pub enum Node {
     Operation(Operation),
     Block(Block),
     Loop(Loop),
+    Enum(Enum),
 }

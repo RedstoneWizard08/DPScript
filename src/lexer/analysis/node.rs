@@ -1,6 +1,6 @@
 use crate::{
-    add_return, Block, Call, Function, Import, Literal, Loop, Module, Node, Operation, ParserError,
-    ParserResult, Spanned, Token, TokenCursor, Variable,
+    add_return, Block, Call, Enum, Function, Import, Literal, Loop, Module, Node, Operation,
+    ParserError, ParserResult, Spanned, Token, TokenCursor, Variable,
 };
 
 use super::Analyzer;
@@ -57,6 +57,13 @@ impl Analyzer<Node> for Node {
             None => {}
         };
 
+        debug!("Trying to parse an enum...");
+
+        match Enum::analyze(item.clone(), cursor, nodes)? {
+            Some(v) => add_return!(nodes += Enum(v)),
+            None => {}
+        };
+
         debug!("Trying to parse a literal...");
 
         match Literal::analyze(item.clone(), cursor, nodes)? {
@@ -85,7 +92,7 @@ impl Analyzer<Node> for Node {
             None => {}
         }
 
-        // TODO: conditionals
+        // TODO: conditionals, enum value, return
 
         Err(ParserError {
             src: cursor.source(),
