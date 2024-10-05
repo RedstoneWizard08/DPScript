@@ -1,3 +1,6 @@
+#[macro_use]
+extern crate tracing;
+
 pub mod ast;
 pub mod error;
 pub mod lexer;

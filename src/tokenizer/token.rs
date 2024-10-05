@@ -160,6 +160,9 @@ pub enum Token {
 
     /// "init"
     Init,
+
+    /// "nbt"
+    Nbt,
 }
 
 impl fmt::Display for Token {
@@ -214,6 +217,7 @@ impl fmt::Display for Token {
             Self::Module => write!(f, "module"),
             Self::Tick => write!(f, "tick"),
             Self::Init => write!(f, "init"),
+            Self::Nbt => write!(f, "nbt"),
         }
     }
 }

@@ -1,5 +1,7 @@
 use miette::{NamedSource, SourceOffset, SourceSpan};
 
+use crate::{ParserError, ParserResult};
+
 use super::bits::HasBits;
 
 #[derive(Debug, Clone)]
@@ -82,6 +84,19 @@ impl<T: HasBits + Clone + FromIterator<T::Bit>, M> Cursor<T, M> {
 impl<T: HasBits + Clone> Cursor<T, NamedSource<String>> {
     pub fn source(&self) -> NamedSource<String> {
         self.meta.clone()
+    }
+
+    pub fn next_or_die(&mut self, span: SourceSpan) -> ParserResult<T::Bit> {
+        self.pos += 1;
+
+        match self.inner.get(self.pos - 1).cloned() {
+            Some(v) => Ok(v),
+            None => Err(ParserError {
+                src: self.source(),
+                at: span,
+                err: "Unexpected end of file!".into(),
+            }),
+        }
     }
 }
 

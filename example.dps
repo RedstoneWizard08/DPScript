@@ -6,31 +6,30 @@ import std/{tellraw, sqrt, ALL_PLAYERS};
 fn say_hi() {
     // `const` means this is just something that gets substituted for the real value during compilation.
     // The `&` just adds those properties to the component.
-    const base = component: "Hello, " & { color: "green" };
+    const base = component: "Hello, " & nbt: { color: "green" };
     // this is syntactic sugar - this is really: new array, add(...), add(...)
-    let text = [base, { text: "", extra: [{ selector: "@s" }], color: red }];
+    let text = [base, nbt: { text: "", extra: [{ selector: "@s" }], color: red }];
 
-    // `[...text]` is syntactic sugar - it creates a new array and adds everything in `text` to it.
-    tellraw(ALL_PLAYERS, [...text]);
+    tellraw(ALL_PLAYERS, text);
 }
 
-// Every module can have an init block, which will be its own function and added to the load tag.
+// Every module can have one or more init blocks, which will be their own functions and added to the load tag.
 init {
-    const txt = component: "Hello, world!" & { color: "green" };
+    const txt = component: "Hello, world!" & nbt: { color: "green" };
     let data = sqrt(100);
     const base = component: "The square root of 100 is: ";
     let msg = [base, data];
 
     tellraw(ALL_PLAYERS, [txt]);
-    tellraw(ALL_PLAYERS, [...msg]);
+    tellraw(ALL_PLAYERS, msg);
 
     // execute as @a run ...
-    for player in ALL_PLAYERS {
+    for entity in ALL_PLAYERS {
         say_hi();
     }
 }
 
-// Every module can also have a tick block, which will be its own function and added to the tick tag.
+// Every module can also have one or more tick blocks, which will be their own functions and added to the tick tag.
 tick {
     // idk, do something here.
 }

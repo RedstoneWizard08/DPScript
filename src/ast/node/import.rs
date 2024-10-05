@@ -13,6 +13,6 @@ pub struct Import {
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub enum ImportNode {
-    Object(String, SourceSpan),
+    Object(Spanned<String>),
     Module(Import),
 }

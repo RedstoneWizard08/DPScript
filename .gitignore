@@ -2,3 +2,5 @@
 /test
 node_modules
 *.vsix
+*.ast.ron
+*.tokens.ron

@@ -276,6 +276,18 @@ pub(crate) fn tokenize_inner(
             }
         }
 
+        'n' => {
+            if cursor.peek_many(0, 2).is_some_and(|v| v == "bt")
+                && cursor.peek_ahead(2).is_some_and(|v| v.is_not_ident())
+            {
+                let span = cursor.span(3);
+                cursor.skip(2);
+                Some((Token::Nbt, span))
+            } else {
+                None
+            }
+        }
+
         't' => {
             if cursor.peek_many(0, 3).is_some_and(|v| v == "ick")
                 && cursor.peek_ahead(3).is_some_and(|v| v.is_not_ident())
@@ -391,6 +403,6 @@ pub(crate) fn tokenize_inner(
     Err(ParserError {
         src: cursor.source(),
         at: cursor.span(1),
-        err: format!("Unexpected token: {}", ch),
+        err: format!("Unexpected character during tokenization: {}", ch),
     })
 }

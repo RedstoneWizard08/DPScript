@@ -15,3 +15,13 @@ impl AddSpan for SourceSpan {
             .into()
     }
 }
+
+pub trait ExpandSpan {
+    fn expand(&self, num: usize) -> SourceSpan;
+}
+
+impl ExpandSpan for SourceSpan {
+    fn expand(&self, num: usize) -> SourceSpan {
+        (self.offset(), self.len() + num).into()
+    }
+}

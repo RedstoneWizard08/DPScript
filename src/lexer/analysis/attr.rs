@@ -1,12 +1,16 @@
 use crate::{
-    check_token, AddSpan, Attribute, AttributeValue, ParserError, ParserResult, Spanned, Token,
-    TokenCursor,
+    check_token, AddSpan, Attribute, AttributeValue, Node, ParserError, ParserResult, Spanned,
+    Token, TokenCursor,
 };
 
 use super::Analyzer;
 
 impl Analyzer<Attribute> for Attribute {
-    fn analyze(item: Spanned<Token>, cursor: &mut TokenCursor) -> ParserResult<Option<Attribute>> {
+    fn analyze(
+        item: Spanned<Token>,
+        cursor: &mut TokenCursor,
+        _nodes: &mut Vec<Node>,
+    ) -> ParserResult<Option<Attribute>> {
         if item.0 == Token::Hash && cursor.peek().is_some_and(|(v, _)| v == Token::LeftBracket) {
             cursor.skip(1);
 
@@ -14,6 +18,10 @@ impl Analyzer<Attribute> for Attribute {
             let mut opens = 0;
 
             while let Some((token, span)) = cursor.next() {
+                if token == Token::LeftBracket {
+                    opens += 1;
+                }
+
                 if token == Token::RightBracket {
                     if opens == 0 {
                         break;
@@ -34,7 +42,7 @@ impl Analyzer<Attribute> for Attribute {
                     return Err(ParserError {
                         src: cursor.source(),
                         at: name_span,
-                        err: format!("Unexpected token: {}", name),
+                        err: format!("Unexpected token while parsing an attr: {}", name),
                     });
                 }
             };
@@ -51,7 +59,7 @@ impl Analyzer<Attribute> for Attribute {
                     return Err(ParserError {
                         src: cursor.source(),
                         at: value_span,
-                        err: format!("Unexpected token: {}", value),
+                        err: format!("Unexpected token while parsing an attr: {}", value),
                     });
                 }
             };

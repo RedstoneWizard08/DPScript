@@ -20,6 +20,6 @@ pub enum TypeKind {
     Component,
     Storage,
     Objective,
-    Enum(String),
+    Ident(String),
     Array(Box<Type>),
 }

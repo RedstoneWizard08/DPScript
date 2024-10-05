@@ -1,6 +1,8 @@
 use miette::SourceSpan;
 use serde::{Deserialize, Serialize};
 
+use crate::Spanned;
+
 use super::{attr::Attribute, Node, Type};
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -9,7 +11,7 @@ pub struct Function {
     pub attrs: Vec<Attribute>,
 
     /// The function name.
-    pub name: String,
+    pub name: Spanned<String>,
 
     /// A list of arguments.
     pub args: Vec<FunctionArg>,
@@ -19,10 +21,13 @@ pub struct Function {
 
     /// Is this a facade function? (A function that directly references a command)
     /// If this is true, `attrs` will have a `#[cmd = ...]` attribute.
-    pub facade: bool,
+    pub is_facade: bool,
 
     /// Is this a compiler builtin?
-    pub compiler: bool,
+    pub is_compiler: bool,
+
+    /// Is this function public?
+    pub is_pub: bool,
 
     /// The body of the function.
     pub body: Vec<Node>,
@@ -34,7 +39,7 @@ pub struct Function {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct FunctionArg {
     pub attrs: Vec<Attribute>,
-    pub name: String,
+    pub name: Spanned<String>,
     pub ty: Type,
     pub span: SourceSpan,
 }

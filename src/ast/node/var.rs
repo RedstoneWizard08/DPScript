@@ -1,13 +1,13 @@
-use miette::SourceSpan;
 use serde::{Deserialize, Serialize};
 
 use crate::Spanned;
 
-use super::Node;
+use super::{Node, Type};
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct Module {
+pub struct Variable {
+    pub is_const: bool,
     pub name: Spanned<String>,
-    pub span: SourceSpan,
-    pub body: Vec<Node>,
+    pub ty: Option<Type>,
+    pub value: Box<Node>,
 }

@@ -1,6 +1,8 @@
 use serde::{Deserialize, Serialize};
 
-use crate::util::Spanned;
+use crate::{util::Spanned, Token};
+
+use super::Node;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub enum Literal {
@@ -8,4 +10,9 @@ pub enum Literal {
     Float(Spanned<f64>),
     Bool(Spanned<bool>),
     String(Spanned<String>),
+    Component(Spanned<String>),
+    Array(Spanned<Vec<Node>>),
+
+    /// TODO: HashMap
+    Nbt(Spanned<Vec<Spanned<Token>>>),
 }
