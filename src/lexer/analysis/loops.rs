@@ -86,6 +86,7 @@ impl Analyzer<Loop> for Loop {
             var_name,
             body,
             span,
+            vars: None,
         }))
     }
 }

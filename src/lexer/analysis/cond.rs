@@ -105,6 +105,7 @@ impl Analyzer<Conditional> for Conditional {
             condition,
             else_body,
             span,
+            vars: None,
         }))
     }
 }

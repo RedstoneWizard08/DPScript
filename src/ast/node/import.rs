@@ -16,3 +16,13 @@ pub enum ImportNode {
     Object(Spanned<String>),
     Module(Import),
 }
+
+impl Import {
+    pub fn module(&self) -> String {
+        self.base
+            .iter()
+            .map(|(v, _)| v.clone())
+            .collect::<Vec<_>>()
+            .join("/")
+    }
+}

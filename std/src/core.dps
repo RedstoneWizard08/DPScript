@@ -1,7 +1,7 @@
 module std/core;
 
-pub compiler fn keyof(obj: Any);
-pub compiler fn storeof(obj: Any);
+pub compiler fn keyof(obj: Any) -> NBTPath;
+pub compiler fn storeof(obj: Any) -> Store;
 
 #[cmd("data modify storage %% %% set value %%")]
 pub facade fn set_data(storage: Storage, pat: NBTPath, value: Any);

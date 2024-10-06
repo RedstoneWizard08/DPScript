@@ -40,9 +40,10 @@ impl Lexer {
         Ok(self)
     }
 
-    pub fn get_ast(self) -> AST {
+    pub fn ast(self) -> AST {
         AST {
             nodes: self.nodes,
+            indexed: false,
             modules: None,
             top_level: None,
             blocks: None,

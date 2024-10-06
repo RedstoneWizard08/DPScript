@@ -15,7 +15,7 @@ objective tempArrayPos: dummy = "__dpscript_tmp_array_add_pos";
 objective tempInputLen: dummy = "__dpscript_tmp_array_input_len";
 objective tempOutputLen: dummy = "__dpscript_tmp_array_output_len";
 
-pub fn array_add(arr: NBT[], add: NBT) {
+pub fn array_add(arr: Any[], add: Any) {
     const stor = storeof(arr);
     const key = keyof(arr);
     const pat = path: "{store}/{key}";
@@ -29,7 +29,7 @@ pub fn array_add(arr: NBT[], add: NBT) {
     arrayLength.set(pat, tempArrayLength.get(temp));
 }
 
-pub fn array_add_all(arr: NBT[], add: NBT[]) {
+pub fn array_add_all(arr: Any[], add: Any[]) {
     const stor = storeof(arr);
     const key = keyof(arr);
     const pat = path: "{stor}/{key}";
@@ -60,17 +60,17 @@ pub fn array_add_all(arr: NBT[], add: NBT[]) {
     tempInputLen.reset(temp);
 }
 
-fn array_add_all_sub(arr: NBT[], add: NBT[]) {
+fn array_add_all_sub(arr: Any[], add: Any[]) {
     let addKey = keyof(add);
     let s1 = storeof(arr);
     let s2 = storeof(add);
     
     s1.append(keyof(arr), add[0]);
-    s2.remove("{addKey}[0]");
+    s2.remove(path: "{addKey}[0]");
 
     tempArrayPos.add(temp, 1);
 
-    if tempArrayPos.lessThan(temp, tempArrayLength, temp) {
+    if tempArrayPos.lt(temp, tempArrayLength, temp) {
         array_add_all_sub(arr, add);
     }
 }

@@ -1,4 +1,4 @@
-use super::{attr::Attribute, Node, Type};
+use super::{attr::Attribute, Node, Type, Variable};
 use crate::Spanned;
 use miette::SourceSpan;
 use serde::{Deserialize, Serialize};
@@ -32,6 +32,9 @@ pub struct Function {
 
     /// The span.
     pub span: SourceSpan,
+
+    /// A cache of local variables defined in the function.
+    pub vars: Option<Vec<Variable>>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -40,4 +43,27 @@ pub struct FunctionArg {
     pub name: Spanned<String>,
     pub ty: Type,
     pub span: SourceSpan,
+}
+
+impl Function {
+    fn cache_vars(&mut self) -> &mut Self {
+        let mut vars = Vec::new();
+
+        for node in &self.body {
+            if let Node::Variable(var) = node {
+                vars.push(var.clone());
+            }
+        }
+
+        self.vars = Some(vars);
+        self
+    }
+
+    pub fn get_locals(&mut self) -> Vec<Variable> {
+        if let Some(vars) = &self.vars {
+            vars.clone()
+        } else {
+            self.cache_vars().vars.clone().unwrap_or_default()
+        }
+    }
 }

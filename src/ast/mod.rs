@@ -1,13 +1,15 @@
-pub mod node;
+mod node;
+
+pub use node::*;
 
 use crate::{module_indexer_add, Result};
-pub use node::*;
 use serde::Serialize;
 use std::collections::HashMap;
 
 #[derive(Debug, Clone, Serialize)]
 pub struct AST {
     pub nodes: Vec<Node>,
+    pub indexed: bool,
     pub modules: Option<HashMap<String, Module>>,
     pub top_level: Option<HashMap<String, Vec<TopLevelNode>>>,
     pub imports: Option<HashMap<String, Vec<Import>>>,
@@ -57,6 +59,10 @@ impl AST {
     }
 
     pub fn index_modules(&mut self) -> Result<&mut Self> {
+        if self.indexed {
+            return Ok(self);
+        }
+
         let mut modules = self.collect_modules();
 
         for (_, module) in &mut modules {
@@ -93,6 +99,7 @@ impl AST {
         self.enums = Some(enums);
         self.objectives = Some(objectives);
         self.exports = Some(exports);
+        self.indexed = true;
 
         Ok(self)
     }

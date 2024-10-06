@@ -5,7 +5,7 @@ use ron::ser::PrettyConfig;
 use std::{fs, path::PathBuf};
 use walkdir::WalkDir;
 
-use crate::{dump_ast_part, tokenize, Lexer, PackToml, Result, AST};
+use crate::{dump_ast_part, Lexer, PackToml, Result, Tokenizer, Validator, AST};
 
 #[derive(Debug, Clone, Parser)]
 #[command(version, about, long_about = None)]
@@ -146,6 +146,8 @@ impl Commands {
                     dump_ast_part!(ast.objectives => merged_dir);
                     dump_ast_part!(ast.modules => merged_dir);
                 }
+
+                Validator::new(ast).validate()?;
             }
 
             Self::Compile {
@@ -185,7 +187,9 @@ impl Commands {
     ) -> Result<AST> {
         let file_name = file.to_str().unwrap();
         let data = fs::read_to_string(&file)?;
-        let tokens = tokenize(&file_name, data.clone())?;
+        let tokens = Tokenizer::new(&file_name, data.clone())
+            .tokenize()?
+            .tokens();
 
         if !out_dir.exists() {
             fs::create_dir_all(out_dir)?;
@@ -207,7 +211,7 @@ impl Commands {
             )?;
         }
 
-        let ast = Lexer::new(&file_name, data, tokens).run()?.get_ast();
+        let ast = Lexer::new(&file_name, data, tokens).run()?.ast();
 
         if dump_ast {
             let ast_dir = out_dir.join("ast");

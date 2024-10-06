@@ -203,6 +203,7 @@ impl Analyzer<Function> for Function {
             name,
             ret,
             span,
+            vars: None,
         }))
     }
 }

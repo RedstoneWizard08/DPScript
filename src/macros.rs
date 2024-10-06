@@ -192,10 +192,10 @@ macro_rules! module_indexer_add {
 #[macro_export]
 macro_rules! dump_ast_part {
     ($ast: ident.$id: ident => $dir: ident) => {
-        if let Some(it) = $ast.$id {
+        if let Some(it) = &$ast.$id {
             let path = $dir.join(format!("{}.ron", stringify!($id)));
 
-            fs::write(path, ron::ser::to_string_pretty(&it, PrettyConfig::new())?)?;
+            fs::write(path, ron::ser::to_string_pretty(it, PrettyConfig::new())?)?;
         }
     };
 }

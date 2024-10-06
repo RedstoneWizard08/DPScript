@@ -60,6 +60,7 @@ impl Analyzer<Block> for Block {
             is_tick,
             body,
             span,
+            vars: None,
         }))
     }
 }

@@ -1,19 +1,19 @@
-pub mod attr;
-pub mod block;
-pub mod call;
-pub mod cond;
-pub mod enums;
-pub mod export;
-pub mod func;
-pub mod import;
-pub mod literal;
-pub mod loops;
-pub mod module;
-pub mod objective;
-pub mod ops;
-pub mod ret;
-pub mod ty;
-pub mod var;
+mod attr;
+mod block;
+mod call;
+mod cond;
+mod enums;
+mod export;
+mod func;
+mod import;
+mod literal;
+mod loops;
+mod module;
+mod objective;
+mod ops;
+mod ret;
+mod ty;
+mod var;
 
 pub use attr::*;
 pub use block::*;
@@ -25,7 +25,6 @@ pub use func::*;
 pub use import::*;
 pub use literal::*;
 pub use loops::*;
-use miette::SourceSpan;
 pub use module::*;
 pub use objective::*;
 pub use ops::*;
@@ -34,7 +33,9 @@ pub use ty::*;
 pub use var::*;
 
 use crate::Spanned;
+use miette::SourceSpan;
 use serde::Serialize;
+use std::fmt;
 
 #[derive(Debug, Clone, Serialize)]
 pub enum Node {
@@ -89,6 +90,28 @@ impl Node {
     }
 }
 
+impl fmt::Display for Node {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self.clone() {
+            Self::Module(_) => write!(f, "Module"),
+            Self::Literal(_) => write!(f, "Literal"),
+            Self::Ident(_) => write!(f, "Import"),
+            Self::Function(_) => write!(f, "Function"),
+            Self::Import(_) => write!(f, "Import"),
+            Self::Variable(_) => write!(f, "Variable"),
+            Self::Call(_) => write!(f, "Call"),
+            Self::Operation(_) => write!(f, "Operation"),
+            Self::Block(_) => write!(f, "Block"),
+            Self::Loop(_) => write!(f, "Loop"),
+            Self::Enum(_) => write!(f, "Enum"),
+            Self::Return(_) => write!(f, "Return"),
+            Self::Objective(_) => write!(f, "Objective"),
+            Self::Conditional(_) => write!(f, "Conditional"),
+            Self::Export(_) => write!(f, "Export"),
+        }
+    }
+}
+
 impl TopLevelNode {
     pub fn get_span(&self) -> SourceSpan {
         match self {
@@ -100,6 +123,21 @@ impl TopLevelNode {
             Self::Enum(e) => e.span,
             Self::Objective(o) => o.span,
             Self::Export(e) => e.span,
+        }
+    }
+}
+
+impl fmt::Display for TopLevelNode {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self.clone() {
+            Self::Module(_) => write!(f, "Module"),
+            Self::Function(_) => write!(f, "Function"),
+            Self::Import(_) => write!(f, "Import"),
+            Self::Variable(_) => write!(f, "Variable"),
+            Self::Block(_) => write!(f, "Block"),
+            Self::Enum(_) => write!(f, "Enum"),
+            Self::Objective(_) => write!(f, "Objective"),
+            Self::Export(_) => write!(f, "Export"),
         }
     }
 }
