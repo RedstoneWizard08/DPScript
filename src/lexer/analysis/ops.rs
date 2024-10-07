@@ -20,18 +20,18 @@ impl Analyzer<Operation> for Operation {
         };
 
         if nodes.is_empty() {
-            debug!("No nodes exist! How?");
+            debug!("No nodes exist! How? Were we called to early?");
 
             return Ok(None);
         }
 
         let lhs = nodes.remove(nodes.len() - 1);
-        let mut span = lhs.get_span();
+        let mut span = lhs.span();
         let tkn = cursor.next_or_die(item.1)?;
         let rhs = Node::analyze(tkn.clone(), cursor, &mut Vec::new())?;
 
         if let Some(rhs) = rhs {
-            span = span.add(rhs.get_span());
+            span = span.add(rhs.span());
 
             Ok(Some(Self {
                 lhs: Box::new(lhs),

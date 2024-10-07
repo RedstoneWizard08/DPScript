@@ -100,11 +100,11 @@ impl Analyzer<Literal> for Literal {
                 )))
             }
 
-            Token::Player => {
+            Token::Entity => {
                 let (_, s) = check_token!(remove cursor == Colon).unwrap();
                 let (tkn, span) = cursor.next_or_die(s)?;
 
-                Some(Literal::Player((
+                Some(Literal::Entity((
                     match tkn {
                         Token::String(s) => s,
 

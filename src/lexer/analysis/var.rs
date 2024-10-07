@@ -86,15 +86,16 @@ impl Analyzer<Variable> for Variable {
 
         match value {
             Some(value) => {
-                span = span.add(value.get_span());
+                span = span.add(value.span());
 
                 Ok(Some(Self {
                     is_pub,
                     is_const,
+                    is_arg: false,
                     name,
                     ty,
                     span,
-                    value: Box::new(value.clone()),
+                    value: Some(Box::new(value.clone())),
                 }))
             }
 

@@ -17,3 +17,13 @@ pub struct Export {
     /// The items to export (empty if [`Self::all`] is true)
     pub items: Vec<ImportNode>,
 }
+
+impl Export {
+    pub fn module_name(&self) -> String {
+        self.module
+            .iter()
+            .map(|v| v.0.clone())
+            .collect::<Vec<_>>()
+            .join("/")
+    }
+}

@@ -1,6 +1,8 @@
 [pack]
-name = "DPScript Standard Library"
-namespace = "dpscript_std"
+name = "std"
+version = "0.1.0"
+authors = ["RedstoneWizard08"]
+description = "DPScript Standard Library"
 
 [version]
 minecraft = "1.21.1"

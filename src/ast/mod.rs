@@ -2,23 +2,27 @@ mod node;
 
 pub use node::*;
 
-use crate::{module_indexer_add, Result};
+use crate::{module_indexer_add, ModuleExport, Result};
 use serde::Serialize;
-use std::collections::HashMap;
+use std::collections::BTreeMap;
 
 #[derive(Debug, Clone, Serialize)]
 pub struct AST {
     pub nodes: Vec<Node>,
     pub indexed: bool,
-    pub modules: Option<HashMap<String, Module>>,
-    pub top_level: Option<HashMap<String, Vec<TopLevelNode>>>,
-    pub imports: Option<HashMap<String, Vec<Import>>>,
-    pub funcs: Option<HashMap<String, Vec<Function>>>,
-    pub vars: Option<HashMap<String, Vec<Variable>>>,
-    pub blocks: Option<HashMap<String, Vec<Block>>>,
-    pub enums: Option<HashMap<String, Vec<Enum>>>,
-    pub objectives: Option<HashMap<String, Vec<Objective>>>,
-    pub exports: Option<HashMap<String, Vec<Export>>>,
+    pub cached: bool,
+
+    // We want these sorted for niceties, so we use a BTreeMap
+    pub modules: Option<BTreeMap<String, Module>>,
+    pub top_level: Option<BTreeMap<String, Vec<TopLevelNode>>>,
+    pub imports: Option<BTreeMap<String, Vec<Import>>>,
+    pub funcs: Option<BTreeMap<String, Vec<Function>>>,
+    pub vars: Option<BTreeMap<String, Vec<Variable>>>,
+    pub blocks: Option<BTreeMap<String, Vec<Block>>>,
+    pub enums: Option<BTreeMap<String, Vec<Enum>>>,
+    pub objectives: Option<BTreeMap<String, Vec<Objective>>>,
+    pub exports: Option<BTreeMap<String, Vec<Export>>>,
+    pub export_nodes: Option<BTreeMap<String, Vec<ModuleExport>>>, // just a cache :)
 }
 
 impl AST {
@@ -27,17 +31,12 @@ impl AST {
         self
     }
 
-    pub fn collect_modules(&self) -> HashMap<String, Module> {
-        let mut modules: HashMap<String, Module> = HashMap::new();
+    pub fn collect_modules(&self) -> BTreeMap<String, Module> {
+        let mut modules: BTreeMap<String, Module> = BTreeMap::new();
 
         for node in &self.nodes {
             if let Node::Module(module) = node {
-                let name = module
-                    .name
-                    .iter()
-                    .map(|v| v.0.clone())
-                    .collect::<Vec<_>>()
-                    .join("/");
+                let name = module.name();
 
                 if let Some(it) = modules.get_mut(&name) {
                     it.body.extend(module.no_submodules());
@@ -71,14 +70,14 @@ impl AST {
 
         self.modules = Some(modules.clone());
 
-        let mut top_level: HashMap<String, Vec<TopLevelNode>> = HashMap::new();
-        let mut imports: HashMap<String, Vec<Import>> = HashMap::new();
-        let mut funcs: HashMap<String, Vec<Function>> = HashMap::new();
-        let mut vars: HashMap<String, Vec<Variable>> = HashMap::new();
-        let mut blocks: HashMap<String, Vec<Block>> = HashMap::new();
-        let mut enums: HashMap<String, Vec<Enum>> = HashMap::new();
-        let mut objectives: HashMap<String, Vec<Objective>> = HashMap::new();
-        let mut exports: HashMap<String, Vec<Export>> = HashMap::new();
+        let mut top_level: BTreeMap<String, Vec<TopLevelNode>> = BTreeMap::new();
+        let mut imports: BTreeMap<String, Vec<Import>> = BTreeMap::new();
+        let mut funcs: BTreeMap<String, Vec<Function>> = BTreeMap::new();
+        let mut vars: BTreeMap<String, Vec<Variable>> = BTreeMap::new();
+        let mut blocks: BTreeMap<String, Vec<Block>> = BTreeMap::new();
+        let mut enums: BTreeMap<String, Vec<Enum>> = BTreeMap::new();
+        let mut objectives: BTreeMap<String, Vec<Objective>> = BTreeMap::new();
+        let mut exports: BTreeMap<String, Vec<Export>> = BTreeMap::new();
 
         for (name, module) in modules {
             module_indexer_add!(top_level += (name, module));

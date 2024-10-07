@@ -1,7 +1,6 @@
+use crate::{util::Spanned, AddSpan};
 use miette::SourceSpan;
 use serde::{Deserialize, Serialize};
-
-use crate::util::Spanned;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Import {
@@ -18,11 +17,25 @@ pub enum ImportNode {
 }
 
 impl Import {
+    /// Get the ID of the module we are importing from
     pub fn module(&self) -> String {
         self.base
             .iter()
             .map(|(v, _)| v.clone())
             .collect::<Vec<_>>()
             .join("/")
+    }
+
+    pub fn module_span(&self) -> SourceSpan {
+        let parts = self.base.clone();
+        let Some((_, mut span)) = parts.first() else {
+            panic!("Achievement Unlocked: How did we get here?")
+        };
+
+        for (_, item) in parts {
+            span = span.add(item);
+        }
+
+        span
     }
 }

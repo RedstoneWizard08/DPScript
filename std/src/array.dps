@@ -65,7 +65,7 @@ fn array_add_all_sub(arr: Any[], add: Any[]) {
     let s1 = storeof(arr);
     let s2 = storeof(add);
     
-    s1.append(keyof(arr), add[0]);
+    s1.append(keyof(arr), add.get(0));
     s2.remove(path: "{addKey}[0]");
 
     tempArrayPos.add(temp, 1);

@@ -1,4 +1,4 @@
-pub mod analysis;
+mod analysis;
 
 use crate::{Cursor, Node, Result, Spanned, Token, AST};
 use analysis::Analyzer;
@@ -44,6 +44,7 @@ impl Lexer {
         AST {
             nodes: self.nodes,
             indexed: false,
+            cached: false,
             modules: None,
             top_level: None,
             blocks: None,
@@ -53,6 +54,7 @@ impl Lexer {
             imports: None,
             objectives: None,
             vars: None,
+            export_nodes: None,
         }
     }
 }

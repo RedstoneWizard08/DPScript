@@ -69,10 +69,10 @@ pub enum TopLevelNode {
 }
 
 impl Node {
-    pub fn get_span(&self) -> SourceSpan {
+    pub fn span(&self) -> SourceSpan {
         match self {
             Self::Module(m) => m.span,
-            Self::Literal(l) => l.get_span(),
+            Self::Literal(l) => l.span(),
             Self::Ident(i) => i.1,
             Self::Import(i) => i.span,
             Self::Function(f) => f.span,
@@ -113,7 +113,7 @@ impl fmt::Display for Node {
 }
 
 impl TopLevelNode {
-    pub fn get_span(&self) -> SourceSpan {
+    pub fn span(&self) -> SourceSpan {
         match self {
             Self::Module(m) => m.span,
             Self::Import(i) => i.span,

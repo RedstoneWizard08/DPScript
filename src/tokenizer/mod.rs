@@ -1,5 +1,5 @@
-pub mod inner;
-pub mod token;
+mod inner;
+mod token;
 
 pub use token::*;
 

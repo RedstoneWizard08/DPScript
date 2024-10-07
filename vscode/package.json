@@ -29,6 +29,17 @@
                     ".dps"
                 ],
                 "configuration": "./language-configuration.json"
+            },
+            {
+                "id": "dpscript_ir",
+                "aliases": [
+                    "dps_ir",
+                    "dpscript_ir"
+                ],
+                "extensions": [
+                    ".dpir"
+                ],
+                "configuration": "./language-configuration.json"
             }
         ],
         "grammars": [
@@ -36,6 +47,11 @@
                 "language": "dpscript",
                 "scopeName": "source.dpscript",
                 "path": "./syntaxes/dpscript.tmLanguage.json"
+            },
+            {
+                "language": "dpscript_ir",
+                "scopeName": "source.dpscript_ir",
+                "path": "./syntaxes/dpscript_ir.tmLanguage.json"
             }
         ]
     },

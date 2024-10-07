@@ -109,6 +109,9 @@ pub enum Token {
     /// "export"
     Export,
 
+    /// "entity"
+    Entity,
+
     /// "enum"
     Enum,
 
@@ -131,9 +134,6 @@ pub enum Token {
 
     /// "path"
     Path,
-
-    /// "player"
-    Player,
 
     // ========================================
     /// "const"
@@ -204,6 +204,7 @@ impl fmt::Display for Token {
             Self::Store => write!(f, "store"),
             Self::Selector => write!(f, "selector"),
             Self::Export => write!(f, "export"),
+            Self::Entity => write!(f, "entity"),
             Self::Enum => write!(f, "enum"),
             Self::Else => write!(f, "else"),
             Self::Fn => write!(f, "fn"),
@@ -211,7 +212,6 @@ impl fmt::Display for Token {
             Self::Facade => write!(f, "facade"),
             Self::Pub => write!(f, "pub"),
             Self::Path => write!(f, "path"),
-            Self::Player => write!(f, "player"),
             Self::Const => write!(f, "const"),
             Self::Compiler => write!(f, "compiler"),
             Self::Component => write!(f, "component"),

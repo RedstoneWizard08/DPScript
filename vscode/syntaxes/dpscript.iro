@@ -14,183 +14,180 @@ __BUILTINS \= \b(storeof|keyof)
 # ============== Styles ==============
 
 styles [] {
+   .comment : style {
+      color                 = green
+      italic                = true
+      ace_scope             = comment
+      textmate_scope        = comment
+      pygments_scope        = Comment
+   }
 
-.comment : style {
-   color                 = green
-   italic                = true
-   ace_scope             = comment
-   textmate_scope        = comment
-   pygments_scope        = Comment
-}
+   .keyword : style {
+      color                 = orange
+      ace_scope             = keyword
+      textmate_scope        = keyword
+      pygments_scope        = Keyword
+   }
 
-.keyword : style {
-   color                 = orange
-   ace_scope             = keyword
-   textmate_scope        = keyword
-   pygments_scope        = Keyword
-}
+   .ident : style {
+      color                 = light_blue
+      ace_scope             = entity.name
+      textmate_scope        = entity.name
+      pygments_scope        = Name.Entity
+   }
 
-.ident : style {
-   color                 = light_blue
-   ace_scope             = entity.name
-   textmate_scope        = entity.name
-   pygments_scope        = Name.Entity
-}
+   .function : style {
+      color                 = red
+      ace_scope             = entity.name.function
+      textmate_scope        = entity.name.function
+      pygments_scope        = Name.Function
+   }
 
-.function : style {
-   color                 = red
-   ace_scope             = entity.name.function
-   textmate_scope        = entity.name.function
-   pygments_scope        = Name.Function
-}
+   .type : style {
+      color                 = gold
+      ace_scope             = entity.name.type
+      textmate_scope        = entity.name.type
+      pygments_scope        = Keyword.Type
+   }
 
-.type : style {
-   color                 = gold
-   ace_scope             = entity.name.type
-   textmate_scope        = entity.name.type
-   pygments_scope        = Keyword.Type
-}
+   .builtin : style {
+      color                 = cyan
+      ace_scope             = support.function
+      textmate_scope        = support.function
+      pygments_scope        = Keyword.Reserved
+   }
 
-.builtin : style {
-   color                 = cyan
-   ace_scope             = support.function
-   textmate_scope        = support.function
-   pygments_scope        = Keyword.Reserved
-}
+   .numeric : style {
+      color                 = gold
+      ace_scope             = constant.numeric
+      textmate_scope        = constant.numeric
+      pygments_scope        = Number
+   }
 
-.numeric : style {
-   color                 = gold
-   ace_scope             = constant.numeric
-   textmate_scope        = constant.numeric
-   pygments_scope        = Number
-}
+   .punctuation : style {
+      color                 = violet
+      ace_scope             = punctuation
+      textmate_scope        = punctuation
+      pygments_scope        = Punctuation
+   }
 
-.punctuation : style {
-   color                 = violet
-   ace_scope             = punctuation
-   textmate_scope        = punctuation
-   pygments_scope        = Punctuation
-}
+   .meta : style {
+      color                 = pink
+      ace_scope             = keyword
+      textmate_scope        = keyword
+      pygments_scope        = Keyword
+   }
 
-.meta : style {
-   color                 = pink
-   ace_scope             = keyword
-   textmate_scope        = keyword
-   pygments_scope        = Keyword
-}
+   .string : style {
+      color                 = brown
+      ace_scope             = string
+      textmate_scope        = string
+      pygments_scope        = String
+   }
 
-.string : style {
-   color                 = brown
-   ace_scope             = string
-   textmate_scope        = string
-   pygments_scope        = String
-}
-
-.illegal : style {
-   color                 = white
-   background_color      = red
-   ace_scope             = invalid
-   textmate_scope        = invalid
-   pygments_scope        = Generic.Error
-}
-
+   .illegal : style {
+      color                 = white
+      background_color      = red
+      ace_scope             = invalid
+      textmate_scope        = invalid
+      pygments_scope        = Generic.Error
+   }
 }
 
 # ============== Contexts ==============
 
 contexts [] {
-
-main : context {
-   : pattern {
-      regex          \= $${__KEYWORDS}
-      styles []       = .keyword;
-   }
-   
-   : pattern {
-      regex          \= $${__BUILTINS}
-      styles []       = .builtin;
-   }
-   
-   : pattern {
-      regex          \= $${__TYPE_KEYWORD}
-      styles []       = .type;
-   }
-   
-   : pattern {
-      regex          \= $${__IDENTIFIER}\b(\()
-      styles []       = .function, .punctuation;
-   }
-   
-   : pattern {
-      regex          \= $${__IDENTIFIER}
-      styles []       = .ident;
-   }
-   
-   : pattern {
-      regex          \= $${__TYPE_IDENT}
-      styles []       = .type;
-   }
-
-   : include "numeric" ;
-   
-   : inline_push {
-      regex          \= (\{)
-      styles []       = .punctuation;
-      : pop {  
-         regex       \= (\};)
-         styles []    = .punctuation;
+   main : context {
+      : pattern {
+         regex          \= $${__KEYWORDS}
+         styles []       = .keyword;
       }
-      : include "main" ;
+
+      : pattern {
+         regex          \= $${__BUILTINS}
+         styles []       = .builtin;
+      }
+
+      : pattern {
+         regex          \= $${__TYPE_KEYWORD}
+         styles []       = .type;
+      }
+
+      : pattern {
+         regex          \= $${__IDENTIFIER}\b(\()
+         styles []       = .function, .punctuation;
+      }
+
+      : pattern {
+         regex          \= $${__IDENTIFIER}
+         styles []       = .ident;
+      }
+
+      : pattern {
+         regex          \= $${__TYPE_IDENT}
+         styles []       = .type;
+      }
+
+      : include "numeric" ;
+
+      : inline_push {
+         regex          \= (\{)
+         styles []       = .punctuation;
+         : pop {  
+            regex       \= (\};)
+            styles []    = .punctuation;
+         }
+         : include "main" ;
+      }
+
+      : pattern {
+         regex          \= $${__PUNCT}
+         styles []       = .punctuation;
+      }
+
+      : pattern {
+         regex          \= (&|=|;|,)
+         styles []       = .punctuation;
+      }
+
+      : pattern {
+         regex          \= (->)
+         styles []       = .punctuation;
+      }
+
+      : inline_push {
+         regex          \= (\")
+         styles []       = .string;
+         default_style   = .string
+         : pop {
+            regex       \= (\")
+            styles []    = .string;
+         }
+      }
+
+      : pattern {
+         regex          \= (\(|\)|\{|\}|\[|\]|\.|#|\/|\*)
+         styles []       = .punctuation;
+      }
+
+      : pattern {
+         regex          \= (//.*)
+         styles []       = .comment;
+      }
+
+      : pattern {
+         regex          \= ([^\s])
+         styles []       = .illegal;
+      }
+
    }
-   
-   : pattern {
-      regex          \= $${__PUNCT}
-      styles []       = .punctuation;
-   }
-   
-   : pattern {
-      regex          \= (&|=|;|,)
-      styles []       = .punctuation;
-   }
-   
-   : pattern {
-      regex          \= (->)
-      styles []       = .punctuation;
-   }
-   
-   : inline_push {
-      regex          \= (\")
-      styles []       = .string;
-      default_style   = .string
-      : pop {
-         regex       \= (\")
-         styles []    = .string;
+
+   # ============== Numeric ==============
+
+   numeric : context {
+      : pattern {
+         regex          \= (\b\d+)
+         styles []       = .numeric;
       }
    }
-   
-   : pattern {
-      regex          \= (\(|\)|\{|\}|\[|\]|\.|#|\/|\*)
-      styles []       = .punctuation;
-   }
-   
-   : pattern {
-      regex          \= (//.*)
-      styles []       = .comment;
-   }
-   
-   : pattern {
-      regex          \= ([^\s])
-      styles []       = .illegal;
-   }
-   
-}
-
-# ============== Numeric ==============
-
-numeric : context {
-   : pattern {
-      regex          \= (\b\d+)
-      styles []       = .numeric;
-   }
-}
 }

@@ -187,6 +187,14 @@ macro_rules! module_indexer_add {
             $id.insert($name.clone(), $module.$id());
         }
     };
+
+    ($id: ident += ($name: ident, $module: ident, &$cx: ident)) => {
+        if let Some(it) = $id.get_mut(&$name) {
+            it.extend($module.$id());
+        } else {
+            $id.insert($name.clone(), $module.$id(&$cx));
+        }
+    };
 }
 
 #[macro_export]

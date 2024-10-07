@@ -1,0 +1,82 @@
+// !!!! WARNING !!!!
+// THIS IS FOR TESTING PURPOSES, THIS FILE SHOULD NEVER BE HAND-WRITTEN OR IN YOUR SOURCE DIRECTORY!
+// DO NOT DO THIS!!!
+
+%define variable_alias TELLRAW_STORAGE: "example:__dpscript/vars/libs/std/base/tellraw" @ "data";
+
+func "example:__dpscript/gen/say_hi": {
+    define variable_alias text: "example:__dpscript/vars/functions/gen/say_hi" @ "text_0"; // The number at the end is the index of the variable in the current scope.
+
+    // Any variable is automatically replaced with its variable_alias, which contains information about its store and path.
+    data set: text, '[]'; // The `'...'` syntax tells the compiler that the string should be treated as a literal.
+    data append: text, '{ "text": "Hello, ", "color": "green" }'; // This was embedded because `base` is a constant!
+
+    // The `"selector": "@s"` is appended because the first operand is a selector.
+    data append: text, '{ "selector": "@s", "color": "red" }';
+
+    // All arguments to tellraw are stored in the TELLRAW_STORAGE variable.
+    data set: TELLRAW_STORAGE, '[]';
+
+    // The `+` here tells the compiler to join these strings
+    // The `'...'` syntax tells the compiler to treat the string as a literal.
+    // The `path!(...)` syntax tells the compiler to embed the path in the storage to the variable.
+    // The `store!(...)` syntax tells the compiler to embed the ID of the store that contains the variable.
+    data append: TELLRAW_STORAGE, '{ "nbt": "' + path!(text) + '", "storage": "' + store!(text) + '", "interpret": true }';
+
+    // Commands will always be evaluated as literals
+    // The `"@a"` comes from the `ALL_PLAYERS` constant exported in `std/selectors`.
+    // It has the concatenation operand because it's a substitution during lowering.
+    command: "tellraw" + "@a" + '["", { "nbt": "' + path!(TELLRAW_STORAGE) + '", "storage": "' + store!(TELLRAW_STORAGE) + '", "interpret": true }]';
+}
+
+func "example:__dpscript/gen/init/0": {
+    define variable_alias data: "example:__dpscript/vars/functions/gen/init/0" @ "data_0";
+    define variable_alias msg: "example:__dpscript/vars/functions/gen/init/0" @ "msg_1";
+
+    // This won't exist if the function returns void.
+    define variable_alias data_res: "example:__dpscript/vars/functions/gen/init/0" @ "data_0_res";
+
+    // Set the variable value to 100.
+    data set: data, '100';
+    
+    // The `argument` keyword tells the compiler to store the data from a variable in the temporary arguments array at that index, which will be accessed by any called function.
+    // `data` is the reference to fetch the real (float) value.
+    argument: 1, data;
+    
+    // The `store` keyword here tells the compiler to execute the function and store its result in the data storage.
+    call: "example:__dpscript/libs/std/advops/sqrt";
+
+    // This tells the compiler to copy any value (if it exists) from `__RETURN__` to `data_res`.
+    // This won't exist if the function returns `void`.
+    data copy __RETURN__ data_res;
+
+    // This clears the temporary argument storage.
+    argument clear;
+
+    // Create, append, append.
+    data set: msg, '[]';
+    data append: msg, '{ "text": "The square root of 100 is: " }';
+    // The compiler will automatically detect that this is a variable_alias.
+    data append: msg, data_res;
+
+    data set: TELLRAW_STORAGE, '[]';
+    data append: TELLRAW_STORAGE, '{ "text": "Hello, world!", "color": "green" }';
+
+    command: "tellraw" + "@a" + '["", { "nbt": "' + path!(TELLRAW_STORAGE) + '", "storage": "' + store!(TELLRAW_STORAGE) + '", "interpret": true }]';
+
+    data set: TELLRAW_STORAGE, '[]';
+    data append: TELLRAW_STORAGE, '{ "nbt": "' + path!(msg) + '", "storage": "' + store!(msg) + '", "interpret": true }';
+
+    command: "tellraw" + "@a" + '["", { "nbt": "' + path!(TELLRAW_STORAGE) + '", "storage": "' + store!(TELLRAW_STORAGE) + '", "interpret": true }]';
+
+    // The `execute` keyword will basically output `execute as [1] run [2]`.
+    // The `$block0` corresponds to the `block0` block, which is the inner block of the loop.
+    execute: "@a", $block0;
+
+    // The inner block of the loop.
+    // The `$` prefix denotes that this is a block.
+    // This will always execute as @s.
+    $block0: {
+        call: "example:__dpscript/gen/say_hi";
+    }
+}

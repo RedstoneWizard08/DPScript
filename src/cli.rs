@@ -3,9 +3,8 @@ use console::style;
 use indicatif::{ProgressBar, ProgressStyle};
 use ron::ser::PrettyConfig;
 use std::{fs, path::PathBuf};
-use walkdir::WalkDir;
 
-use crate::{dump_ast_part, Lexer, PackToml, Result, Tokenizer, Validator, AST};
+use crate::{dump_ast_part, get_source_files, Lexer, PackToml, Result, Tokenizer, Validator, AST};
 
 #[derive(Debug, Clone, Parser)]
 #[command(version, about, long_about = None)]
@@ -21,8 +20,8 @@ pub enum Commands {
         #[arg(short, long = "config", default_value_os_t = PathBuf::from("./pack.toml"))]
         config_path: PathBuf,
 
-        #[arg(short, long = "output", default_value_os_t = PathBuf::from("./out"))]
-        out_dir: PathBuf,
+        #[arg(short, long = "output")]
+        out_dir: Option<PathBuf>,
 
         #[arg(short = 'A', long)]
         dump_ast: bool,
@@ -65,21 +64,20 @@ impl Commands {
                 dump_tokens,
                 out_dir,
             } => {
-                let root = config_path.canonicalize()?.parent().unwrap().join("src");
+                let base = config_path.canonicalize()?.parent().unwrap().to_path_buf();
+                let root = base.join("src");
                 let config = fs::read_to_string(config_path)?;
-                let _config = toml::from_str::<PackToml>(&config)?;
+                let config = toml::from_str::<PackToml>(&config)?;
+
+                let out_dir = out_dir
+                    .clone()
+                    .unwrap_or(PathBuf::from(config.build.output.clone()));
 
                 debug!("Source Root: {:?}", root);
 
-                // TODO: Something with the config
+                let source_files = get_source_files(&base, config)?;
 
-                let walk = WalkDir::new(&root)
-                    .into_iter()
-                    .filter_map(|v| v.ok())
-                    .filter(|v| v.file_name().to_str().unwrap().ends_with(".dps"))
-                    .collect::<Vec<_>>();
-
-                let bar = ProgressBar::new(walk.len() as u64).with_style(
+                let bar = ProgressBar::new(source_files.len() as u64).with_style(
                     ProgressStyle::with_template("[{bar:40.cyan/blue}] {pos:.blue} of {len:.blue}")
                         .unwrap()
                         .progress_chars("## "),
@@ -87,10 +85,7 @@ impl Commands {
 
                 let mut asts = Vec::new();
 
-                for entry in walk {
-                    let path = entry.path();
-                    let path_str = path.strip_prefix(&root).unwrap().to_str().unwrap();
-
+                for (path, path_str) in source_files {
                     bar.println(format!(
                         "{} {}",
                         style("[parse]").red(),
@@ -99,7 +94,7 @@ impl Commands {
 
                     asts.push(Self::create_ast(
                         &PathBuf::from(path),
-                        out_dir,
+                        &out_dir,
                         *dump_tokens,
                         *dump_ast,
                     )?);
@@ -145,9 +140,25 @@ impl Commands {
                     dump_ast_part!(ast.enums => merged_dir);
                     dump_ast_part!(ast.objectives => merged_dir);
                     dump_ast_part!(ast.modules => merged_dir);
+                    dump_ast_part!(ast.exports => merged_dir);
+
+                    if let Ok(it) = &ast.export_nodes() {
+                        let path = merged_dir.join("export_nodes.ron");
+
+                        fs::write(path, ron::ser::to_string_pretty(it, PrettyConfig::new())?)?;
+                    }
                 }
 
-                Validator::new(ast).validate()?;
+                let ast = Validator::new(ast).validate()?.ast.clone();
+
+                if *dump_ast {
+                    let dump_file = out_dir.join("ast_merged_validated.ron");
+
+                    fs::write(
+                        dump_file,
+                        ron::ser::to_string_pretty(&ast, PrettyConfig::new())?,
+                    )?;
+                }
             }
 
             Self::Compile {

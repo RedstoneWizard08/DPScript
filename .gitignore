@@ -5,3 +5,4 @@ node_modules
 *.ast.ron
 *.tokens.ron
 std/out
+example/out

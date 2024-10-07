@@ -1,3 +1,5 @@
+use std::fmt;
+
 use super::Node;
 use miette::SourceSpan;
 use serde::{Deserialize, Serialize};
@@ -17,4 +19,23 @@ pub enum OperationKind {
     Multiply,
     Divide,
     And,
+}
+
+impl OperationKind {
+    pub fn name(&self) -> String {
+        match self {
+            Self::Add => "add",
+            Self::Subtract => "sub",
+            Self::Multiply => "mul",
+            Self::Divide => "div",
+            Self::And => "and",
+        }
+        .into()
+    }
+}
+
+impl fmt::Display for OperationKind {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{}", self.name())
+    }
 }

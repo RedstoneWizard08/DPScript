@@ -4,15 +4,15 @@ pub compiler fn keyof(obj: Any) -> NBTPath;
 pub compiler fn storeof(obj: Any) -> Store;
 
 #[cmd("data modify storage %% %% set value %%")]
-pub facade fn set_data(storage: Storage, pat: NBTPath, value: Any);
+pub facade fn set_data(storage: Store, pat: NBTPath, value: Any);
 
 #[cmd("data get storage %% %%")]
-pub facade fn get_data(storage: Storage, pat: NBTPath) -> Any;
+pub facade fn get_data(storage: Store, pat: NBTPath) -> Any;
 
 pub module stores {
     pub const arrayLength = store: "dpscript:arrays/length";
 }
 
 pub module players {
-    pub const temp = player: "__dpscript_temp";
+    pub const temp = entity: "__dpscript_temp";
 }

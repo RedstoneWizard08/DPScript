@@ -136,6 +136,12 @@ impl Tokenizer {
                     let span = self.cursor.span(6);
                     self.cursor.skip(5);
                     Some((Token::Export, span))
+                } else if self.cursor.peek_many(0, 5).is_some_and(|v| v == "ntity")
+                    && self.cursor.peek_ahead(5).is_some_and(|v| v.is_not_ident())
+                {
+                    let span = self.cursor.span(6);
+                    self.cursor.skip(5);
+                    Some((Token::Entity, span))
                 } else if self.cursor.peek_many(0, 3).is_some_and(|v| v == "num")
                     && self.cursor.peek_ahead(3).is_some_and(|v| v.is_not_ident())
                 {
@@ -196,12 +202,6 @@ impl Tokenizer {
                     let span = self.cursor.span(4);
                     self.cursor.skip(3);
                     Some((Token::Path, span))
-                } else if self.cursor.peek_many(0, 5).is_some_and(|v| v == "layer")
-                    && self.cursor.peek_ahead(5).is_some_and(|v| v.is_not_ident())
-                {
-                    let span = self.cursor.span(6);
-                    self.cursor.skip(5);
-                    Some((Token::Player, span))
                 } else {
                     None
                 }

@@ -1,5 +1,7 @@
 module std/advops;
 
+import std/core/{set_data, get_data};
+
 enum AdvOps {
     Sqrt,
     Sin,
@@ -11,10 +13,10 @@ enum AdvOps {
 }
 
 #[cmd("data advops storage %% %% %%")]
-facade fn advops(#[id(storage)] storage: Identifier, pat: NBTPath, op: AdvOps);
+facade fn advops(storage: Store, pat: NBTPath, op: AdvOps);
 
 pub fn sqrt(num: float) -> float {
-    const stor = id: "dpscript:temp/ops/sqrt";
+    const stor = store: "dpscript:temp/ops/sqrt";
     const pat = path: "temp_val";
 
     set_data(stor, pat, num);
@@ -24,7 +26,7 @@ pub fn sqrt(num: float) -> float {
 }
 
 pub fn sin(num: float) -> float {
-    const stor = id: "dpscript:temp/ops/sin";
+    const stor = store: "dpscript:temp/ops/sin";
     const pat = path: "temp_val";
 
     set_data(stor, pat, num);
@@ -34,7 +36,7 @@ pub fn sin(num: float) -> float {
 }
 
 pub fn cos(num: float) -> float {
-    const stor = id: "dpscript:temp/ops/cos";
+    const stor = store: "dpscript:temp/ops/cos";
     const pat = path: "temp_val";
 
     set_data(stor, pat, num);
@@ -44,7 +46,7 @@ pub fn cos(num: float) -> float {
 }
 
 pub fn tan(num: float) -> float {
-    const stor = id: "dpscript:temp/ops/tan";
+    const stor = store: "dpscript:temp/ops/tan";
     const pat = path: "temp_val";
 
     set_data(stor, pat, num);
@@ -54,7 +56,7 @@ pub fn tan(num: float) -> float {
 }
 
 pub fn asin(num: float) -> float {
-    const stor = id: "dpscript:temp/ops/asin";
+    const stor = store: "dpscript:temp/ops/asin";
     const pat = path: "temp_val";
 
     set_data(stor, pat, num);
@@ -64,7 +66,7 @@ pub fn asin(num: float) -> float {
 }
 
 pub fn acos(num: float) -> float {
-    const stor = id: "dpscript:temp/ops/acos";
+    const stor = store: "dpscript:temp/ops/acos";
     const pat = path: "temp_val";
 
     set_data(stor, pat, num);
@@ -74,7 +76,7 @@ pub fn acos(num: float) -> float {
 }
 
 pub fn atan(num: float) -> float {
-    const stor = id: "dpscript:temp/ops/atan";
+    const stor = store: "dpscript:temp/ops/atan";
     const pat = path: "temp_val";
 
     set_data(stor, pat, num);

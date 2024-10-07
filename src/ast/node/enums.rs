@@ -9,3 +9,9 @@ pub struct Enum {
     pub span: SourceSpan,
     pub entries: Vec<Spanned<String>>,
 }
+
+impl Enum {
+    pub fn entries(&self) -> Vec<String> {
+        self.entries.iter().map(|(v, _)| v.clone()).collect()
+    }
+}

@@ -34,8 +34,11 @@ impl Analyzer<Type> for Type {
             "Identifier" => TypeKind::Identifier,
             "Selector" => TypeKind::Selector,
             "Component" => TypeKind::Component,
-            "Storage" => TypeKind::Storage,
+            "Store" => TypeKind::Store,
             "Objective" => TypeKind::Objective,
+            "Any" => TypeKind::Any,
+            "Entity" => TypeKind::Entity,
+            "Void" => TypeKind::Void,
 
             it => TypeKind::Ident(it.into()),
         };

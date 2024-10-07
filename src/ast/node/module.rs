@@ -1,5 +1,5 @@
-use super::{Node, TopLevelNode};
-use crate::{module_top_level_getter, ParserError, Result, Spanned};
+use super::{ImportNode, Node, TopLevelNode};
+use crate::{module_top_level_getter, ModuleImport, ParserError, Result, Spanned};
 use miette::{NamedSource, SourceSpan};
 use serde::Serialize;
 use std::collections::HashMap;
@@ -24,9 +24,17 @@ pub struct Module {
     /// The file & source this module is in.
     #[serde(skip)]
     pub source: NamedSource<String>,
+
+    /// A cache for imported objects.
+    #[serde(skip)]
+    pub imported_objects: Option<Vec<ModuleImport>>,
 }
 
 impl Module {
+    pub fn source(&self) -> NamedSource<String> {
+        self.source.clone()
+    }
+
     pub fn no_submodules(&self) -> Vec<Node> {
         let mut nodes = Vec::new();
 
@@ -57,6 +65,7 @@ impl Module {
             span: self.span,
             top_level: self.top_level.clone(),
             source: self.source.clone(),
+            imported_objects: None,
         }
     }
 
@@ -112,7 +121,7 @@ impl Module {
                 _ => {
                     return Err(ParserError {
                         src: self.source.clone(),
-                        at: node.get_span(),
+                        at: node.span(),
                         err: format!("This node is not allowed in the top-level: {:?}", node),
                     }
                     .into())
@@ -132,6 +141,57 @@ impl Module {
 
         Ok(())
     }
+
+    pub fn get_imported_names(&self) -> Vec<String> {
+        let mut imports = Vec::new();
+
+        for item in &self.body {
+            match item {
+                Node::Import(it) => {
+                    for node in &it.imports {
+                        match node {
+                            ImportNode::Object((obj, _)) => imports.push(obj.clone()),
+                            _ => todo!("Implement nested imports"),
+                        }
+                    }
+                }
+
+                _ => {}
+            }
+        }
+
+        imports
+    }
+
+    pub fn get_enums(&self) -> Vec<(String, Vec<String>)> {
+        let mut enums = Vec::new();
+
+        for item in &self.body {
+            match item {
+                Node::Enum(it) => {
+                    let mut entries = Vec::new();
+
+                    for (entry, _) in &it.entries {
+                        entries.push(entry.clone());
+                    }
+
+                    enums.push((it.name.0.clone(), entries));
+                }
+
+                _ => {}
+            }
+        }
+
+        enums
+    }
+
+    pub fn name(&self) -> String {
+        self.name
+            .iter()
+            .map(|v| v.0.clone())
+            .collect::<Vec<_>>()
+            .join("/")
+    }
 }
 
 module_top_level_getter!(imports -> Import);
@@ -141,3 +201,4 @@ module_top_level_getter!(blocks -> Block);
 module_top_level_getter!(enums -> Enum);
 module_top_level_getter!(objectives -> Objective);
 module_top_level_getter!(exports -> Export);
+module_top_level_getter!(modules -> Module);

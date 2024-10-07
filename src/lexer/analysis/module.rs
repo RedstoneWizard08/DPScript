@@ -89,6 +89,7 @@ impl Analyzer<Module> for Module {
             span,
             top_level: None,
             source: cursor.source(),
+            imported_objects: None,
         }))
     }
 }

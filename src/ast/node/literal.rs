@@ -14,7 +14,7 @@ pub enum Literal {
     Identifier(Spanned<String>),
     Path(Spanned<String>),
     Store(Spanned<String>),
-    Player(Spanned<String>),
+    Entity(Spanned<String>),
     Selector(Spanned<String>),
 
     /// An enum value. This is (Enum Name, Value Name).
@@ -25,7 +25,7 @@ pub enum Literal {
 }
 
 impl Literal {
-    pub fn get_span(&self) -> SourceSpan {
+    pub fn span(&self) -> SourceSpan {
         match self.clone() {
             Self::Int((_, s)) => s,
             Self::Float((_, s)) => s,
@@ -36,7 +36,7 @@ impl Literal {
             Self::Identifier((_, s)) => s,
             Self::Path((_, s)) => s,
             Self::Store((_, s)) => s,
-            Self::Player((_, s)) => s,
+            Self::Entity((_, s)) => s,
             Self::Selector((_, s)) => s,
             Self::EnumValue((_, s), (_, s2)) => s.add(s2),
             Self::Nbt((_, s)) => s,

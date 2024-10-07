@@ -1,0 +1,14 @@
+[pack]
+name = "example"
+version = "0.1.0"
+authors = ["RedstoneWizard08"]
+description = "Example Project"
+
+[version]
+minecraft = "1.21.1"
+
+[dependencies]
+std = "../std"
+
+[build]
+output = "./out"

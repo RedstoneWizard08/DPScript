@@ -1,34 +1,33 @@
 use super::{ctx::CheckerContext, Checker};
-use crate::{Import, Module, Node, Result, ValidatorError};
+use crate::{
+    Block, Call, Conditional, Enum, Function, Import, Loop, Node, Objective, Operation, Result,
+    Return, ValidatorError, Variable,
+};
 
 impl Checker<Node> for Node {
-    fn check(module: &(String, Module), item: &mut Node, cx: &CheckerContext) -> Result<()> {
+    fn check(item: &mut Node, cx: &mut CheckerContext) -> Result<()> {
+        let module = cx.cur_modules.clone();
+        let module = module.last().unwrap();
+
         match item {
-            Node::Import(import) => Import::check(module, import, cx),
-            Node::Export(_) => Ok(()),
-            Node::Literal(_) => Ok(()),
+            Node::Block(block) => Block::check(block, cx),
+            Node::Import(import) => Import::check(import, cx),
+            Node::Objective(obj) => Objective::check(obj, cx),
+            Node::Function(func) => Function::check(func, cx),
+            Node::Enum(enum_) => Enum::check(enum_, cx),
+            Node::Variable(var) => Variable::check(var, cx),
+            Node::Call(call) => Call::check(call, cx),
+            Node::Conditional(cond) => Conditional::check(cond, cx),
+            Node::Return(ret) => Return::check(ret, cx),
+            Node::Loop(it) => Loop::check(it, cx),
+            Node::Operation(op) => Operation::check(op, cx),
 
-            Node::Ident(_) => Err(ValidatorError {
-                src: module.1.source.clone(),
-                at: item.get_span(),
-                err: format!("No context for identifier!"),
-            }
-            .into()),
+            // Literals and idents on their own are always valid and exports are taken care of during `Module::get_exports()`
+            Node::Export(_) | Node::Literal(_) | Node::Ident(_) => Ok(()),
 
-            // Module(Module),
-            // Function(Function),
-            // Variable(Variable),
-            // Call(Call),
-            // Operation(Operation),
-            // Block(Block),
-            // Loop(Loop),
-            // Enum(Enum),
-            // Return(Return),
-            // Objective(Objective),
-            // Conditional(Conditional),
             _ => Err(ValidatorError {
-                src: module.1.source.clone(),
-                at: item.get_span(),
+                src: module.source.clone(),
+                at: item.span(),
                 err: format!("Could not validate node: {}", item),
             }
             .into()),

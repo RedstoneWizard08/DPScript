@@ -4,4 +4,4 @@ module std/base;
 pub facade fn tellraw(who: Selector, message: Component[]);
 
 #[cmd("summon %%")]
-pub facade fn summon(#[id(entity)] entity: Identifier);
+pub facade fn summon(ent: Entity);

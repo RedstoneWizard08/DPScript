@@ -18,7 +18,7 @@ pub struct Loop {
     pub body: Vec<Node>,
 
     /// A cache of local variables defined in the function.
-    pub vars: Option<Vec<Variable>>,
+    pub locals: Option<Vec<Variable>>,
 }
 
 impl Loop {
@@ -31,15 +31,15 @@ impl Loop {
             }
         }
 
-        self.vars = Some(vars);
+        self.locals = Some(vars);
         self
     }
 
     pub fn get_locals(&mut self) -> Vec<Variable> {
-        if let Some(vars) = &self.vars {
+        if let Some(vars) = &self.locals {
             vars.clone()
         } else {
-            self.cache_vars().vars.clone().unwrap_or_default()
+            self.cache_vars().locals.clone().unwrap_or_default()
         }
     }
 }

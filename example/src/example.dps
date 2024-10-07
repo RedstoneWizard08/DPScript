@@ -8,7 +8,7 @@ fn say_hi() {
     // The `&` just adds those properties to the component.
     const base = component: "Hello, " & nbt: { color: "green" };
     // this is syntactic sugar - this is really: new array, add(...), add(...)
-    let text = [base, nbt: { text: "", extra: [{ selector: "@s" }], color: red }];
+    let text = [base, selector: "@s" & nbt: { color: "red" }];
 
     tellraw(ALL_PLAYERS, text);
 }
@@ -24,7 +24,7 @@ init {
     tellraw(ALL_PLAYERS, msg);
 
     // execute as @a run ...
-    for entity in ALL_PLAYERS {
+    for player in ALL_PLAYERS {
         say_hi();
     }
 }

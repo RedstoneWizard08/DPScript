@@ -12,6 +12,14 @@ pub enum Error {
     Validator(#[from] ValidatorError),
 
     #[error(transparent)]
+    #[diagnostic(transparent)]
+    TSValidator(#[from] TSValidatorError),
+
+    #[error(transparent)]
+    #[diagnostic(transparent)]
+    Dependency(#[from] DependencyError),
+
+    #[error(transparent)]
     Io(#[from] std::io::Error),
 
     #[error(transparent)]
@@ -39,6 +47,37 @@ pub struct ParserError {
 #[error("An error occured while validating!")]
 #[diagnostic(code(dpscript::error::validation), url(docsrs))]
 pub struct ValidatorError {
+    #[source_code]
+    pub src: NamedSource<String>,
+
+    #[label("here")]
+    pub at: SourceSpan,
+
+    #[help]
+    pub err: String,
+}
+
+#[derive(Debug, Error, Diagnostic)]
+#[error("An error occured while validating!")]
+#[diagnostic(code(dpscript::error::validation), url(docsrs))]
+pub struct TSValidatorError {
+    #[source_code]
+    pub src: NamedSource<String>,
+
+    #[label("here")]
+    pub at: SourceSpan,
+
+    #[label("here")]
+    pub other: SourceSpan,
+
+    #[help]
+    pub err: String,
+}
+
+#[derive(Debug, Error, Diagnostic)]
+#[error("An error occured during dependency resolution!")]
+#[diagnostic(code(dpscript::error::validation), url(docsrs))]
+pub struct DependencyError {
     #[source_code]
     pub src: NamedSource<String>,
 

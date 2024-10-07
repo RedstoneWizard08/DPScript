@@ -1,2 +1,0 @@
-#[name = "test/nested_test"]
-fn nested_test() {}
