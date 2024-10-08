@@ -10,7 +10,7 @@ fn say_hi() {
     // this is syntactic sugar - this is really: new array, add(...), add(...)
     let text = [base, selector: "@s" & nbt: { color: "red" }];
 
-    tellraw(ALL_PLAYERS, text);
+    tellraw(selector: "@s", text);
 }
 
 // Every module can have one or more init blocks, which will be their own functions and added to the load tag.

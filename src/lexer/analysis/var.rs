@@ -1,6 +1,5 @@
 use crate::{
-    check_token, AddSpan, Cursor, Node, ParserError, Result, Spanned, Token, TokenCursor, Type,
-    Variable,
+    check_token, AddSpan, Node, ParserError, Result, Spanned, Token, TokenCursor, Type, Variable,
 };
 
 use super::Analyzer;
@@ -75,7 +74,7 @@ impl Analyzer<Variable> for Variable {
         let mut nodes = Vec::new();
 
         let mut buf_cursor =
-            Cursor::new_from_src(cursor.source().name(), cursor.source().inner().clone(), buf);
+            TokenCursor::new_from_src(cursor.source().name(), cursor.source().inner().clone(), buf);
 
         while let Some(item) = buf_cursor.next() {
             Node::analyze(item, &mut buf_cursor, &mut nodes)?;

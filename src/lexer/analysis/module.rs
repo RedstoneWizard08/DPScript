@@ -1,5 +1,5 @@
 use super::Analyzer;
-use crate::{AddSpan, Cursor, Module, Node, Result, Spanned, Token, TokenCursor};
+use crate::{AddSpan, Module, Node, Result, Spanned, Token, TokenCursor};
 
 impl Analyzer<Module> for Module {
     fn analyze(
@@ -76,7 +76,7 @@ impl Analyzer<Module> for Module {
 
         let mut body = Vec::new();
         let mut buf_cursor =
-            Cursor::new_from_src(cursor.source().name(), cursor.source().inner().clone(), buf);
+            TokenCursor::new_from_src(cursor.source().name(), cursor.source().inner().clone(), buf);
 
         while let Some(item) = buf_cursor.next() {
             Node::analyze(item, &mut buf_cursor, &mut body)?;

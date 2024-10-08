@@ -18,7 +18,7 @@ impl Tokenizer {
     pub fn new(file: impl AsRef<str>, data: impl AsRef<str>) -> Self {
         Self {
             tokens: Vec::new(),
-            cursor: Cursor::new_from_code(file, data),
+            cursor: StringCursor::new_from_code(file, data),
         }
     }
 

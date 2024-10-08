@@ -2,7 +2,7 @@
 // THIS IS FOR TESTING PURPOSES, THIS FILE SHOULD NEVER BE HAND-WRITTEN OR IN YOUR SOURCE DIRECTORY!
 // DO NOT DO THIS!!!
 
-%define variable_alias TELLRAW_STORAGE: "example:__dpscript/vars/libs/std/base/tellraw" @ "data";
+define variable_alias TELLRAW_STORAGE: "example:__dpscript/vars/libs/std/base/tellraw" @ "data";
 
 func "example:__dpscript/gen/say_hi": {
     define variable_alias text: "example:__dpscript/vars/functions/gen/say_hi" @ "text_0"; // The number at the end is the index of the variable in the current scope.
@@ -26,38 +26,38 @@ func "example:__dpscript/gen/say_hi": {
     // Commands will always be evaluated as literals
     // The `"@a"` comes from the `ALL_PLAYERS` constant exported in `std/selectors`.
     // It has the concatenation operand because it's a substitution during lowering.
-    command: "tellraw" + "@a" + '["", { "nbt": "' + path!(TELLRAW_STORAGE) + '", "storage": "' + store!(TELLRAW_STORAGE) + '", "interpret": true }]';
+    command: "tellraw" + " " + "@s" + " " + '["", { "nbt": "' + path!(TELLRAW_STORAGE) + '", "storage": "' + store!(TELLRAW_STORAGE) + '", "interpret": true }]';
 }
 
 func "example:__dpscript/gen/init/0": {
-    define variable_alias data: "example:__dpscript/vars/functions/gen/init/0" @ "data_0";
-    define variable_alias msg: "example:__dpscript/vars/functions/gen/init/0" @ "msg_1";
+    define variable_alias _var_data: "example:__dpscript/vars/functions/gen/init/0" @ "local__data_0";
+    define variable_alias _var_msg: "example:__dpscript/vars/functions/gen/init/0" @ "local__msg_1";
 
     // This won't exist if the function returns void.
-    define variable_alias data_res: "example:__dpscript/vars/functions/gen/init/0" @ "data_0_res";
+    define variable_alias _ret_data: "example:__dpscript/vars/functions/gen/init/0" @ "ret__data_0";
 
     // Set the variable value to 100.
-    data set: data, '100';
+    data set: _var_data, '100';
     
     // The `argument` keyword tells the compiler to store the data from a variable in the temporary arguments array at that index, which will be accessed by any called function.
     // `data` is the reference to fetch the real (float) value.
-    argument: 1, data;
+    argument set: 1, _var_data;
     
     // The `store` keyword here tells the compiler to execute the function and store its result in the data storage.
     call: "example:__dpscript/libs/std/advops/sqrt";
 
     // This tells the compiler to copy any value (if it exists) from `__RETURN__` to `data_res`.
     // This won't exist if the function returns `void`.
-    data copy __RETURN__ data_res;
+    data copy: __RETURN__, _ret_data;
 
     // This clears the temporary argument storage.
     argument clear;
 
     // Create, append, append.
-    data set: msg, '[]';
-    data append: msg, '{ "text": "The square root of 100 is: " }';
+    data set: _var_msg, '[]';
+    data append: _var_msg, '{ "text": "The square root of 100 is: " }';
     // The compiler will automatically detect that this is a variable_alias.
-    data append: msg, data_res;
+    data append: _var_msg, _ret_data;
 
     data set: TELLRAW_STORAGE, '[]';
     data append: TELLRAW_STORAGE, '{ "text": "Hello, world!", "color": "green" }';
@@ -80,3 +80,15 @@ func "example:__dpscript/gen/init/0": {
         call: "example:__dpscript/gen/say_hi";
     }
 }
+
+func "example:__dpscript/gen/tick/0": {
+    // This is empty
+}
+
+tag "minecraft:tags/functions/load": [
+    "example:__dpscript/gen/init/0";
+]
+
+tag "minecraft:tags/functions/tick": [
+    "example:__dpscript/gen/tick/0";
+]

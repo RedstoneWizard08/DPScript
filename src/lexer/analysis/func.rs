@@ -1,6 +1,6 @@
 use crate::{
-    check_token, AddSpan, Attribute, Cursor, Function, FunctionArg, Node, ParserError, Result,
-    Spanned, Token, TokenCursor, Type,
+    check_token, AddSpan, Attribute, Function, FunctionArg, Node, ParserError, Result, Spanned,
+    Token, TokenCursor, Type,
 };
 
 use super::Analyzer;
@@ -185,8 +185,11 @@ impl Analyzer<Function> for Function {
                 span = span.add(tkn.1);
             }
 
-            let mut buf_cursor =
-                Cursor::new_from_src(cursor.source().name(), cursor.source().inner().clone(), buf);
+            let mut buf_cursor = TokenCursor::new_from_src(
+                cursor.source().name(),
+                cursor.source().inner().clone(),
+                buf,
+            );
 
             while let Some(item) = buf_cursor.next() {
                 Node::analyze(item, &mut buf_cursor, &mut body)?;

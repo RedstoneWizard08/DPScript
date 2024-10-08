@@ -1,5 +1,5 @@
 use crate::{
-    check_token, AddSpan, Cursor, Literal, Node, ParserError, Result, Spanned, Token, TokenCursor,
+    check_token, AddSpan, Literal, Node, ParserError, Result, Spanned, Token, TokenCursor,
 };
 
 use super::Analyzer;
@@ -171,7 +171,14 @@ impl Analyzer<Literal> for Literal {
                     span = span.add(tkn.1);
                 }
 
-                Some(Literal::Nbt((buf, span)))
+                let buf = buf
+                    .iter()
+                    .map(|v| format!("{}", v.0))
+                    .collect::<Vec<_>>()
+                    .join("");
+                let buf = format!("{{{}}}", buf);
+
+                Some(Literal::Nbt((json5::from_str(&buf)?, span)))
             }
 
             Token::LeftBracket => {
@@ -233,7 +240,7 @@ impl Analyzer<Literal> for Literal {
                 }
 
                 for buf in buf {
-                    let mut buf_cursor = Cursor::new_from_src(
+                    let mut buf_cursor = TokenCursor::new_from_src(
                         cursor.source().name(),
                         cursor.source().inner().clone(),
                         buf,

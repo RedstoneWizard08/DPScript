@@ -1,3 +1,7 @@
+use miette::SourceSpan;
+
+use super::Spanned;
+
 pub trait HasBits {
     type Bit: Clone;
 
@@ -17,5 +21,15 @@ impl<T: Clone> HasBits for Vec<T> {
 
     fn get_bits(&self) -> Vec<Self::Bit> {
         self.clone()
+    }
+}
+
+pub trait HasSpan {
+    fn get_span(&self) -> SourceSpan;
+}
+
+impl<T> HasSpan for Spanned<T> {
+    fn get_span(&self) -> SourceSpan {
+        self.1
     }
 }

@@ -1,8 +1,6 @@
 use super::Analyzer;
 
-use crate::{
-    check_token, AddSpan, Cursor, Loop, Node, ParserError, Result, Spanned, Token, TokenCursor,
-};
+use crate::{check_token, AddSpan, Loop, Node, ParserError, Result, Spanned, Token, TokenCursor};
 
 impl Analyzer<Loop> for Loop {
     fn analyze(
@@ -75,7 +73,7 @@ impl Analyzer<Loop> for Loop {
 
         let mut body = Vec::new();
         let mut buf_cursor =
-            Cursor::new_from_src(cursor.source().name(), cursor.source().inner().clone(), buf);
+            TokenCursor::new_from_src(cursor.source().name(), cursor.source().inner().clone(), buf);
 
         while let Some(item) = buf_cursor.next() {
             Node::analyze(item, &mut buf_cursor, &mut body)?;

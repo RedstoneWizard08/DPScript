@@ -1,6 +1,4 @@
-use crate::{
-    check_token, AddSpan, Cursor, Enum, Node, ParserError, Result, Spanned, Token, TokenCursor,
-};
+use crate::{check_token, AddSpan, Enum, Node, ParserError, Result, Spanned, Token, TokenCursor};
 
 use super::Analyzer;
 
@@ -53,7 +51,7 @@ impl Analyzer<Enum> for Enum {
 
         let mut entries = Vec::new();
         let mut buf_cursor =
-            Cursor::new_from_src(cursor.source().name(), cursor.source().inner().clone(), buf);
+            TokenCursor::new_from_src(cursor.source().name(), cursor.source().inner().clone(), buf);
 
         while let Some(item) = buf_cursor.next() {
             if let Some(it) = String::analyze(item.clone(), &mut buf_cursor, &mut Vec::new())? {

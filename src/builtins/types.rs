@@ -200,15 +200,51 @@ impl BuiltInTypes {
                 ("get", vec![Self::Entity], Some(Self::Int)),
                 ("add", vec![Self::Entity, Self::Int], None),
                 ("reset", vec![Self::Entity], None),
-                ("ltEq", vec![Self::Entity, Self::Objective, Self::Entity], Some(Self::Bool)),
-                ("gtEq", vec![Self::Entity, Self::Objective, Self::Entity], Some(Self::Bool)),
-                ("lt", vec![Self::Entity, Self::Objective, Self::Entity], Some(Self::Bool)),
-                ("gt", vec![Self::Entity, Self::Objective, Self::Entity], Some(Self::Bool)),
-                ("equals", vec![Self::Entity, Self::Objective, Self::Entity], Some(Self::Bool)),
-                ("lessThanEqual", vec![Self::Entity, Self::Objective, Self::Entity], Some(Self::Bool)),
-                ("greaterThanEqual", vec![Self::Entity, Self::Objective, Self::Entity], Some(Self::Bool)),
-                ("lessThan", vec![Self::Entity, Self::Objective, Self::Entity], Some(Self::Bool)),
-                ("greaterThan", vec![Self::Entity, Self::Objective, Self::Entity], Some(Self::Bool)),
+                (
+                    "ltEq",
+                    vec![Self::Entity, Self::Objective, Self::Entity],
+                    Some(Self::Bool),
+                ),
+                (
+                    "gtEq",
+                    vec![Self::Entity, Self::Objective, Self::Entity],
+                    Some(Self::Bool),
+                ),
+                (
+                    "lt",
+                    vec![Self::Entity, Self::Objective, Self::Entity],
+                    Some(Self::Bool),
+                ),
+                (
+                    "gt",
+                    vec![Self::Entity, Self::Objective, Self::Entity],
+                    Some(Self::Bool),
+                ),
+                (
+                    "equals",
+                    vec![Self::Entity, Self::Objective, Self::Entity],
+                    Some(Self::Bool),
+                ),
+                (
+                    "lessThanEqual",
+                    vec![Self::Entity, Self::Objective, Self::Entity],
+                    Some(Self::Bool),
+                ),
+                (
+                    "greaterThanEqual",
+                    vec![Self::Entity, Self::Objective, Self::Entity],
+                    Some(Self::Bool),
+                ),
+                (
+                    "lessThan",
+                    vec![Self::Entity, Self::Objective, Self::Entity],
+                    Some(Self::Bool),
+                ),
+                (
+                    "greaterThan",
+                    vec![Self::Entity, Self::Objective, Self::Entity],
+                    Some(Self::Bool),
+                ),
                 (
                     "operation",
                     vec![

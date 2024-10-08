@@ -1,7 +1,8 @@
 use super::Node;
-use crate::{util::Spanned, AddSpan, Token};
+use crate::{util::Spanned, AddSpan};
 use miette::SourceSpan;
 use serde::Serialize;
+use serde_json::Value;
 
 #[derive(Debug, Clone, Serialize)]
 pub enum Literal {
@@ -16,12 +17,10 @@ pub enum Literal {
     Store(Spanned<String>),
     Entity(Spanned<String>),
     Selector(Spanned<String>),
+    Nbt(Spanned<Value>),
 
     /// An enum value. This is (Enum Name, Value Name).
     EnumValue(Spanned<String>, Spanned<String>),
-
-    // TODO: HashMap
-    Nbt(Spanned<Vec<Spanned<Token>>>),
 }
 
 impl Literal {

@@ -16,7 +16,7 @@
                     "name": "comment.dpscript_ir"
                 },
                 {
-                    "match": "\\b(func|define|command|argument|call)",
+                    "match": "\\b(func|define|command|argument|call|tag|entry)",
                     "name": "keyword.dpscript_ir"
                 },
                 {
@@ -62,8 +62,19 @@
                     "name": "punctuation.dpscript_ir"
                 },
                 {
-                    "match": "(')",
-                    "name": "string.dpscript_ir"
+                    "begin": "(')",
+                    "beginCaptures": {
+                        "1": {
+                            "name": "string.dpscript_ir"
+                        }
+                    },
+                    "contentName": "string.dpscript_ir",
+                    "end": "(')",
+                    "endCaptures": {
+                        "1": {
+                            "name": "string.dpscript_ir"
+                        }
+                    }
                 },
                 {
                     "begin": "(\\\")",
@@ -98,6 +109,9 @@
             ]
         },
         "main__2": {
+            "patterns": []
+        },
+        "main__3": {
             "patterns": []
         },
         "numeric": {

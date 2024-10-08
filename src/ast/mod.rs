@@ -13,16 +13,35 @@ pub struct AST {
     pub cached: bool,
 
     // We want these sorted for niceties, so we use a BTreeMap
+    #[serde(skip)]
     pub modules: Option<BTreeMap<String, Module>>,
+
+    #[serde(skip)]
     pub top_level: Option<BTreeMap<String, Vec<TopLevelNode>>>,
+
+    #[serde(skip)]
     pub imports: Option<BTreeMap<String, Vec<Import>>>,
+
+    #[serde(skip)]
     pub funcs: Option<BTreeMap<String, Vec<Function>>>,
+
+    #[serde(skip)]
     pub vars: Option<BTreeMap<String, Vec<Variable>>>,
+
+    #[serde(skip)]
     pub blocks: Option<BTreeMap<String, Vec<Block>>>,
+
+    #[serde(skip)]
     pub enums: Option<BTreeMap<String, Vec<Enum>>>,
+
+    #[serde(skip)]
     pub objectives: Option<BTreeMap<String, Vec<Objective>>>,
+
+    #[serde(skip)]
     pub exports: Option<BTreeMap<String, Vec<Export>>>,
-    pub export_nodes: Option<BTreeMap<String, Vec<ModuleExport>>>, // just a cache :)
+
+    #[serde(skip)]
+    pub export_nodes: Option<BTreeMap<String, Vec<ModuleExport>>>, // just a cache :) this is updated elsewhere
 }
 
 impl AST {

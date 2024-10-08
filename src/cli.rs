@@ -4,7 +4,10 @@ use indicatif::{ProgressBar, ProgressStyle};
 use ron::ser::PrettyConfig;
 use std::{fs, path::PathBuf};
 
-use crate::{dump_ast_part, get_source_files, Lexer, PackToml, Result, Tokenizer, Validator, AST};
+use crate::{
+    dump_ast_part, get_source_files, IRAst, IRLexer, IRTokenizer, Lexer, Lowerer, PackToml, Result,
+    Tokenizer, Validator, AST,
+};
 
 #[derive(Debug, Clone, Parser)]
 #[command(version, about, long_about = None)]
@@ -28,6 +31,15 @@ pub enum Commands {
 
         #[arg(short = 'T', long)]
         dump_tokens: bool,
+
+        #[arg(short = 'I', long)]
+        dump_ir: bool,
+
+        #[arg(
+            long = "build-ir",
+            help = "Build manually-created IR files. THIS IS ONLY FOR DEBUG!! ERRORS HERE WILL BE HARD TO DEBUG!"
+        )]
+        ir: bool,
     },
 
     /// Compile a single file
@@ -62,7 +74,9 @@ impl Commands {
                 config_path,
                 dump_ast,
                 dump_tokens,
+                dump_ir,
                 out_dir,
+                ir,
             } => {
                 let base = config_path.canonicalize()?.parent().unwrap().to_path_buf();
                 let root = base.join("src");
@@ -75,89 +89,155 @@ impl Commands {
 
                 debug!("Source Root: {:?}", root);
 
-                let source_files = get_source_files(&base, config)?;
+                let source_files = get_source_files(&base, &config, *ir)?;
 
-                let bar = ProgressBar::new(source_files.len() as u64).with_style(
-                    ProgressStyle::with_template("[{bar:40.cyan/blue}] {pos:.blue} of {len:.blue}")
+                if *ir {
+                    let bar = ProgressBar::new(source_files.len() as u64).with_style(
+                        ProgressStyle::with_template(
+                            "[{bar:40.cyan/blue}] {pos:.blue} of {len:.blue}",
+                        )
                         .unwrap()
                         .progress_chars("## "),
-                );
+                    );
 
-                let mut asts = Vec::new();
+                    let mut asts = Vec::new();
 
-                for (path, path_str) in source_files {
-                    bar.println(format!(
-                        "{} {}",
-                        style("[parse]").red(),
-                        style(path_str).magenta()
-                    ));
+                    for (path, path_str) in source_files {
+                        bar.println(format!(
+                            "{} {}",
+                            style("[parse]").red(),
+                            style(path_str).magenta()
+                        ));
 
-                    asts.push(Self::create_ast(
-                        &PathBuf::from(path),
-                        &out_dir,
-                        *dump_tokens,
-                        *dump_ast,
-                    )?);
+                        asts.push(Self::create_ir_ast(
+                            &PathBuf::from(path),
+                            &out_dir,
+                            *dump_tokens,
+                            *dump_ast,
+                        )?);
 
-                    bar.inc(1);
-                }
-
-                bar.finish();
-
-                if asts.is_empty() {
-                    warn!("No source files found!");
-
-                    return Ok(());
-                }
-
-                let mut ast = asts.remove(0);
-
-                for item in asts {
-                    ast.merge(item);
-                }
-
-                ast.index_modules()?;
-
-                if *dump_ast {
-                    let dump_file = out_dir.join("ast_merged.ron");
-
-                    fs::write(
-                        dump_file,
-                        ron::ser::to_string_pretty(&ast, PrettyConfig::new())?,
-                    )?;
-
-                    let merged_dir = out_dir.join("merged");
-
-                    if !merged_dir.exists() {
-                        fs::create_dir_all(&merged_dir)?;
+                        bar.inc(1);
                     }
 
-                    dump_ast_part!(ast.top_level => merged_dir);
-                    dump_ast_part!(ast.imports => merged_dir);
-                    dump_ast_part!(ast.funcs => merged_dir);
-                    dump_ast_part!(ast.vars => merged_dir);
-                    dump_ast_part!(ast.blocks => merged_dir);
-                    dump_ast_part!(ast.enums => merged_dir);
-                    dump_ast_part!(ast.objectives => merged_dir);
-                    dump_ast_part!(ast.modules => merged_dir);
-                    dump_ast_part!(ast.exports => merged_dir);
+                    bar.finish();
 
-                    if let Ok(it) = &ast.export_nodes() {
-                        let path = merged_dir.join("export_nodes.ron");
+                    if asts.is_empty() {
+                        warn!("No source files found!");
 
-                        fs::write(path, ron::ser::to_string_pretty(it, PrettyConfig::new())?)?;
+                        return Ok(());
                     }
-                }
 
-                let ast = Validator::new(ast).validate()?.ast.clone();
+                    let mut ast = asts.remove(0);
 
-                if *dump_ast {
-                    let dump_file = out_dir.join("ast_merged_validated.ron");
+                    for item in asts {
+                        ast.merge(item);
+                    }
 
-                    fs::write(
-                        dump_file,
-                        ron::ser::to_string_pretty(&ast, PrettyConfig::new())?,
-                    )?;
+                    if *dump_ast {
+                        let dump_file = out_dir.join("ir_ast_merged.ron");
+
+                        fs::write(
+                            dump_file,
+                            ron::ser::to_string_pretty(&ast, PrettyConfig::new())?,
+                        )?;
+
+                        let dump_file = out_dir.join("ir_ast_merged.back_conv.dpir");
+
+                        fs::write(dump_file, ast.serialize_nodes())?;
+                    }
+                } else {
+                    let bar = ProgressBar::new(source_files.len() as u64).with_style(
+                        ProgressStyle::with_template(
+                            "[{bar:40.cyan/blue}] {pos:.blue} of {len:.blue}",
+                        )
+                        .unwrap()
+                        .progress_chars("## "),
+                    );
+
+                    let mut asts = Vec::new();
+
+                    for (path, path_str) in source_files {
+                        bar.println(format!(
+                            "{} {}",
+                            style("[parse]").red(),
+                            style(path_str).magenta()
+                        ));
+
+                        asts.push(Self::create_ast(
+                            &PathBuf::from(path),
+                            &out_dir,
+                            *dump_tokens,
+                            *dump_ast,
+                        )?);
+
+                        bar.inc(1);
+                    }
+
+                    bar.finish();
+
+                    if asts.is_empty() {
+                        warn!("No source files found!");
+
+                        return Ok(());
+                    }
+
+                    let mut ast = asts.remove(0);
+
+                    for item in asts {
+                        ast.merge(item);
+                    }
+
+                    ast.index_modules()?;
+
+                    if *dump_ast {
+                        let dump_file = out_dir.join("ast_merged.ron");
+
+                        fs::write(
+                            dump_file,
+                            ron::ser::to_string_pretty(&ast, PrettyConfig::new())?,
+                        )?;
+
+                        let merged_dir = out_dir.join("merged");
+
+                        if !merged_dir.exists() {
+                            fs::create_dir_all(&merged_dir)?;
+                        }
+
+                        dump_ast_part!(ast.top_level => merged_dir);
+                        dump_ast_part!(ast.imports => merged_dir);
+                        dump_ast_part!(ast.funcs => merged_dir);
+                        dump_ast_part!(ast.vars => merged_dir);
+                        dump_ast_part!(ast.blocks => merged_dir);
+                        dump_ast_part!(ast.enums => merged_dir);
+                        dump_ast_part!(ast.objectives => merged_dir);
+                        dump_ast_part!(ast.modules => merged_dir);
+                        dump_ast_part!(ast.exports => merged_dir);
+
+                        if let Ok(it) = &ast.export_nodes() {
+                            let path = merged_dir.join("export_nodes.ron");
+
+                            fs::write(path, ron::ser::to_string_pretty(it, PrettyConfig::new())?)?;
+                        }
+                    }
+
+                    let ast = Validator::new(ast).validate()?.ast.clone();
+
+                    if *dump_ast {
+                        let dump_file = out_dir.join("ast_merged_validated.ron");
+
+                        fs::write(
+                            dump_file,
+                            ron::ser::to_string_pretty(&ast, PrettyConfig::new())?,
+                        )?;
+                    }
+
+                    let lowered = Lowerer::new(config.pack.name, ast).run()?.get_code()?;
+
+                    if *dump_ir {
+                        let dump_file = out_dir.join("code_merged.dpir");
+
+                        fs::write(dump_file, &lowered)?;
+                    }
                 }
             }
 
@@ -223,6 +303,55 @@ impl Commands {
         }
 
         let ast = Lexer::new(&file_name, data, tokens).run()?.ast();
+
+        if dump_ast {
+            let ast_dir = out_dir.join("ast");
+
+            if !ast_dir.exists() {
+                fs::create_dir_all(&ast_dir)?;
+            }
+
+            let dump_file = ast_dir.join(file.with_extension("dps.ast.ron").file_name().unwrap());
+
+            fs::write(
+                dump_file,
+                ron::ser::to_string_pretty(&ast, PrettyConfig::new())?,
+            )?;
+        }
+
+        Ok(ast)
+    }
+
+    fn create_ir_ast(
+        file: &PathBuf,
+        out_dir: &PathBuf,
+        dump_tokens: bool,
+        dump_ast: bool,
+    ) -> Result<IRAst> {
+        let data = fs::read_to_string(&file)?;
+        let tokens = IRTokenizer::new(data.clone()).tokenize()?.tokens();
+
+        if !out_dir.exists() {
+            fs::create_dir_all(out_dir)?;
+        }
+
+        if dump_tokens {
+            let tokens_dir = out_dir.join("tokens");
+
+            if !tokens_dir.exists() {
+                fs::create_dir_all(&tokens_dir)?;
+            }
+
+            let dump_file =
+                tokens_dir.join(file.with_extension("dpir.tokens.ron").file_name().unwrap());
+
+            fs::write(
+                dump_file,
+                ron::ser::to_string_pretty(&tokens, PrettyConfig::new())?,
+            )?;
+        }
+
+        let ast = IRLexer::new(data, tokens).run()?.ast();
 
         if dump_ast {
             let ast_dir = out_dir.join("ast");

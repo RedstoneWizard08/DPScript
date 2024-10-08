@@ -149,9 +149,168 @@ macro_rules! check_token {
 }
 
 #[macro_export]
+macro_rules! check_ir_token {
+    ($cursor: ident => $var: ident[$n: expr] == $tkn: ident) => {{
+        let it = $var.get($n);
+
+        if let Some((token, span)) = it {
+            if token.clone() != $crate::IRToken::$tkn {
+                return Err($crate::IRParserError {
+                    src: $cursor.source(),
+                    at: span.clone(),
+                    err: format!(
+                        "Unexpected token: {} (expected: {})",
+                        token,
+                        $crate::IRToken::$tkn
+                    ),
+                }
+                .into());
+            }
+        }
+
+        it
+    }};
+
+    (data $cursor: ident => $var: ident[$n: expr] == $tkn: ident) => {{
+        let it = $var.get($n);
+
+        if let Some((token, span)) = it {
+            if let $crate::IRToken::$tkn(_) = token {
+            } else {
+                return Err($crate::IRParserError {
+                    src: $cursor.source(),
+                    at: span.clone(),
+                    err: format!("Unexpected token: {}", token),
+                }
+                .into());
+            }
+        }
+
+        it
+    }};
+
+    (remove $cursor: ident => $var: ident[$n: expr] == $tkn: ident) => {{
+        let it = $var.get($n);
+
+        if let Some((token, span)) = it {
+            if token.clone() != $crate::IRToken::$tkn {
+                return Err($crate::IRParserError {
+                    src: $cursor.source(),
+                    at: span.clone(),
+                    err: format!(
+                        "Unexpected token: {} (expected: {})",
+                        token,
+                        $crate::IRToken::$tkn
+                    ),
+                }
+                .into());
+            }
+        }
+
+        $var.remove($n)
+    }};
+
+    ($cursor: ident => $tkn: ident == $expected: ident) => {{
+        if $tkn.0 != $crate::IRToken::$expected {
+            return Err($crate::IRParserError {
+                src: $cursor.source(),
+                at: $tkn.1.clone(),
+                err: format!(
+                    "Unexpected token: {} (expected: {})",
+                    $tkn.0,
+                    $crate::IRToken::$expected
+                ),
+            }
+            .into());
+        }
+    }};
+
+    (data $cursor: ident == $tkn: ident) => {{
+        let it = $cursor.peek();
+
+        if let Some((token, span)) = it {
+            if let $crate::IRToken::$tkn(_) = token {
+            } else {
+                return Err($crate::IRParserError {
+                    src: $cursor.source(),
+                    at: span.clone(),
+                    err: format!("Unexpected token: {}", token),
+                }
+                .into());
+            }
+        }
+
+        it
+    }};
+
+    ($cursor: ident == $tkn: ident) => {{
+        let it = $cursor.peek();
+
+        if let Some((token, span)) = it.clone() {
+            if token != $crate::IRToken::$tkn {
+                return Err($crate::IRParserError {
+                    src: $cursor.source(),
+                    at: span.clone(),
+                    err: format!(
+                        "Unexpected token: {} (expected: {})",
+                        token,
+                        $crate::IRToken::$tkn
+                    ),
+                }
+                .into());
+            }
+        }
+
+        it
+    }};
+
+    (remove $cursor: ident == $tkn: ident) => {{
+        let it = $cursor.next();
+
+        if let Some((token, span)) = it.clone() {
+            if token != $crate::IRToken::$tkn {
+                return Err($crate::IRParserError {
+                    src: $cursor.source(),
+                    at: span.clone(),
+                    err: format!(
+                        "Unexpected token: {} (expected: {})",
+                        token,
+                        $crate::IRToken::$tkn
+                    ),
+                }
+                .into());
+            }
+        }
+
+        it
+    }};
+
+    (data $cursor: ident => $tkn: ident == $expected: ident) => {{
+        if let $crate::IRToken::$expected(_) = $tkn.0 {
+        } else {
+            return Err($crate::IRParserError {
+                src: $cursor.source(),
+                at: $tkn.1.clone(),
+                err: format!("Unexpected token: {}", $tkn.0),
+            }
+            .into());
+        }
+    }};
+}
+
+#[macro_export]
 macro_rules! add_return {
     ($arr: ident += $variant: ident($val: ident)) => {{
         let node = $crate::Node::$variant($val);
+        $arr.push(node.clone());
+        return Ok(Some(node));
+    }};
+}
+
+#[macro_export]
+macro_rules! add_ir_return {
+    ($arr: ident += $variant: ident($val: ident)) => {{
+        let node = $crate::IRNode::$variant($val);
         $arr.push(node.clone());
         return Ok(Some(node));
     }};

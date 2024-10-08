@@ -1,22 +1,26 @@
 #[macro_use]
 extern crate tracing;
 
-pub mod ast;
-pub mod builtins;
-pub mod cli;
-pub mod error;
-pub mod lexer;
-pub mod macros;
-pub mod pack;
-pub mod tokenizer;
-pub mod util;
-pub mod validator;
+mod ast;
+mod builtins;
+mod cli;
+mod error;
+mod ir;
+mod lexer;
+mod lowerer;
+mod macros;
+mod pack;
+mod tokenizer;
+mod util;
+mod validator;
 
 pub use ast::*;
 pub use builtins::*;
 pub use cli::*;
 pub use error::*;
+pub use ir::*;
 pub use lexer::*;
+pub use lowerer::*;
 pub use pack::*;
 pub use tokenizer::*;
 pub use util::*;

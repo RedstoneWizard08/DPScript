@@ -34,7 +34,7 @@
         </dict>
         <dict>
           <key>match</key>
-          <string>\b(func|define|command|argument|call)</string>
+          <string>\b(func|define|command|argument|call|tag|entry)</string>
           <key>name</key>
           <string>keyword.dpscript_ir</string>
         </dict>
@@ -102,10 +102,28 @@
           <string>punctuation.dpscript_ir</string>
         </dict>
         <dict>
-          <key>match</key>
+          <key>begin</key>
           <string>(&apos;)</string>
-          <key>name</key>
+          <key>beginCaptures</key>
+          <dict>
+            <key>1</key>
+            <dict>
+              <key>name</key>
+              <string>string.dpscript_ir</string>
+            </dict>
+          </dict>
+          <key>contentName</key>
           <string>string.dpscript_ir</string>
+          <key>end</key>
+          <string>(&apos;)</string>
+          <key>endCaptures</key>
+          <dict>
+            <key>1</key>
+            <dict>
+              <key>name</key>
+              <string>string.dpscript_ir</string>
+            </dict>
+          </dict>
         </dict>
         <dict>
           <key>begin</key>
@@ -156,6 +174,12 @@
        </array>
     </dict>
     <key>main__2</key>
+    <dict>
+      <key>patterns</key>
+      <array> 
+       </array>
+    </dict>
+    <key>main__3</key>
     <dict>
       <key>patterns</key>
       <array> 

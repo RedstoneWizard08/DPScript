@@ -1,8 +1,6 @@
+use super::{bits::HasBits, HasSpan};
+use crate::{IRParserError, ParserError, Result};
 use miette::{NamedSource, SourceOffset, SourceSpan};
-
-use crate::{ParserError, Result};
-
-use super::bits::HasBits;
 
 #[derive(Debug, Clone)]
 pub struct Cursor<T: HasBits + Clone, M = ()> {
@@ -30,6 +28,17 @@ impl<T: HasBits + Clone> Cursor<T, NamedSource<String>> {
             inner: data.get_bits(),
             pos: 0,
             meta: NamedSource::new(file, code.as_ref().into()),
+        }
+    }
+}
+
+impl<T: HasBits + Clone> Cursor<T, String> {
+    pub fn new_from_src(code: impl AsRef<str>, data: T) -> Self {
+        Self {
+            src: data.clone(),
+            inner: data.get_bits(),
+            pos: 0,
+            meta: code.as_ref().into(),
         }
     }
 }
@@ -81,6 +90,28 @@ impl<T: HasBits + Clone + FromIterator<T::Bit>, M> Cursor<T, M> {
     }
 }
 
+impl<T: HasBits + Clone> Cursor<T, String> {
+    pub fn source(&self) -> String {
+        self.meta.clone()
+    }
+}
+
+impl<B: Clone + HasSpan, T: HasBits<Bit = B> + Clone> Cursor<T, String> {
+    pub fn next_or_die(&mut self) -> Result<T::Bit> {
+        self.pos += 1;
+
+        match self.inner.get(self.pos - 1).cloned() {
+            Some(v) => Ok(v),
+            None => Err(IRParserError {
+                src: self.source(),
+                at: self.inner.get(self.pos - 2).clone().unwrap().get_span(),
+                err: "Unexpected end of file!".into(),
+            }
+            .into()),
+        }
+    }
+}
+
 impl<T: HasBits + Clone> Cursor<T, NamedSource<String>> {
     pub fn source(&self) -> NamedSource<String> {
         self.meta.clone()
@@ -98,6 +129,56 @@ impl<T: HasBits + Clone> Cursor<T, NamedSource<String>> {
             }
             .into()),
         }
+    }
+}
+
+impl Cursor<String, String> {
+    pub fn new_from_code(data: impl AsRef<str>) -> Self {
+        let s = data.as_ref().to_string();
+
+        Self {
+            src: s.clone(),
+            inner: s.chars().collect(),
+            pos: 0,
+            meta: s,
+        }
+    }
+
+    fn find_line(&self) -> usize {
+        let mut lines = 0;
+
+        for item in &self.inner[0..self.pos] {
+            if *item == '\n' {
+                lines += 1;
+            }
+        }
+
+        lines
+    }
+
+    fn find_char(&self) -> usize {
+        let line = self.find_line();
+        let mut lines = 0;
+        let mut chars = 0;
+
+        for item in &self.inner[0..self.pos] {
+            if *item == '\n' {
+                lines += 1;
+            } else {
+                if line == lines {
+                    chars += 1;
+                }
+            }
+        }
+
+        chars
+    }
+
+    pub fn span(&self, length: usize) -> SourceSpan {
+        SourceSpan::new(
+            SourceOffset::from_location(&self.src, self.find_line() + 1, self.find_char()),
+            length,
+        )
     }
 }
 

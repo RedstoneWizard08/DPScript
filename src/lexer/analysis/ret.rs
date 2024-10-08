@@ -1,5 +1,5 @@
 use super::Analyzer;
-use crate::{AddSpan, Cursor, Node, Result, Return, Spanned, Token, TokenCursor};
+use crate::{AddSpan, Node, Result, Return, Spanned, Token, TokenCursor};
 
 impl Analyzer<Return> for Return {
     fn analyze(
@@ -24,7 +24,7 @@ impl Analyzer<Return> for Return {
         }
 
         let mut buf_cursor =
-            Cursor::new_from_src(cursor.source().name(), cursor.source().inner().clone(), buf);
+            TokenCursor::new_from_src(cursor.source().name(), cursor.source().inner().clone(), buf);
 
         let value = Node::analyze(
             buf_cursor.next_or_die(span)?,

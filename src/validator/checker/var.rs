@@ -22,7 +22,7 @@ impl Checker<Variable> for Variable {
                 .into());
             }
 
-            if let Some(val) = &item.value {
+            if let Some(val) = &mut item.value {
                 let val_ty = val.get_type(&module, cx)?;
 
                 if !val_ty.is_compatible(ty) {

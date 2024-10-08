@@ -31,7 +31,7 @@ impl Lexer {
 
     pub fn run(mut self) -> Result<Self> {
         let mut cursor =
-            Cursor::new_from_src(&self.file, self.source.inner().clone(), self.tokens.clone());
+            TokenCursor::new_from_src(&self.file, self.source.inner().clone(), self.tokens.clone());
 
         while let Some(item) = cursor.next() {
             Node::analyze(item, &mut cursor, &mut self.nodes)?;

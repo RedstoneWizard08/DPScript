@@ -11,7 +11,7 @@ impl Checker<Enum> for Enum {
         for it in enums {
             if it.name.0 == item.name.0 {
                 occurences += 1;
-                
+
                 if occurences > 1 {
                     return Err(TSValidatorError {
                         src: module.source.clone(),

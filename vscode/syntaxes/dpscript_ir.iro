@@ -4,7 +4,7 @@ textmate_uuid = ae8328da-80d6-42c8-b2a2-03468f3b0819
 
 # ============== Constants ==============
 
-__KEYWORDS \= \b(func|define|command|argument|call)
+__KEYWORDS \= \b(func|define|command|argument|call|tag|entry)
 __IDENTIFIER \= \b([A-Za-z_$][\w$]*)
 __SUB_KEYWORD \= \b(copy|append|set|get|variable_alias)\b
 
@@ -135,9 +135,14 @@ contexts [] {
          styles []       = .punctuation;
       }
       
-      : pattern {
+      : inline_push {
          regex          \= (')
          styles []       = .string;
+         default_style   = .string
+         : pop {
+            regex       \= (')
+            styles []    = .string;
+         }
       }
       
       : inline_push {

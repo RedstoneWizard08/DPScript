@@ -66,4 +66,13 @@ impl Function {
             self.cache_vars().locals.clone().unwrap_or_default()
         }
     }
+
+    pub fn ir_name(&self, ns: impl AsRef<str>, module: impl AsRef<str>) -> String {
+        format!(
+            "{}:__dpscript_gen/{}/funcs/{}",
+            ns.as_ref(),
+            module.as_ref(),
+            self.name.0
+        )
+    }
 }

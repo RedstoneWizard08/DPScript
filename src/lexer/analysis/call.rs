@@ -1,7 +1,5 @@
 use super::Analyzer;
-use crate::{
-    check_token, AddSpan, Call, Cursor, Node, ParserError, Result, Spanned, Token, TokenCursor,
-};
+use crate::{check_token, AddSpan, Call, Node, ParserError, Result, Spanned, Token, TokenCursor};
 
 impl Analyzer<Call> for Call {
     fn analyze(
@@ -110,7 +108,7 @@ impl Analyzer<Call> for Call {
             }
 
             for buf in buf {
-                let mut buf_cursor = Cursor::new_from_src(
+                let mut buf_cursor = TokenCursor::new_from_src(
                     cursor.source().name(),
                     cursor.source().inner().clone(),
                     buf,

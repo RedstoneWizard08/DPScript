@@ -11,7 +11,7 @@ impl Checker<Objective> for Objective {
         for it in objectives {
             if it.name.0 == item.name.0 {
                 occurances += 1;
-                
+
                 if occurances > 1 {
                     return Err(TSValidatorError {
                         src: module.source.clone(),

@@ -1,4 +1,4 @@
-use crate::{check_token, AddSpan, Conditional, Cursor, Node, Result, Spanned, Token, TokenCursor};
+use crate::{check_token, AddSpan, Conditional, Node, Result, Spanned, Token, TokenCursor};
 
 use super::Analyzer;
 
@@ -25,7 +25,7 @@ impl Analyzer<Conditional> for Conditional {
         }
 
         let mut buf_cursor =
-            Cursor::new_from_src(cursor.source().name(), cursor.source().inner().clone(), buf);
+            TokenCursor::new_from_src(cursor.source().name(), cursor.source().inner().clone(), buf);
 
         while let Some(item) = buf_cursor.next() {
             Node::analyze(item, &mut buf_cursor, &mut condition)?;
@@ -56,7 +56,7 @@ impl Analyzer<Conditional> for Conditional {
         }
 
         let mut buf_cursor =
-            Cursor::new_from_src(cursor.source().name(), cursor.source().inner().clone(), buf);
+            TokenCursor::new_from_src(cursor.source().name(), cursor.source().inner().clone(), buf);
 
         while let Some(item) = buf_cursor.next() {
             Node::analyze(item, &mut buf_cursor, &mut body)?;
@@ -92,8 +92,11 @@ impl Analyzer<Conditional> for Conditional {
                 span = span.add(sp.clone());
             }
 
-            let mut buf_cursor =
-                Cursor::new_from_src(cursor.source().name(), cursor.source().inner().clone(), buf);
+            let mut buf_cursor = TokenCursor::new_from_src(
+                cursor.source().name(),
+                cursor.source().inner().clone(),
+                buf,
+            );
 
             while let Some(item) = buf_cursor.next() {
                 Node::analyze(item, &mut buf_cursor, &mut else_body)?;
