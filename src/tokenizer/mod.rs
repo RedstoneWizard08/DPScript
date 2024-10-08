@@ -22,7 +22,7 @@ impl Tokenizer {
         }
     }
 
-    pub fn tokenize(&mut self) -> Result<&mut Self> {
+    pub fn run(&mut self) -> Result<&mut Self> {
         while let Some(ch) = self.cursor.next() {
             self.tokenize_inner(ch)?;
         }

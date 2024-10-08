@@ -1,5 +1,5 @@
 use super::Analyzer;
-use crate::{check_ir_token, IRCommand, IRConcat, IRNode, IRToken, IRTokenCursor, Result, Spanned};
+use crate::{check_ir_token, IRCommand, IRNode, IRToken, IRTokenCursor, Result, Spanned};
 
 impl Analyzer<IRCommand> for IRCommand {
     fn analyze(
@@ -24,18 +24,14 @@ impl Analyzer<IRCommand> for IRCommand {
             let mut buf_cursor = IRTokenCursor::new_from_src(cursor.source(), buf);
 
             while let Some(item) = buf_cursor.next() {
+                if item.0 == IRToken::Comma {
+                    continue;
+                }
+
                 IRNode::analyze(item, &mut buf_cursor, &mut items)?;
             }
 
-            let item = if items.len() == 1 {
-                items.first().unwrap().clone()
-            } else {
-                IRNode::Concat(IRConcat { items })
-            };
-
-            Ok(Some(Self {
-                cmd: Box::new(item),
-            }))
+            Ok(Some(Self { cmd: items }))
         } else {
             Ok(None)
         }

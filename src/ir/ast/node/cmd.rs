@@ -7,5 +7,5 @@ use super::IRNode;
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct IRCommand {
     /// The command string.
-    pub cmd: Box<IRNode>,
+    pub cmd: Vec<IRNode>,
 }

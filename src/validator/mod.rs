@@ -16,17 +16,13 @@ impl Validator {
         Self { ast }
     }
 
-    pub fn validate(&mut self) -> Result<&mut Self> {
+    pub fn run(&mut self) -> Result<&mut Self> {
+        self.ast.indexed = false;
+        self.ast.cached = false;
         self.ast.cache_values()?;
 
         let mut cx = self.ast.create_checker_context()?;
         let mut modules = cx.modules.clone();
-
-        for (name, module) in &mut modules {
-            module.get_imported_objects(&cx)?;
-
-            cx.modules.insert(name.clone(), module.clone());
-        }
 
         for (_, module) in &mut modules {
             Module::check(module, &mut cx)?;

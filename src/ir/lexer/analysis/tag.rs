@@ -38,6 +38,8 @@ impl Analyzer<IRTag> for IRTag {
                 buf.push((tkn, span));
             }
 
+            check_ir_token!(remove cursor == Semi);
+
             let mut entries = Vec::new();
             let mut buf_cursor = IRTokenCursor::new_from_src(cursor.source(), buf);
 

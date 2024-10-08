@@ -2,7 +2,10 @@ use super::Lowerable;
 use crate::{CheckerContext, IRFunction, IRNode, LoweringContext, Module, Result};
 
 impl Lowerable for Module {
-    fn lower(&self, cx: &mut CheckerContext, lcx: &mut LoweringContext) -> Result<Vec<IRNode>> {
+    fn lower(&mut self, cx: &mut CheckerContext, lcx: &mut LoweringContext) -> Result<Vec<IRNode>> {
+        self.get_imported_objects(cx)?;
+
+        cx.cur_modules.push(self.clone());
         lcx.module = self.name();
 
         let mut nodes = Vec::new();
@@ -10,43 +13,49 @@ impl Lowerable for Module {
         lcx.init_nodes.clear();
         lcx.tick_nodes.clear();
 
-        for node in &self.body {
+        for node in &mut self.body {
             nodes.extend(node.lower(cx, lcx)?);
         }
 
-        let init_id = format!(
-            "{}:__dpscript_gen/{}/blocks/init/{}",
-            lcx.namespace,
-            self.name(),
-            lcx.inits
-        );
-        let tick_id = format!(
-            "{}:__dpscript_gen/{}/blocks/tick/{}",
-            lcx.namespace,
-            self.name(),
-            lcx.ticks
-        );
+        if !lcx.init_nodes.is_empty() {
+            let init_id = format!(
+                "{}:__dpscript_gen/{}/blocks/init/{}",
+                lcx.namespace,
+                self.name(),
+                lcx.inits
+            );
 
-        let init_block = IRNode::Function(IRFunction {
-            id: init_id.clone(),
-            body: lcx.init_nodes.clone(),
-        });
+            let init_block = IRNode::Function(IRFunction {
+                id: init_id.clone(),
+                body: lcx.init_nodes.clone(),
+            });
 
-        let tick_block = IRNode::Function(IRFunction {
-            id: tick_id.clone(),
-            body: lcx.tick_nodes.clone(),
-        });
+            nodes.push(init_block);
+            lcx.init_names.push(init_id);
+        }
 
-        nodes.push(init_block);
-        nodes.push(tick_block);
+        if !lcx.tick_nodes.is_empty() {
+            let tick_id = format!(
+                "{}:__dpscript_gen/{}/blocks/tick/{}",
+                lcx.namespace,
+                self.name(),
+                lcx.ticks
+            );
 
-        lcx.init_names.push(init_id);
-        lcx.tick_names.push(tick_id);
+            let tick_block = IRNode::Function(IRFunction {
+                id: tick_id.clone(),
+                body: lcx.tick_nodes.clone(),
+            });
+
+            nodes.push(tick_block);
+            lcx.tick_names.push(tick_id);
+        }
 
         lcx.init_nodes.clear();
         lcx.tick_nodes.clear();
 
         lcx.module.clear();
+        cx.cur_modules.pop();
 
         Ok(nodes)
     }

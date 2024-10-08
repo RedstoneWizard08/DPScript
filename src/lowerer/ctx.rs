@@ -1,12 +1,12 @@
+use crate::{IRBlock, IRNode};
 use serde::{Deserialize, Serialize};
-
-use crate::IRNode;
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct LoweringContext {
     pub module: String,
     pub namespace: String,
 
+    pub blocks: usize,
     pub inits: usize,
     pub ticks: usize,
 
@@ -15,6 +15,9 @@ pub struct LoweringContext {
 
     pub init_names: Vec<String>,
     pub tick_names: Vec<String>,
+
+    pub block_nodes: Vec<IRBlock>,
+    pub extra_nodes: Vec<IRNode>,
 }
 
 impl LoweringContext {

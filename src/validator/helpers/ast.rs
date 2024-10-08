@@ -25,6 +25,12 @@ impl AST {
         self.index_modules()?;
         self.export_nodes()?;
 
+        let cx = self.create_checker_context()?;
+
+        for node in &mut self.nodes {
+            node.cache(&cx)?;
+        }
+
         self.cached = true;
 
         Ok(())

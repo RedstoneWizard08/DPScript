@@ -28,7 +28,7 @@ impl IRAst {
             parts.push(node.serialize_node());
         }
 
-        parts.join("\n")
+        parts.join("\n\n")
     }
 
     pub fn merge(&mut self, other: IRAst) -> &mut Self {

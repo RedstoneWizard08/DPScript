@@ -220,7 +220,7 @@ impl Commands {
                         }
                     }
 
-                    let ast = Validator::new(ast).validate()?.ast.clone();
+                    let ast = Validator::new(ast).run()?.ast.clone();
 
                     if *dump_ast {
                         let dump_file = out_dir.join("ast_merged_validated.ron");
@@ -278,9 +278,7 @@ impl Commands {
     ) -> Result<AST> {
         let file_name = file.to_str().unwrap();
         let data = fs::read_to_string(&file)?;
-        let tokens = Tokenizer::new(&file_name, data.clone())
-            .tokenize()?
-            .tokens();
+        let tokens = Tokenizer::new(&file_name, data.clone()).run()?.tokens();
 
         if !out_dir.exists() {
             fs::create_dir_all(out_dir)?;

@@ -36,6 +36,15 @@ impl Checker<Variable> for Variable {
             }
         }
 
+        if item.is_const && item.value.is_none() {
+            return Err(ValidatorError {
+                src: module.source.clone(),
+                at: item.span,
+                err: "Constant variables must be initialized!".into(),
+            }
+            .into());
+        }
+
         // TODO: Duplicate name checking
 
         Ok(())

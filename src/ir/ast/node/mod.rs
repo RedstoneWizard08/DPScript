@@ -40,3 +40,26 @@ pub enum IRNode {
     Reference(String),
     // TODO: For each loops
 }
+
+macro_rules! node_from {
+    ($other: ident = $field: ident) => {
+        impl From<$other> for IRNode {
+            fn from(value: $other) -> Self {
+                Self::$field(value)
+            }
+        }
+    };
+}
+
+node_from!(IRDefinition = Definition);
+node_from!(IRDataOperation = DataOperation);
+node_from!(IRFunction = Function);
+node_from!(IRConcat = Concat);
+node_from!(IRLiteral = Literal);
+node_from!(IRArgumentOperation = Argument);
+node_from!(IRTag = Tag);
+node_from!(IRBlock = Block);
+node_from!(IRCommand = Command);
+node_from!(IRExecute = Execute);
+node_from!(IRCall = Call);
+node_from!(String = Reference);

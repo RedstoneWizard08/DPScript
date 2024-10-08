@@ -1,31 +1,93 @@
-use super::Lowerable;
-use crate::{CheckerContext, IRNode, IRParserError, LoweringContext, Node, Result};
+use super::{Lowerable, Valued};
+use crate::{
+    CheckerContext, IRLiteral, IRNode, LoweringContext, LoweringError, Node, Reference, Result,
+};
 
-impl Node {
-    pub fn get_value(
-        &self,
+impl Valued for Node {
+    fn get_value(
+        &mut self,
         cx: &mut CheckerContext,
         lcx: &mut LoweringContext,
         nodes: &mut Vec<IRNode>,
     ) -> Result<IRNode> {
         match self {
-            Self::Literal(lit) => lit.get_value(cx, nodes),
-            Self::Ident((id, _)) => Ok(IRNode::Reference(id.clone())),
+            Self::Operation(op) => op.get_value(cx, lcx, nodes),
+            Self::Literal(lit) => lit.get_value(cx, lcx, nodes),
+
+            Self::Ident((id, _)) => Ok(IRNode::Reference({
+                let refs = cx.get_refs()?;
+
+                if let Some(it) = refs.get(id) {
+                    if let Reference::Variable(var) = it {
+                        if var.is_const {
+                            return Ok(var.value.clone().unwrap().get_value(cx, lcx, nodes)?);
+                        }
+                    }
+                }
+
+                if id.starts_with("__var_") || id == "__RETURN_VAL__" {
+                    id.clone()
+                } else {
+                    format!("__var_{}", id)
+                }
+            })),
 
             Self::Call(call) => {
+                if call.function.0 == "storeof" {
+                    let id = match call.args.first().unwrap() {
+                        Node::Ident((id, _)) => id.clone(),
+
+                        it => {
+                            return Err(LoweringError {
+                                src: cx.get_source(),
+                                at: it.span(),
+                                err: "Expected an identifier!".into(),
+                            }
+                            .into())
+                        }
+                    };
+
+                    return Ok(IRNode::Literal(IRLiteral::StoreOf(id)));
+                }
+
+                if call.function.0 == "keyof" {
+                    let id = match call.args.first().unwrap() {
+                        Node::Ident((id, _)) => id.clone(),
+
+                        it => {
+                            return Err(LoweringError {
+                                src: cx.get_source(),
+                                at: it.span(),
+                                err: "Expected an identifier!".into(),
+                            }
+                            .into())
+                        }
+                    };
+
+                    return Ok(IRNode::Literal(IRLiteral::PathOf(id)));
+                }
+
                 nodes.extend(call.lower(cx, lcx)?);
 
                 Ok(IRNode::Reference("__RETURN_VAL__".into()))
             }
 
-            Self::Operation(op) => {
-                nodes.extend(op.lower(cx, lcx)?);
-
-                Ok(IRNode::Reference("__RETURN_VAL__".into()))
+            Self::Variable(var) => {
+                if var.is_const {
+                    var.value.clone().unwrap().get_value(cx, lcx, nodes)
+                } else {
+                    Ok(IRNode::Reference(
+                        if var.name.0.starts_with("__var_") || var.name.0 == "__RETURN_VAL__" {
+                            var.name.0.clone()
+                        } else {
+                            format!("__var_{}", var.name.0)
+                        },
+                    ))
+                }
             }
 
-            _ => Err(IRParserError {
-                src: cx.get_source().inner().to_owned(),
+            _ => Err(LoweringError {
+                src: cx.get_source(),
                 at: self.span(),
                 err: "This cannot be used as a value!".into(),
             }
@@ -35,10 +97,10 @@ impl Node {
 }
 
 impl Lowerable for Node {
-    fn lower(&self, cx: &mut CheckerContext, lcx: &mut LoweringContext) -> Result<Vec<IRNode>> {
+    fn lower(&mut self, cx: &mut CheckerContext, lcx: &mut LoweringContext) -> Result<Vec<IRNode>> {
         let mut nodes = Vec::new();
 
-        nodes.extend(match self.clone() {
+        nodes.extend(match self {
             Self::Module(it) => it.lower(cx, lcx)?,
             Self::Literal(it) => it.lower(cx, lcx)?,
             Self::Function(it) => it.lower(cx, lcx)?,

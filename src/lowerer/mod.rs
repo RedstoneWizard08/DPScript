@@ -1,8 +1,10 @@
 mod ctx;
 mod node;
+mod remap;
 
 pub use ctx::*;
 pub use node::*;
+pub use remap::*;
 
 use crate::{Error, IRAst, IRNode, IRTag, Result, AST};
 
@@ -23,11 +25,16 @@ impl Lowerer {
     }
 
     pub fn run(&mut self) -> Result<&mut Self> {
+        self.ast.indexed = false;
+        self.ast.cached = false;
+        self.ast.cache_values()?;
+
         let mut cx = self.ast.create_checker_context()?;
         let mut lcx = LoweringContext::new(&self.ns);
         let mut nodes = Vec::new();
+        let mut modules = cx.modules.clone();
 
-        for item in &self.ast.nodes {
+        for (_, item) in &mut modules {
             nodes.extend(item.lower(&mut cx, &mut lcx)?);
         }
 

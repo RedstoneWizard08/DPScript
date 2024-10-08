@@ -98,6 +98,9 @@ pub enum Token {
     /// "import"
     Import,
 
+    /// "inline"
+    Inline,
+
     // ========================================
     /// "store"
     Store,
@@ -201,6 +204,7 @@ impl fmt::Display for Token {
             Self::In => write!(f, "in"),
             Self::Id => write!(f, "id"),
             Self::Import => write!(f, "import"),
+            Self::Inline => write!(f, "inline"),
             Self::Store => write!(f, "store"),
             Self::Selector => write!(f, "selector"),
             Self::Export => write!(f, "export"),

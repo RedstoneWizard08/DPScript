@@ -6,8 +6,12 @@ pub compiler fn storeof(obj: Any) -> Store;
 #[cmd("data modify storage %% %% set value %%")]
 pub facade fn set_data(storage: Store, pat: NBTPath, value: Any);
 
-#[cmd("data get storage %% %%")]
-pub facade fn get_data(storage: Store, pat: NBTPath) -> Any;
+#[cmd("data modify storage %% %% set from storage %% %%")]
+pub facade fn copy_data(source: Store, source_path: NBTPath, dest: Store, dest_path: NBTPath);
+
+pub inline fn get_data(storage: Store, pat: NBTPath) -> Any {
+    copy_data(storage, pat, storeof(__RETURN_VAL__), keyof(__RETURN_VAL__));
+}
 
 pub module stores {
     pub const arrayLength = store: "dpscript:arrays/length";

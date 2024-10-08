@@ -1,6 +1,6 @@
 use crate::{
-    Block, Conditional, Enum, Export, ExportNode, Function, Import, Loop, Module, Objective,
-    Reference, Result, Type, TypeKind, ValidatorError, Variable,
+    fake_span, Block, Conditional, Enum, Export, ExportNode, Function, Import, Loop, Module,
+    Objective, Reference, Result, Type, TypeKind, ValidatorError, Variable,
 };
 use miette::{NamedSource, SourceOffset, SourceSpan};
 use serde::Serialize;
@@ -39,6 +39,22 @@ impl CheckerContext {
     pub fn get_refs(&mut self) -> Result<HashMap<String, Reference>> {
         let mut refs: HashMap<String, Reference> = HashMap::new();
         let mut locals: HashMap<String, Variable> = HashMap::new();
+
+        refs.insert(
+            "__RETURN_VAL__".into(),
+            Reference::Variable(Variable {
+                is_arg: true, // It's a builtin, but it functions the same as an arg
+                is_const: false,
+                is_pub: false,
+                name: ("__RETURN_VAL__".into(), fake_span()),
+                span: fake_span(),
+                ty: Some(Type {
+                    kind: TypeKind::Any,
+                    span: fake_span(),
+                }),
+                value: None,
+            }),
+        );
 
         if let Some(module) = self.cur_modules.last() {
             refs.extend(

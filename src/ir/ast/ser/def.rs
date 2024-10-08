@@ -12,7 +12,7 @@ impl SerializeNode for IRDefinition {
 impl SerializeNode for VariableAlias {
     fn serialize_node(&self) -> String {
         format!(
-            "define variable_alias {}: \"{}\" @ \"{}\";\n",
+            "define variable_alias {}: \"{}\" @ \"{}\";",
             self.name, self.store, self.path
         )
     }

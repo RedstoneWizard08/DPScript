@@ -15,5 +15,14 @@ use super::LoweringContext;
 use crate::{CheckerContext, IRNode, Result};
 
 pub trait Lowerable {
-    fn lower(&self, cx: &mut CheckerContext, lcx: &mut LoweringContext) -> Result<Vec<IRNode>>;
+    fn lower(&mut self, cx: &mut CheckerContext, lcx: &mut LoweringContext) -> Result<Vec<IRNode>>;
+}
+
+pub trait Valued {
+    fn get_value(
+        &mut self,
+        cx: &mut CheckerContext,
+        lcx: &mut LoweringContext,
+        nodes: &mut Vec<IRNode>,
+    ) -> Result<IRNode>;
 }

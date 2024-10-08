@@ -13,3 +13,9 @@ pub enum IRLiteral {
     /// *Technically* this isn't a literal but it is for our purposes.
     StoreOf(String),
 }
+
+impl<T: AsRef<str>> From<T> for IRLiteral {
+    fn from(value: T) -> Self {
+        Self::String(value.as_ref().into())
+    }
+}

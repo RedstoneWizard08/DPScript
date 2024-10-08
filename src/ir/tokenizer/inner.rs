@@ -219,6 +219,12 @@ impl IRTokenizer {
             let c2 = self.cursor.clone();
 
             while let Some(tkn) = self.cursor.next() {
+                if tkn == '\\' && self.cursor.peek().is_some_and(|v| v == '\'') {
+                    self.cursor.skip(1);
+                    s.push('\'');
+                    continue;
+                }
+
                 if tkn == '\'' {
                     break;
                 } else {
@@ -237,6 +243,12 @@ impl IRTokenizer {
             let c2 = self.cursor.clone();
 
             while let Some(tkn) = self.cursor.next() {
+                if tkn == '\\' && self.cursor.peek().is_some_and(|v| v == '"') {
+                    self.cursor.skip(1);
+                    s.push('"');
+                    continue;
+                }
+
                 if tkn == '"' {
                     break;
                 } else {

@@ -12,7 +12,12 @@ impl Analyzer<Function> for Function {
         nodes: &mut Vec<Node>,
     ) -> Result<Option<Function>> {
         match item.0 {
-            Token::Fn | Token::Pub | Token::Facade | Token::Component | Token::Hash => {}
+            Token::Fn
+            | Token::Pub
+            | Token::Inline
+            | Token::Facade
+            | Token::Component
+            | Token::Hash => {}
             _ => return Ok(None),
         }
 
@@ -27,18 +32,28 @@ impl Analyzer<Function> for Function {
 
         let is_pub = match item.0 {
             Token::Pub => true,
-            Token::Fn | Token::Facade | Token::Compiler => false,
+            Token::Fn | Token::Facade | Token::Inline | Token::Compiler => false,
             _ => return Ok(None),
         };
 
         if is_pub {
-            if !cursor
-                .peek()
-                .is_some_and(|(v, _)| v == Token::Fn || v == Token::Facade || v == Token::Compiler)
-            {
+            if !cursor.peek().is_some_and(|(v, _)| {
+                v == Token::Fn || v == Token::Inline || v == Token::Facade || v == Token::Compiler
+            }) {
                 return Ok(None);
             }
 
+            item = cursor.next().unwrap();
+        }
+
+        let is_inline = match item.0 {
+            Token::Inline => true,
+            Token::Fn | Token::Facade | Token::Compiler => false,
+            _ => return Ok(None),
+        };
+
+        if is_inline {
+            check_token!(cursor == Fn);
             item = cursor.next().unwrap();
         }
 
@@ -203,6 +218,7 @@ impl Analyzer<Function> for Function {
             is_compiler,
             is_facade,
             is_pub,
+            is_inline,
             name,
             ret,
             span,

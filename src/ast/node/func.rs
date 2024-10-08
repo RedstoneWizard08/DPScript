@@ -27,6 +27,9 @@ pub struct Function {
     /// Is this function public?
     pub is_pub: bool,
 
+    /// Is this function inline?
+    pub is_inline: bool,
+
     /// The body of the function.
     pub body: Vec<Node>,
 

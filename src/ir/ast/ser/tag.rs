@@ -4,7 +4,7 @@ use crate::{IRTag, Indented};
 impl SerializeNode for IRTag {
     fn serialize_node(&self) -> String {
         format!(
-            "tag \"{}\": [\n{}\n]\n",
+            "tag \"{}\": [\n{}\n];",
             self.name,
             self.entries
                 .iter()

@@ -81,6 +81,12 @@ impl Tokenizer {
                                 let span = self.cursor.span(4);
                                 self.cursor.skip(2);
                                 Some((Token::Init, span))
+                            } else if self.cursor.peek_many(1, 4).is_some_and(|v| v == "line")
+                                && self.cursor.peek_ahead(5).is_some_and(|v| v.is_not_ident())
+                            {
+                                let span = self.cursor.span(6);
+                                self.cursor.skip(4);
+                                Some((Token::Inline, span))
                             } else {
                                 None
                             }
@@ -323,6 +329,12 @@ impl Tokenizer {
             let c2 = self.cursor.clone();
 
             while let Some(tkn) = self.cursor.next() {
+                if tkn == '\\' && self.cursor.peek().is_some_and(|v| v == '"') {
+                    self.cursor.skip(1);
+                    s.push('"');
+                    continue;
+                }
+
                 if tkn == '"' {
                     break;
                 } else {
@@ -386,7 +398,7 @@ impl Tokenizer {
             return Ok(());
         }
 
-        if ch.is_ascii_alphabetic() {
+        if ch.is_ascii_alphabetic() || ch == '_' {
             let mut ident = Vec::new();
             let c2 = self.cursor.clone();
 

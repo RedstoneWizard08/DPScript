@@ -4,7 +4,7 @@ use crate::{IRBlock, Indented};
 impl SerializeNode for IRBlock {
     fn serialize_node(&self) -> String {
         format!(
-            "\n${}: {{\n{}\n}}",
+            "${}: {{\n{}\n}}",
             self.id,
             self.body
                 .iter()
