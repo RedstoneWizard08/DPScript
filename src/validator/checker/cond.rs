@@ -3,10 +3,7 @@ use crate::{Conditional, Node, Result};
 
 impl Checker<Conditional> for Conditional {
     fn check(item: &mut Conditional, cx: &mut CheckerContext) -> Result<()> {
-        for item in &mut item.condition {
-            Node::check(item, cx)?;
-        }
-
+        Node::check(&mut item.condition, cx)?;
         cx.cur_conds.push(item.clone());
 
         for item in &mut item.body {

@@ -1,6 +1,7 @@
 use super::{Lowerable, Valued};
 use crate::{
-    AddDataOperation, CheckerContext, IRDataOperation, IRNode, LoweringContext, Result, Return,
+    AddDataOperation, CheckerContext, CopyDataOperation, IRDataOperation, IRNode, LoweringContext,
+    Result, Return,
 };
 
 impl Lowerable for Return {
@@ -11,9 +12,14 @@ impl Lowerable for Return {
             let val = val.get_value(cx, lcx, &mut nodes)?;
 
             if let IRNode::Reference(id) = &val {
-                if id == "__RETURN_VAL__" {
-                    return Ok(Vec::new());
-                }
+                let copy = IRNode::DataOperation(IRDataOperation::Copy(CopyDataOperation {
+                    source: id.clone(),
+                    target: "__RETURN_VAL__".into(),
+                }));
+
+                nodes.push(copy);
+
+                return Ok(nodes);
             }
 
             let set = IRNode::DataOperation(IRDataOperation::Set(AddDataOperation {

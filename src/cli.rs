@@ -1,6 +1,5 @@
 use clap::{Parser, Subcommand};
-use console::style;
-use indicatif::{ProgressBar, ProgressStyle};
+use indicatif::{ProgressIterator, ProgressStyle};
 use ron::ser::PrettyConfig;
 use std::{fs, path::PathBuf};
 
@@ -79,7 +78,6 @@ impl Commands {
                 ir,
             } => {
                 let base = config_path.canonicalize()?.parent().unwrap().to_path_buf();
-                let root = base.join("src");
                 let config = fs::read_to_string(config_path)?;
                 let config = toml::from_str::<PackToml>(&config)?;
 
@@ -87,39 +85,25 @@ impl Commands {
                     .clone()
                     .unwrap_or(PathBuf::from(config.build.output.clone()));
 
-                debug!("Source Root: {:?}", root);
-
                 let source_files = get_source_files(&base, &config, *ir)?;
 
                 if *ir {
-                    let bar = ProgressBar::new(source_files.len() as u64).with_style(
-                        ProgressStyle::with_template(
-                            "[{bar:40.cyan/blue}] {pos:.blue} of {len:.blue}",
-                        )
-                        .unwrap()
-                        .progress_chars("## "),
-                    );
+                    let style = ProgressStyle::with_template(
+                        "[{bar:40.cyan/blue}] {pos:.blue} of {len:.blue}",
+                    )
+                    .unwrap()
+                    .progress_chars("## ");
 
                     let mut asts = Vec::new();
 
-                    for (path, path_str) in source_files {
-                        bar.println(format!(
-                            "{} {}",
-                            style("[parse]").red(),
-                            style(path_str).magenta()
-                        ));
-
+                    for path in source_files.iter().progress_with_style(style) {
                         asts.push(Self::create_ir_ast(
                             &PathBuf::from(path),
                             &out_dir,
                             *dump_tokens,
                             *dump_ast,
                         )?);
-
-                        bar.inc(1);
                     }
-
-                    bar.finish();
 
                     if asts.is_empty() {
                         warn!("No source files found!");
@@ -146,34 +130,22 @@ impl Commands {
                         fs::write(dump_file, ast.serialize_nodes())?;
                     }
                 } else {
-                    let bar = ProgressBar::new(source_files.len() as u64).with_style(
-                        ProgressStyle::with_template(
-                            "[{bar:40.cyan/blue}] {pos:.blue} of {len:.blue}",
-                        )
-                        .unwrap()
-                        .progress_chars("## "),
-                    );
+                    let style = ProgressStyle::with_template(
+                        "[{bar:40.cyan/blue}] {pos:.blue} of {len:.blue}",
+                    )
+                    .unwrap()
+                    .progress_chars("## ");
 
                     let mut asts = Vec::new();
 
-                    for (path, path_str) in source_files {
-                        bar.println(format!(
-                            "{} {}",
-                            style("[parse]").red(),
-                            style(path_str).magenta()
-                        ));
-
+                    for path in source_files.iter().progress_with_style(style) {
                         asts.push(Self::create_ast(
                             &PathBuf::from(path),
                             &out_dir,
                             *dump_tokens,
                             *dump_ast,
                         )?);
-
-                        bar.inc(1);
                     }
-
-                    bar.finish();
 
                     if asts.is_empty() {
                         warn!("No source files found!");
@@ -231,12 +203,22 @@ impl Commands {
                         )?;
                     }
 
-                    let lowered = Lowerer::new(config.pack.name, ast).run()?.get_code()?;
+                    let lowered = Lowerer::new(config.pack.name, ast).run()?;
 
                     if *dump_ir {
+                        let dump_file = out_dir.join("code_merged.dpir.ron");
+
+                        fs::write(
+                            dump_file,
+                            &ron::ser::to_string_pretty(
+                                &lowered.lowered.clone().unwrap(),
+                                PrettyConfig::new(),
+                            )?,
+                        )?;
+
                         let dump_file = out_dir.join("code_merged.dpir");
 
-                        fs::write(dump_file, &lowered)?;
+                        fs::write(dump_file, &lowered.get_code()?)?;
                     }
                 }
             }
@@ -247,25 +229,11 @@ impl Commands {
                 dump_tokens,
                 out_dir,
             } => {
-                Self::compile(file, out_dir, *dump_tokens, *dump_ast)?;
+                let _ast = Self::create_ast(file, out_dir, *dump_tokens, *dump_ast)?;
+
+                // TODO: Something
             }
         }
-
-        Ok(())
-    }
-
-    fn compile_ast(_file: &PathBuf, _out_dir: &PathBuf, _ast: &AST) -> Result<()> {
-        // TODO: Implement
-
-        Ok(())
-    }
-
-    fn compile(file: &PathBuf, out_dir: &PathBuf, dump_tokens: bool, dump_ast: bool) -> Result<()> {
-        Self::compile_ast(
-            file,
-            out_dir,
-            &Self::create_ast(file, out_dir, dump_tokens, dump_ast)?,
-        )?;
 
         Ok(())
     }

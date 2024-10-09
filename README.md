@@ -8,18 +8,19 @@ inspired by CBScript.
 ### Core
 
 - [x] Tokenizer
-- [ ] AST
-- [ ] Lexer
-- [ ] AST Validator
+- [x] AST
+- [x] Lexer
+- [x] AST Validator
 - [ ] Codegen
-- [ ] Build System
+- [x] Build System
 
 ### Language Features
 
-- [ ] Functions
-- [ ] Variables
-- [ ] Imports
-- [ ] If/Else statements
+- [x] Functions
+- [x] Variables
+- [x] Imports
+- [x] If/Else statements
+- [x] `for entity in selector` loops
 - [ ] `for ... in ...` loops
 - [ ] `for ... in [0..3]` loop unrolling
 

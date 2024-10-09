@@ -9,6 +9,7 @@ mod node;
 mod objective;
 mod ops;
 mod ret;
+mod ty;
 mod var;
 
 use super::LoweringContext;

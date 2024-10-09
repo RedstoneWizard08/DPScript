@@ -1,7 +1,7 @@
 use super::Lowerable;
 use crate::{
     CheckerContext, IRArgumentOperation, IRBlock, IRDefinition, IRExecute, IRGetArgument, IRNode,
-    Literal, Loop, LoweringContext, LoweringError, Node, Reference, Result, TypeKind,
+    InsertHelper, Literal, Loop, LoweringContext, LoweringError, Node, Reference, Result, TypeKind,
     VariableAlias,
 };
 
@@ -10,6 +10,9 @@ impl Lowerable for Loop {
         if self.body.is_empty() {
             return Ok(Vec::new());
         }
+
+        let join_block = format!("block{}", lcx.blocks);
+        lcx.blocks += 1;
 
         let mut nodes = Vec::new();
         let refs = cx.get_refs()?;
@@ -34,6 +37,8 @@ impl Lowerable for Loop {
                     for item in &mut self.body {
                         body.extend(item.lower(cx, lcx)?);
                     }
+
+                    body.push(IRNode::Goto(join_block.clone()));
 
                     let id = format!("block{}", lcx.blocks);
 
@@ -79,13 +84,14 @@ impl Lowerable for Loop {
                         format!("__var_{}", self.var_name.0)
                     };
 
-                    body.push(IRNode::Definition(IRDefinition::VariableAlias(
-                        VariableAlias {
+                    lcx.defs.insert_if_absent(
+                        var.clone(),
+                        IRDefinition::VariableAlias(VariableAlias {
                             name: var.clone(),
                             store: "dpscript:core/vars".into(),
                             path: var.clone(),
-                        },
-                    )));
+                        }),
+                    );
 
                     body.push(IRNode::Argument(IRArgumentOperation::Get(IRGetArgument {
                         index: 0,
@@ -96,6 +102,8 @@ impl Lowerable for Loop {
                         body.extend(item.lower(cx, lcx)?);
                     }
 
+                    body.push(IRNode::Goto(join_block.clone()));
+
                     todo!("For each loops")
                 }
             }
@@ -103,6 +111,12 @@ impl Lowerable for Loop {
             _ => panic!("[Achievement Unlocked] How did we get here?"),
         }
 
+        lcx.join_block = Some(IRBlock {
+            id: join_block,
+            body: Vec::new(),
+        });
+
+        lcx.join_dirty = true;
         cx.cur_loops.pop();
 
         Ok(nodes)

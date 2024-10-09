@@ -3,6 +3,7 @@ mod block;
 mod call;
 mod cmd;
 mod concat;
+mod condition;
 mod data;
 mod def;
 mod exec;

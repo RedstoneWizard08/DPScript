@@ -155,10 +155,10 @@ impl BuiltInTypes {
     pub fn methods(&self) -> Vec<(&'static str, Vec<BuiltInTypes>, Option<BuiltInTypes>)> {
         let mut base = match self {
             Self::Int => vec![
-                ("add", vec![Self::Int], None),
-                ("sub", vec![Self::Int], None),
-                ("mul", vec![Self::Int], None),
-                ("div", vec![Self::Int], None),
+                ("add", vec![Self::Int], Some(Self::Int)),
+                ("sub", vec![Self::Int], Some(Self::Int)),
+                ("mul", vec![Self::Int], Some(Self::Int)),
+                ("div", vec![Self::Int], Some(Self::Int)),
                 ("eq", vec![Self::Int], Some(Self::Bool)),
                 ("ltEq", vec![Self::Int], Some(Self::Bool)),
                 ("gtEq", vec![Self::Int], Some(Self::Bool)),
@@ -172,10 +172,10 @@ impl BuiltInTypes {
             ],
 
             Self::Float => vec![
-                ("add", vec![Self::Float], None),
-                ("sub", vec![Self::Float], None),
-                ("mul", vec![Self::Float], None),
-                ("div", vec![Self::Float], None),
+                ("add", vec![Self::Float], Some(Self::Float)),
+                ("sub", vec![Self::Float], Some(Self::Float)),
+                ("mul", vec![Self::Float], Some(Self::Float)),
+                ("div", vec![Self::Float], Some(Self::Float)),
                 ("eq", vec![Self::Float], Some(Self::Bool)),
                 ("ltEq", vec![Self::Float], Some(Self::Bool)),
                 ("gtEq", vec![Self::Float], Some(Self::Bool)),

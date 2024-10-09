@@ -1,5 +1,6 @@
-use crate::{IRBlock, IRNode};
+use crate::{IRBlock, IRDefinition, IRNode};
 use serde::{Deserialize, Serialize};
+use std::collections::BTreeMap;
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct LoweringContext {
@@ -16,8 +17,12 @@ pub struct LoweringContext {
     pub init_names: Vec<String>,
     pub tick_names: Vec<String>,
 
+    pub defs: BTreeMap<String, IRDefinition>,
     pub block_nodes: Vec<IRBlock>,
     pub extra_nodes: Vec<IRNode>,
+
+    pub join_dirty: bool,
+    pub join_block: Option<IRBlock>,
 }
 
 impl LoweringContext {

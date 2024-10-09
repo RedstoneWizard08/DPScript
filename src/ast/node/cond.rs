@@ -5,7 +5,7 @@ use serde::Serialize;
 #[derive(Debug, Clone, Serialize)]
 pub struct Conditional {
     /// The condition
-    pub condition: Vec<Node>,
+    pub condition: Box<Node>,
 
     /// The body
     pub body: Vec<Node>,

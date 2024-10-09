@@ -7,7 +7,7 @@ use crate::{DependencyError, Result};
 
 use super::PackToml;
 
-pub fn get_source_files(dir: &PathBuf, pack: &PackToml, ir: bool) -> Result<Vec<(String, String)>> {
+pub fn get_source_files(dir: &PathBuf, pack: &PackToml, ir: bool) -> Result<Vec<String>> {
     let mut files = Vec::new();
 
     files.extend(get_pack_source_files(dir, ir));
@@ -23,7 +23,7 @@ pub fn get_source_files(dir: &PathBuf, pack: &PackToml, ir: bool) -> Result<Vec<
     Ok(files)
 }
 
-fn get_pack_source_files(dir: &PathBuf, ir: bool) -> Vec<(String, String)> {
+fn get_pack_source_files(dir: &PathBuf, ir: bool) -> Vec<String> {
     let root = dir.join("src");
     let ext = if ir { ".dpir" } else { ".dps" };
     let mut files = Vec::new();
@@ -36,9 +36,8 @@ fn get_pack_source_files(dir: &PathBuf, ir: bool) -> Vec<(String, String)> {
 
     for entry in walk {
         let path = entry.path();
-        let path_str = path.strip_prefix(&root).unwrap().to_str().unwrap();
 
-        files.push((path.to_str().unwrap().into(), path_str.into()));
+        files.push(path.to_str().unwrap().into());
     }
 
     files

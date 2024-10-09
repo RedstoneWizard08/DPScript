@@ -1,4 +1,6 @@
-use crate::{check_token, AddSpan, Conditional, Node, Result, Spanned, Token, TokenCursor};
+use crate::{
+    check_token, AddSpan, Conditional, Node, ParserError, Result, Spanned, Token, TokenCursor,
+};
 
 use super::Analyzer;
 
@@ -30,6 +32,17 @@ impl Analyzer<Conditional> for Conditional {
         while let Some(item) = buf_cursor.next() {
             Node::analyze(item, &mut buf_cursor, &mut condition)?;
         }
+
+        let Some(condition) = condition.last() else {
+            return Err(ParserError {
+                src: cursor.source(),
+                at: span,
+                err: "Condition does not return a value!".into(),
+            }
+            .into());
+        };
+
+        let condition = condition.clone();
 
         let mut buf = Vec::new();
         let mut body = Vec::new();
@@ -105,7 +118,7 @@ impl Analyzer<Conditional> for Conditional {
 
         Ok(Some(Self {
             body,
-            condition,
+            condition: Box::new(condition),
             else_body,
             span,
             locals: None,

@@ -3,6 +3,7 @@ mod block;
 mod call;
 mod cmd;
 mod concat;
+mod condition;
 mod data;
 mod def;
 mod exec;
@@ -15,6 +16,7 @@ pub use block::*;
 pub use call::*;
 pub use cmd::*;
 pub use concat::*;
+pub use condition::*;
 pub use data::*;
 pub use def::*;
 pub use exec::*;
@@ -38,6 +40,8 @@ pub enum IRNode {
     Execute(IRExecute),
     Call(IRCall),
     Reference(String),
+    Condition(IRCondition),
+    Goto(String),
     // TODO: For each loops
 }
 
@@ -62,4 +66,5 @@ node_from!(IRBlock = Block);
 node_from!(IRCommand = Command);
 node_from!(IRExecute = Execute);
 node_from!(IRCall = Call);
+node_from!(IRCondition = Condition);
 node_from!(String = Reference);

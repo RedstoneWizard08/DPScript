@@ -24,7 +24,7 @@ impl Lowerer {
         }
     }
 
-    pub fn run(&mut self) -> Result<&mut Self> {
+    pub fn run(mut self) -> Result<Self> {
         self.ast.indexed = false;
         self.ast.cached = false;
         self.ast.cache_values()?;

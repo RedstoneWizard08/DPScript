@@ -1,7 +1,9 @@
+use std::collections::BTreeMap;
+
 use super::Lowerable;
 use crate::{
-    CheckerContext, Function, IRArgumentOperation, IRDefinition, IRFunction, IRGetArgument, IRNode,
-    LoweringContext, Result, VariableAlias,
+    CheckerContext, Function, IRArgumentOperation, IRBlock, IRDefinition, IRFunction,
+    IRGetArgument, IRNode, InsertHelper, LoweringContext, Result, VariableAlias,
 };
 
 impl Lowerable for Function {
@@ -14,38 +16,77 @@ impl Lowerable for Function {
             return Ok(Vec::new());
         }
 
-        // TODO: Facade functions
-
         cx.cur_fn = Some(self.clone());
         lcx.blocks = 0;
         lcx.extra_nodes = Vec::new();
         lcx.block_nodes = Vec::new();
+        lcx.defs = BTreeMap::new();
 
         let id = self.ir_name(&lcx.namespace, &lcx.module);
-        let mut body = Vec::new();
+        let mut items = Vec::new();
 
         for (i, arg) in self.args.iter().enumerate() {
-            body.push(IRNode::Definition(IRDefinition::VariableAlias(
-                VariableAlias {
-                    name: format!("arg_{}", arg.name.0),
-                    path: format!("{}:__dpscript/vars/local", lcx.namespace),
-                    store: format!("__arg_{}_{}", arg.name.0, i),
-                },
-            )));
+            let name = format!("__var_{}", arg.name.0);
 
-            body.push(IRNode::Argument(IRArgumentOperation::Get(IRGetArgument {
+            lcx.defs.insert_if_absent(
+                name.clone(),
+                IRDefinition::VariableAlias(VariableAlias {
+                    name,
+                    path: format!("{}:__dpscript/vars/local", lcx.namespace),
+                    store: format!("__var_{}", arg.name.0),
+                }),
+            );
+
+            items.push(IRNode::Argument(IRArgumentOperation::Get(IRGetArgument {
                 index: i,
-                var: format!("arg_{}", arg.name.0),
+                var: format!("__var_{}", arg.name.0),
             })));
         }
 
+        let mut last_block: Option<IRBlock> = None;
+
         for node in &mut self.body {
-            body.extend(node.lower(cx, lcx)?);
+            let data = node.lower(cx, lcx)?;
+
+            if let Some(block) = &mut lcx.join_block {
+                if lcx.join_dirty {
+                    if let Some(it) = &mut last_block {
+                        it.body.extend(data);
+                    } else {
+                        items.extend(data);
+                    }
+                } else {
+                    block.body.extend(data);
+                }
+
+                last_block = Some(block.clone());
+            } else {
+                items.extend(data);
+            }
+
+            if lcx.join_dirty {
+                if let Some(block) = last_block {
+                    lcx.block_nodes.push(block);
+                }
+
+                last_block = None;
+                lcx.join_dirty = false;
+            }
+        }
+
+        if let Some(block) = lcx.join_block.clone() {
+            if lcx.block_nodes.iter().find(|v| v.id == block.id).is_none() {
+                lcx.block_nodes.push(block);
+            }
         }
 
         cx.cur_fn = None;
         lcx.blocks = 0;
 
+        let mut body = Vec::new();
+
+        body.extend(lcx.defs.iter().map(|(_, v)| IRNode::Definition(v.clone())));
+        body.extend(items);
         body.extend(lcx.block_nodes.iter().map(|v| IRNode::Block(v.clone())));
 
         let mut nodes = Vec::new();
@@ -55,6 +96,9 @@ impl Lowerable for Function {
 
         lcx.extra_nodes = Vec::new();
         lcx.block_nodes = Vec::new();
+        lcx.defs = BTreeMap::new();
+        lcx.join_block = None;
+        lcx.join_dirty = false;
 
         Ok(nodes)
     }

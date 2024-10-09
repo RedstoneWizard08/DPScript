@@ -66,9 +66,24 @@ impl TypeKind {
     }
 
     fn is_compatible_inner(&self, other: &TypeKind) -> bool {
+        let compats = vec![
+            Self::NBT,
+            Self::Component,
+            Self::Selector,
+            Self::Entity,
+            Self::Int,
+            Self::Float,
+        ];
+
         match self.clone() {
             Self::Any => true,
-            Self::NBT => *other == Self::NBT || Self::Component.is_compatible(other),
+
+            Self::NBT
+            | Self::Component
+            | Self::Selector
+            | Self::Entity
+            | Self::Int
+            | Self::Float => compats.contains(other),
 
             Self::Array(it) => match other {
                 TypeKind::Array(other) => it.kind.is_compatible(&other.kind),

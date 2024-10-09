@@ -8,7 +8,7 @@ use once_cell::sync::Lazy;
 use regex::Regex;
 
 pub const SELECTOR_REGEX: Lazy<Regex> =
-    Lazy::new(|| Regex::new(r#"(?m)\{ "selector": "([^"]+)" \}"#).unwrap());
+    Lazy::new(|| Regex::new(r#"(?m)\{"selector": "([^"]+)"\}"#).unwrap());
 
 impl Call {
     fn handle_inline(
@@ -21,12 +21,11 @@ impl Call {
         let args = self.args.clone();
         let real_args = func.args.clone();
 
-        for (i, mut arg) in args.iter().cloned().enumerate() {
+        for (i, arg) in args.iter().cloned().enumerate() {
             let real = real_args.get(i).unwrap();
-            let value = arg.get_value(cx, lcx, &mut Vec::new())?;
 
-            if let IRNode::Reference(id) = value {
-                func = func.remap_name(&real.name.0, &id);
+            if let Node::Ident(id) = arg {
+                func = func.remap_name(&real.name.0, &id.0);
             }
         }
 
@@ -79,11 +78,11 @@ impl Call {
                 let value = arg.get_value(cx, lcx, &mut nodes)?;
 
                 if real.ty.kind == TypeKind::Selector || real.ty.kind == TypeKind::Entity {
-                    if let IRNode::Literal(lit) = value {
+                    if let IRNode::Literal(lit) = &value {
                         if let IRLiteral::String(val) = lit {
-                            if SELECTOR_REGEX.is_match(&val) {
+                            if SELECTOR_REGEX.is_match(val) {
                                 args.push(IRNode::Literal(
-                                    SELECTOR_REGEX.replace(&val, "$1").into(),
+                                    SELECTOR_REGEX.replace(val, "$1").into(),
                                 ));
 
                                 continue;
@@ -92,7 +91,7 @@ impl Call {
                     }
                 }
 
-                args.push(arg.get_value(cx, lcx, &mut nodes)?);
+                args.push(value);
             } else {
                 if item.ends_with('%') {
                     item = item.trim_end_matches('%').into();
@@ -114,57 +113,7 @@ impl Call {
 
 impl Lowerable for Call {
     fn lower(&mut self, cx: &mut CheckerContext, lcx: &mut LoweringContext) -> Result<Vec<IRNode>> {
-        if self.function.0 == "storeof" {
-            let id = match self.args.first().unwrap() {
-                Node::Ident((id, _)) => id.clone(),
-
-                it => {
-                    return Err(LoweringError {
-                        src: cx.get_source(),
-                        at: it.span(),
-                        err: "Expected an identifier!".into(),
-                    }
-                    .into())
-                }
-            };
-
-            return Ok(vec![IRNode::Literal(IRLiteral::StoreOf(id))]);
-        }
-
-        if self.function.0 == "keyof" {
-            let id = match self.args.first().unwrap() {
-                Node::Ident((id, _)) => id.clone(),
-
-                it => {
-                    return Err(LoweringError {
-                        src: cx.get_source(),
-                        at: it.span(),
-                        err: "Expected an identifier!".into(),
-                    }
-                    .into())
-                }
-            };
-
-            return Ok(vec![IRNode::Literal(IRLiteral::PathOf(id))]);
-        }
-
         let mut nodes = Vec::new();
-        let mut args = Vec::new();
-
-        if let Some((parent, _)) = self.parent.clone() {
-            args.push(IRNode::Argument(IRArgumentOperation::Set(IRSetArgument {
-                index: 0,
-                value: Box::new(IRNode::Reference(parent)),
-            })));
-        }
-
-        for arg in &mut self.args {
-            args.push(IRNode::Argument(IRArgumentOperation::Set(IRSetArgument {
-                index: args.len(),
-                value: Box::new(arg.get_value(cx, lcx, &mut nodes)?),
-            })));
-        }
-
         let mut module = cx.modules.get(&lcx.module).unwrap().clone();
         let refs = cx.get_refs()?;
         let objs = module.get_imported_objects(cx)?;
@@ -214,17 +163,28 @@ impl Lowerable for Call {
             }
 
             let (id, _, _) = method.unwrap();
+            let mut num_args = 0;
 
-            nodes.extend(args);
+            if let Some((parent, _)) = self.parent.clone() {
+                nodes.push(IRNode::Argument(IRArgumentOperation::Set(IRSetArgument {
+                    index: 0,
+                    value: Box::new(IRNode::Reference(parent)),
+                })));
 
-            nodes.push(IRNode::Call(IRCall {
-                function: format!(
-                    "{}:__dpscript_gen/core/{}/{}",
-                    lcx.namespace,
-                    base_ty.name(),
-                    id
-                ),
-            }));
+                num_args += 1;
+            }
+
+            for arg in &mut self.args {
+                let arg = IRNode::Argument(IRArgumentOperation::Set(IRSetArgument {
+                    index: num_args,
+                    value: Box::new(arg.get_value(cx, lcx, &mut nodes)?),
+                }));
+
+                num_args += 1;
+                nodes.push(arg);
+            }
+
+            base_ty.create_ir(id.to_string(), lcx, &mut nodes);
 
             return Ok(nodes);
         }
@@ -242,6 +202,27 @@ impl Lowerable for Call {
                         nodes.extend(self.handle_inline(func, cx, lcx)?);
                         found = true;
                         break;
+                    }
+
+                    let mut num_args = 0;
+
+                    if let Some((parent, _)) = self.parent.clone() {
+                        nodes.push(IRNode::Argument(IRArgumentOperation::Set(IRSetArgument {
+                            index: 0,
+                            value: Box::new(IRNode::Reference(parent)),
+                        })));
+
+                        num_args += 1;
+                    }
+
+                    for arg in &mut self.args {
+                        let arg = IRNode::Argument(IRArgumentOperation::Set(IRSetArgument {
+                            index: num_args,
+                            value: Box::new(arg.get_value(cx, lcx, &mut nodes)?),
+                        }));
+
+                        num_args += 1;
+                        nodes.push(arg);
                     }
 
                     let id = func.ir_name(&lcx.namespace, item.module);
@@ -268,7 +249,26 @@ impl Lowerable for Call {
                         break;
                     }
 
-                    nodes.extend(args);
+                    let mut num_args = 0;
+
+                    if let Some((parent, _)) = self.parent.clone() {
+                        nodes.push(IRNode::Argument(IRArgumentOperation::Set(IRSetArgument {
+                            index: 0,
+                            value: Box::new(IRNode::Reference(parent)),
+                        })));
+
+                        num_args += 1;
+                    }
+
+                    for arg in &mut self.args {
+                        let arg = IRNode::Argument(IRArgumentOperation::Set(IRSetArgument {
+                            index: num_args,
+                            value: Box::new(arg.get_value(cx, lcx, &mut nodes)?),
+                        }));
+
+                        num_args += 1;
+                        nodes.push(arg);
+                    }
 
                     let id = func.ir_name(&lcx.namespace, &lcx.module);
 

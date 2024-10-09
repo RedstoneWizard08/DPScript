@@ -77,6 +77,9 @@ pub enum IRToken {
     /// "command"
     Command,
 
+    /// "condition"
+    Condition,
+
     // ========================================
     /// "data"
     Data,
@@ -92,14 +95,22 @@ pub enum IRToken {
     Store,
 
     // ========================================
+    /// "else"
+    Else,
+
     /// "execute"
     Execute,
 
-    /// "func"
-    Func,
-
+    // ========================================
     /// "get"
     Get,
+
+    /// "goto"
+    Goto,
+
+    // ========================================
+    /// "func"
+    Func,
 
     /// "path"
     Path,
@@ -109,6 +120,12 @@ pub enum IRToken {
 
     /// "variable_alias"
     VariableAlias,
+
+    /// "if"
+    If,
+
+    /// "join"
+    Join,
 }
 
 impl fmt::Display for IRToken {
@@ -137,16 +154,21 @@ impl fmt::Display for IRToken {
             Self::Copy => write!(f, "copy"),
             Self::Clear => write!(f, "clear"),
             Self::Command => write!(f, "command"),
+            Self::Condition => write!(f, "condition"),
             Self::Data => write!(f, "data"),
             Self::Define => write!(f, "define"),
             Self::Set => write!(f, "set"),
             Self::Store => write!(f, "store"),
+            Self::Else => write!(f, "else"),
             Self::Execute => write!(f, "execute"),
             Self::Func => write!(f, "func"),
             Self::Get => write!(f, "get"),
+            Self::Goto => write!(f, "goto"),
             Self::Path => write!(f, "path"),
             Self::Tag => write!(f, "tag"),
             Self::VariableAlias => write!(f, "variable_alias"),
+            Self::If => write!(f, "if"),
+            Self::Join => write!(f, "join"),
         }
     }
 }

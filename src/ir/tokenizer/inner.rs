@@ -89,6 +89,12 @@ impl IRTokenizer {
                     let span = self.cursor.span(7);
                     self.cursor.skip(6);
                     Some((IRToken::Command, span))
+                } else if self.cursor.peek_many(0, 8).is_some_and(|v| v == "ondition")
+                    && self.cursor.peek_ahead(8).is_some_and(|v| v.is_not_ident())
+                {
+                    let span = self.cursor.span(9);
+                    self.cursor.skip(8);
+                    Some((IRToken::Condition, span))
                 } else {
                     None
                 }
@@ -137,6 +143,12 @@ impl IRTokenizer {
                     let span = self.cursor.span(7);
                     self.cursor.skip(6);
                     Some((IRToken::Execute, span))
+                } else if self.cursor.peek_many(0, 3).is_some_and(|v| v == "lse")
+                    && self.cursor.peek_ahead(3).is_some_and(|v| v.is_not_ident())
+                {
+                    let span = self.cursor.span(4);
+                    self.cursor.skip(3);
+                    Some((IRToken::Else, span))
                 } else {
                     None
                 }
@@ -161,6 +173,12 @@ impl IRTokenizer {
                     let span = self.cursor.span(3);
                     self.cursor.skip(2);
                     Some((IRToken::Get, span))
+                } else if self.cursor.peek_many(0, 3).is_some_and(|v| v == "oto")
+                    && self.cursor.peek_ahead(3).is_some_and(|v| v.is_not_ident())
+                {
+                    let span = self.cursor.span(4);
+                    self.cursor.skip(3);
+                    Some((IRToken::Goto, span))
                 } else {
                     None
                 }
@@ -190,6 +208,18 @@ impl IRTokenizer {
                 }
             }
 
+            'i' => {
+                if self.cursor.peek().is_some_and(|v| v == 'f')
+                    && self.cursor.peek_ahead(1).is_some_and(|v| v.is_not_ident())
+                {
+                    let span = self.cursor.span(2);
+                    self.cursor.skip(1);
+                    Some((IRToken::If, span))
+                } else {
+                    None
+                }
+            }
+
             'v' => {
                 if self
                     .cursor
@@ -200,6 +230,18 @@ impl IRTokenizer {
                     let span = self.cursor.span(14);
                     self.cursor.skip(13);
                     Some((IRToken::VariableAlias, span))
+                } else {
+                    None
+                }
+            }
+
+            'j' => {
+                if self.cursor.peek_many(0, 3).is_some_and(|v| v == "oin")
+                    && self.cursor.peek_ahead(3).is_some_and(|v| v.is_not_ident())
+                {
+                    let span = self.cursor.span(4);
+                    self.cursor.skip(3);
+                    Some((IRToken::Join, span))
                 } else {
                     None
                 }

@@ -4,7 +4,7 @@ use serde_json::Value;
 
 use super::{Lowerable, Valued};
 use crate::{
-    CheckerContext, IRArgumentOperation, IRLiteral, IRNode, IRSetArgument, Literal,
+    BuiltInTypes, CheckerContext, IRArgumentOperation, IRLiteral, IRNode, IRSetArgument, Literal,
     LoweringContext, Node, Operation, Result,
 };
 
@@ -78,7 +78,11 @@ impl Valued for Operation {
         nodes.push(lhs);
         nodes.push(rhs);
 
-        // TODO: Get the IR function name and call it
+        let module = cx.current_module();
+        let ty = self.lhs.get_type(&module, cx)?;
+        let ty = BuiltInTypes::of(ty.kind);
+
+        ty.create_ir(self.kind.name(), lcx, nodes);
 
         Ok(IRNode::Reference("__RETURN_VAL__".into()))
     }

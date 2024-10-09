@@ -161,7 +161,10 @@ impl Literal {
                         return Err(ValidatorError {
                             src,
                             at: span,
-                            err: "Item type is incompatible with the rest of the array!".into(),
+                            err: format!(
+                                "Item type is ({}) incompatible with the rest of the array ({})!",
+                                item.kind, ty
+                            ),
                         }
                         .into());
                     }

@@ -6,6 +6,7 @@ define variable_alias TELLRAW_STORAGE: "example:__dpscript/vars/libs/std/base/te
 
 func "example:__dpscript/gen/say_hi": {
     define variable_alias text: "example:__dpscript/vars/functions/gen/say_hi" @ "text_0"; // The number at the end is the index of the variable in the current scope.
+    define variable_alias another: "example:__dpscript/vars/functions/gen/say_hi" @ "another_1";
 
     // Any variable is automatically replaced with its variable_alias, which contains information about its store and path.
     data set: text, '[]'; // The `'...'` syntax tells the compiler that the string should be treated as a literal.
@@ -27,6 +28,33 @@ func "example:__dpscript/gen/say_hi": {
     // The `"@a"` comes from the `ALL_PLAYERS` constant exported in `std/selectors`.
     // It has the concatenation operand because it's a substitution during lowering.
     command: "tellraw" + " " + "@s" + " " + '["", { "nbt": "' + path!(TELLRAW_STORAGE) + '", "storage": "' + store!(TELLRAW_STORAGE) + '", "interpret": true }]';
+
+    data set: another, '42';
+
+    // pretend we loaded `another == 42` into the score `__dpscript_score_condition_value`
+
+    // This only supports `== [number]` operations
+    condition: '__dpscript_score_condition_value';
+    // This checks if the above score is equal to 1.
+    if: $block0;
+    // Otherwise, it'll call this block.
+    else: $block1;
+    // Both sides will join at block 3.
+    join: $block3;
+
+    $block0: {
+        command: "tellraw" + " " + "@a" + " " + '["", { "text": "The meaning of life is 42!" }]';
+        goto: $block3;
+    };
+
+    $block1: {
+        command: "tellraw" + " " + "@a" + " " + '["", { "text": "The meaning of life wasn\'t 42..." }]';
+        goto: $block3;
+    };
+
+    $block3: {
+        command: "tellraw" + " " + "@a" + " " + '["", { "text": "There you go!" }]';
+    };
 }
 
 func "example:__dpscript/gen/init/0": {
@@ -87,8 +115,8 @@ func "example:__dpscript/gen/tick/0": {
 
 tag "minecraft:tags/functions/load": [
     "example:__dpscript/gen/init/0";
-]
+];
 
 tag "minecraft:tags/functions/tick": [
     "example:__dpscript/gen/tick/0";
-]
+];

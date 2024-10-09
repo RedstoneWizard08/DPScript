@@ -366,3 +366,12 @@ macro_rules! dump_ast_part {
         }
     };
 }
+
+#[macro_export]
+macro_rules! command {
+    ($($part: expr),*) => {
+        $crate::IRCommand {
+            cmd: vec![$($crate::IRNode::Literal($crate::IRLiteral::String($part.into()))),*],
+        }
+    };
+}

@@ -1,7 +1,7 @@
 use super::{Lowerable, Valued};
 use crate::{
-    AddDataOperation, CheckerContext, IRDataOperation, IRDefinition, IRNode, LoweringContext,
-    Result, Variable, VariableAlias,
+    AddDataOperation, CheckerContext, CopyDataOperation, IRDataOperation, IRDefinition, IRNode,
+    InsertHelper, LoweringContext, Result, Variable, VariableAlias,
 };
 
 impl Lowerable for Variable {
@@ -11,30 +11,40 @@ impl Lowerable for Variable {
         }
 
         let mut nodes = Vec::new();
-        let var = format!(
-            "__var_{}",
-            if self.name.0.starts_with("__var_") || self.name.0 == "__RETURN_VAL__" {
-                self.name.0.clone()
-            } else {
-                format!("__var_{}", self.name.0)
-            }
-        );
 
-        nodes.push(IRNode::Definition(IRDefinition::VariableAlias(
-            VariableAlias {
+        let var = if self.name.0.starts_with("__var_") || self.name.0 == "__RETURN_VAL__" {
+            self.name.0.clone()
+        } else {
+            format!("__var_{}", self.name.0)
+        };
+
+        lcx.defs.insert_if_absent(
+            var.clone(),
+            IRDefinition::VariableAlias(VariableAlias {
                 name: var.clone(),
                 store: "dpscript:core/vars".into(),
                 path: var.clone(),
-            },
-        )));
+            }),
+        );
 
         if let Some(val) = &mut self.value {
-            let node = IRNode::DataOperation(IRDataOperation::Set(AddDataOperation {
-                var,
-                value: Box::new(val.get_value(cx, lcx, &mut nodes)?),
-            }));
+            let val = val.get_value(cx, lcx, &mut nodes)?;
 
-            nodes.push(node);
+            if let IRNode::Reference(it) = val {
+                let node = IRNode::DataOperation(IRDataOperation::Copy(CopyDataOperation {
+                    source: it,
+                    target: var,
+                }));
+
+                nodes.push(node);
+            } else {
+                let node = IRNode::DataOperation(IRDataOperation::Set(AddDataOperation {
+                    var,
+                    value: Box::new(val),
+                }));
+
+                nodes.push(node);
+            }
         }
 
         Ok(nodes)

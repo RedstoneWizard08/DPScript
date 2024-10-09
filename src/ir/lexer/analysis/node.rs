@@ -1,8 +1,8 @@
 use super::Analyzer;
 use crate::{
-    add_ir_return, IRArgumentOperation, IRBlock, IRCall, IRCommand, IRConcat, IRDataOperation,
-    IRDefinition, IRExecute, IRFunction, IRLiteral, IRNode, IRParserError, IRTag, IRToken,
-    IRTokenCursor, Result, Spanned,
+    add_ir_return, check_ir_token, IRArgumentOperation, IRBlock, IRCall, IRCommand, IRConcat,
+    IRCondition, IRDataOperation, IRDefinition, IRExecute, IRFunction, IRLiteral, IRNode,
+    IRParserError, IRTag, IRToken, IRTokenCursor, Result, Spanned,
 };
 
 impl Analyzer<IRNode> for IRNode {
@@ -55,6 +55,11 @@ impl Analyzer<IRNode> for IRNode {
             None => {}
         };
 
+        match IRCondition::analyze(item.clone(), cursor, nodes)? {
+            Some(v) => add_ir_return!(nodes += Condition(v)),
+            None => {}
+        };
+
         match IRCall::analyze(item.clone(), cursor, nodes)? {
             Some(v) => add_ir_return!(nodes += Call(v)),
             None => {}
@@ -69,6 +74,29 @@ impl Analyzer<IRNode> for IRNode {
             Some(v) => add_ir_return!(nodes += Literal(v)),
             None => {}
         };
+
+        if item.0 == IRToken::Goto {
+            check_ir_token!(remove cursor == Colon);
+            check_ir_token!(remove cursor == Dollar);
+
+            let it = cursor.next_or_die()?;
+
+            let block = match it.0 {
+                IRToken::Ident(it) => it,
+
+                _ => {
+                    return Err(IRParserError {
+                        src: cursor.source(),
+                        at: it.1,
+                        err: format!("Unexpected token: {}", it.0),
+                    }
+                    .into())
+                }
+            };
+
+            check_ir_token!(remove cursor == Semi);
+            add_ir_return!(nodes += Goto(block));
+        }
 
         if let IRToken::Ident(id) = item.0 {
             Ok(Some(IRNode::Reference(id)))
