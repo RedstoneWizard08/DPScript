@@ -1,4 +1,6 @@
-use super::{Node, Variable};
+use std::collections::HashMap;
+
+use super::{Node, Subroutine, Variable};
 use crate::Spanned;
 use miette::SourceSpan;
 use serde::Serialize;
@@ -17,7 +19,7 @@ pub struct Loop {
     /// The loop body
     pub body: Vec<Node>,
 
-    /// A cache of local variables defined in the function.
+    /// A cache of local variables defined in the loop.
     pub locals: Option<Vec<Variable>>,
 }
 
@@ -41,5 +43,17 @@ impl Loop {
         } else {
             self.cache_vars().locals.clone().unwrap_or_default()
         }
+    }
+
+    pub fn get_subroutines(&self) -> HashMap<String, Subroutine> {
+        let mut map = HashMap::new();
+
+        for item in &self.body {
+            if let Node::Subroutine(sub) = item {
+                map.insert(sub.name.clone().0, sub.clone());
+            }
+        }
+
+        map
     }
 }

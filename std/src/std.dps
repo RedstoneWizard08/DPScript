@@ -4,4 +4,47 @@ export advops/*;
 export array/*;
 export base/*;
 export core/*;
+export data/*;
+export scoreboard/*;
 export selectors/*;
+
+import std/base/tellraw;
+import std/selectors/ALL_PLAYERS;
+import std/scoreboard/{notEqual, set_score};
+
+pub objective enableMessage: dummy = "enable_std_hello";
+pub const config = entity: "config";
+
+// FIXME: This shouldn't be necessary.
+import std/config;
+
+init {
+    const welcome = [component: "Thank you for using DPScript!" & nbt: { bold: true }];
+    const hint_base = component: "Hint: " & nbt: { bold: true, color: "gold" };
+    const disable = component: "You can disable this message by running:\n" & nbt: { color: "dark_aqua" };
+    const cmd = component: "/scoreboard players set config enable_std_hello 0\n" & nbt: { bold: true, color: "gray" };
+    
+    const click = component: "[Click to copy!]" & nbt: {
+        bold: true,
+        color: "dark_aqua",
+        clickEvent: {
+            action: "copy_to_clipboard",
+            value: "/scoreboard players set config enable_std_hello 0"
+        },
+        hoverEvent: {
+            action: "show_text",
+            contents: ["Copy: /scoreboard players set config enable_std_hello 0"],
+        },
+    };
+    
+    const hint = [hint_base, disable, cmd, click];
+
+    if notEqual(enableMessage, config, 0) {
+        set_score(enableMessage, config, 0);
+    }
+
+    if notEqual(enableMessage, config, 1) {
+        tellraw(ALL_PLAYERS, welcome);
+        tellraw(ALL_PLAYERS, hint);
+    }
+}

@@ -1,0 +1,25 @@
+module std/data;
+
+import std/core/{storeof, keyof};
+
+#[cmd("data modify storage %% %% append from storage %% %%")]
+pub facade fn append_data(src: Store, src_path: NBTPath, dest: Store, dest_path: NBTPath);
+
+#[cmd("data remove storage %% %%")]
+pub facade fn remove_data(stor: Store, pat: NBTPath);
+
+#[cmd("data modify storage %% %% append from storage %% %%[%%]")]
+pub facade fn append_data_from_index(src: Store, src_path: NBTPath, dest: Store, dest_path: NBTPath, index: int);
+
+#[cmd("data remove storage %% %%[%%]")]
+pub facade fn remove_data_index(stor: Store, pat: NBTPath, index: int);
+
+#[cmd("data modify storage %% %% set from storage %% %%")]
+pub facade fn clone(src: Store, src_path: NBTPath, dest: Store, dest_path: NBTPath);
+
+#[cmd("data modify storage %% %% set value %%")]
+pub facade fn set_data(storage: Store, pat: NBTPath, value: Any);
+
+pub inline fn get_data(storage: Store, pat: NBTPath) -> Any {
+    clone(storage, pat, storeof(__RETURN_VAL__), keyof(__RETURN_VAL__));
+}

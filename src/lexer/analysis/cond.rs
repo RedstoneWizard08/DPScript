@@ -121,7 +121,8 @@ impl Analyzer<Conditional> for Conditional {
             condition: Box::new(condition),
             else_body,
             span,
-            locals: None,
+            if_locals: None,
+            else_locals: None,
         }))
     }
 }

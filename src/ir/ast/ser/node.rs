@@ -17,7 +17,7 @@ impl SerializeNode for IRNode {
             Self::Execute(it) => it.serialize_node(),
             Self::Condition(it) => it.serialize_node(),
             Self::Reference(it) => it.clone(),
-            Self::Goto(it) => format!("goto: {};", it),
+            Self::Goto(it) => format!("goto: ${};", it),
         }
     }
 }

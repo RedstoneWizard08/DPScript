@@ -1,6 +1,6 @@
 module std/advops;
 
-import std/core/{set_data, get_data, copy_data};
+import std/data/{set_data, get_data, clone};
 
 enum AdvOps {
     Sqrt,

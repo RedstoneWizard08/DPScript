@@ -45,16 +45,16 @@ func "example:__dpscript/gen/say_hi": {
     $block0: {
         command: "tellraw" + " " + "@a" + " " + '["", { "text": "The meaning of life is 42!" }]';
         goto: $block3;
-    };
+    }
 
     $block1: {
         command: "tellraw" + " " + "@a" + " " + '["", { "text": "The meaning of life wasn\'t 42..." }]';
         goto: $block3;
-    };
+    }
 
     $block3: {
         command: "tellraw" + " " + "@a" + " " + '["", { "text": "There you go!" }]';
-    };
+    }
 }
 
 func "example:__dpscript/gen/init/0": {

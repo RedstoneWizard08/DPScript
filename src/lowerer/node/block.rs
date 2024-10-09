@@ -44,11 +44,12 @@ impl Lowerable for Block {
         let mut last_block: Option<IRBlock> = None;
 
         for node in &mut self.body {
+            let mut real_last_block = last_block.clone();
             let data = node.lower(cx, lcx)?;
 
             if let Some(block) = &mut lcx.join_block {
                 if lcx.join_dirty {
-                    if let Some(it) = &mut last_block {
+                    if let Some(it) = &mut real_last_block {
                         it.body.extend(data);
                     } else {
                         items.extend(data);
@@ -63,11 +64,10 @@ impl Lowerable for Block {
             }
 
             if lcx.join_dirty {
-                if let Some(block) = last_block {
+                if let Some(block) = real_last_block {
                     lcx.block_nodes.push(block);
                 }
 
-                last_block = None;
                 lcx.join_dirty = false;
             }
         }
@@ -78,6 +78,7 @@ impl Lowerable for Block {
             }
         }
 
+        lcx.block_nodes.sort_by_key(|v| v.id.clone());
         cx.cur_fn = None;
         lcx.blocks = 0;
 

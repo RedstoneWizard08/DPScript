@@ -118,7 +118,13 @@ impl Tokenizer {
             }
 
             's' => {
-                if self.cursor.peek_many(0, 4).is_some_and(|v| v == "tore")
+                if self.cursor.peek_many(0, 2).is_some_and(|v| v == "ub")
+                    && self.cursor.peek_ahead(2).is_some_and(|v| v.is_not_ident())
+                {
+                    let span = self.cursor.span(3);
+                    self.cursor.skip(2);
+                    Some((Token::Sub, span))
+                } else if self.cursor.peek_many(0, 4).is_some_and(|v| v == "tore")
                     && self.cursor.peek_ahead(4).is_some_and(|v| v.is_not_ident())
                 {
                     let span = self.cursor.span(5);
@@ -292,6 +298,18 @@ impl Tokenizer {
                     let span = self.cursor.span(3);
                     self.cursor.skip(2);
                     Some((Token::Nbt, span))
+                } else {
+                    None
+                }
+            }
+
+            'g' => {
+                if self.cursor.peek_many(0, 3).is_some_and(|v| v == "oto")
+                    && self.cursor.peek_ahead(3).is_some_and(|v| v.is_not_ident())
+                {
+                    let span = self.cursor.span(4);
+                    self.cursor.skip(3);
+                    Some((Token::Goto, span))
                 } else {
                     None
                 }

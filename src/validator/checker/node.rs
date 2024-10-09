@@ -1,7 +1,7 @@
 use super::{ctx::CheckerContext, Checker};
 use crate::{
     Block, Call, Conditional, Enum, Function, Import, Loop, Node, Objective, Operation, Result,
-    Return, ValidatorError, Variable,
+    Return, Subroutine, ValidatorError, Variable,
 };
 
 impl Checker<Node> for Node {
@@ -21,6 +21,20 @@ impl Checker<Node> for Node {
             Node::Return(ret) => Return::check(ret, cx),
             Node::Loop(it) => Loop::check(it, cx),
             Node::Operation(op) => Operation::check(op, cx),
+            Node::Subroutine(sub) => Subroutine::check(sub, cx),
+
+            Node::Goto(it) => {
+                if !cx.get_subroutines().contains_key(&it.0) {
+                    return Err(ValidatorError {
+                        src: module.source.clone(),
+                        at: it.1,
+                        err: format!("Could not find subroutine: {}", it.0),
+                    }
+                    .into());
+                }
+
+                Ok(())
+            }
 
             // Literals and idents on their own are always valid and exports are taken care of during `Module::get_exports()`
             Node::Export(_) | Node::Literal(_) | Node::Ident(_) => Ok(()),

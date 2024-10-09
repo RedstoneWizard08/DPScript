@@ -1,6 +1,7 @@
 use crate::{
-    add_return, Block, Call, Conditional, Enum, Export, Function, Import, Literal, Loop, Module,
-    Node, Objective, Operation, ParserError, Result, Return, Spanned, Token, TokenCursor, Variable,
+    add_return, check_token, Block, Call, Conditional, Enum, Export, Function, Import, Literal,
+    Loop, Module, Node, Objective, Operation, ParserError, Result, Return, Spanned, Subroutine,
+    Token, TokenCursor, Variable,
 };
 
 use super::Analyzer;
@@ -37,6 +38,11 @@ impl Analyzer<Node> for Node {
 
         match Block::analyze(item.clone(), cursor, nodes)? {
             Some(v) => add_return!(nodes += Block(v)),
+            None => {}
+        };
+
+        match Subroutine::analyze(item.clone(), cursor, nodes)? {
+            Some(v) => add_return!(nodes += Subroutine(v)),
             None => {}
         };
 
@@ -84,6 +90,27 @@ impl Analyzer<Node> for Node {
             Some(v) => add_return!(nodes += Objective(v)),
             None => {}
         };
+
+        if item.0 == Token::Goto {
+            let it = cursor.next_or_die(item.1)?;
+
+            let block = match it.0 {
+                Token::Ident(id) => (id, it.1),
+
+                _ => {
+                    return Err(ParserError {
+                        src: cursor.source(),
+                        at: it.1,
+                        err: format!("Unexpected token while parsing a goto: {}", it.0),
+                    }
+                    .into())
+                }
+            };
+
+            check_token!(remove cursor == Semi);
+
+            add_return!(nodes += Goto(block));
+        }
 
         match String::analyze(item.clone(), cursor, nodes)? {
             Some(v) => add_return!(nodes += Ident(v)),

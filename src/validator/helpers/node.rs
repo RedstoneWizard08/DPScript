@@ -230,6 +230,8 @@ impl Node {
             | Self::Enum(_)
             | Self::Return(_)
             | Self::Conditional(_)
+            | Self::Subroutine(_)
+            | Self::Goto(_)
             | Self::Objective(_) => {
                 return Err(ValidatorError {
                     src,

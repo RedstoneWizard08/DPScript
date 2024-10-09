@@ -1,4 +1,6 @@
-use super::{attr::Attribute, Node, Type, Variable};
+use std::collections::HashMap;
+
+use super::{attr::Attribute, Node, Subroutine, Type, Variable};
 use crate::Spanned;
 use miette::SourceSpan;
 use serde::{Deserialize, Serialize};
@@ -68,6 +70,18 @@ impl Function {
         } else {
             self.cache_vars().locals.clone().unwrap_or_default()
         }
+    }
+
+    pub fn get_subroutines(&self) -> HashMap<String, Subroutine> {
+        let mut map = HashMap::new();
+
+        for item in &self.body {
+            if let Node::Subroutine(sub) = item {
+                map.insert(sub.name.clone().0, sub.clone());
+            }
+        }
+
+        map
     }
 
     pub fn ir_name(&self, ns: impl AsRef<str>, module: impl AsRef<str>) -> String {

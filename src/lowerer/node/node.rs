@@ -22,6 +22,8 @@ impl Valued for Node {
                         if var.is_const {
                             return Ok(var.value.clone().unwrap().get_value(cx, lcx, nodes)?);
                         }
+                    } else if let Reference::Objective(obj) = it {
+                        return Ok(IRNode::Literal(IRLiteral::String(obj.id.0.clone())));
                     }
                 }
 
@@ -47,7 +49,7 @@ impl Valued for Node {
                         }
                     };
 
-                    return Ok(IRNode::Literal(IRLiteral::StoreOf(id)));
+                    return Ok(IRNode::Literal(IRLiteral::StoreOf(format!("__var_{}", id))));
                 }
 
                 if call.function.0 == "keyof" {
@@ -64,7 +66,7 @@ impl Valued for Node {
                         }
                     };
 
-                    return Ok(IRNode::Literal(IRLiteral::PathOf(id)));
+                    return Ok(IRNode::Literal(IRLiteral::PathOf(format!("__var_{}", id))));
                 }
 
                 nodes.extend(call.lower(cx, lcx)?);
@@ -112,6 +114,8 @@ impl Lowerable for Node {
             Self::Return(it) => it.lower(cx, lcx)?,
             Self::Objective(it) => it.lower(cx, lcx)?,
             Self::Conditional(it) => it.lower(cx, lcx)?,
+            Self::Subroutine(it) => it.lower(cx, lcx)?,
+            Self::Goto((it, _)) => vec![IRNode::Goto(format!("__sub_{}", it))],
 
             // Imports, exports, types, and enums don't get transpiled - they're types.
             _ => Vec::new(),

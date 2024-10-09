@@ -1,0 +1,49 @@
+module std/scoreboard;
+
+// Basics
+
+#[cmd("scoreboard players set %% %% %%")]
+pub facade fn set_score(score: Objective, ent: Entity, value: int);
+
+#[cmd("scoreboard players get %% %%")]
+pub facade fn get_score(score: Objective, ent: Entity) -> int;
+
+#[cmd("scoreboard players add %% %% %%")]
+pub facade fn add_score(score: Objective, ent: Entity, add: int);
+
+#[cmd("scoreboard players remove %% %% %%")]
+pub facade fn remove_score(score: Objective, ent: Entity, add: int);
+
+#[cmd("scoreboard players reset %% %%")]
+pub facade fn reset_score(score: Objective, ent: Entity);
+
+// Storage
+
+#[cmd("execute store result score %% %% run data get storage %% %%")]
+pub facade fn set_score_from_data(score: Objective, ent: Entity, stor: Store, pat: NBTPath);
+
+#[cmd("execute store result storage %% %% int 1 run scoreboard players get %% %%")]
+pub facade fn set_data_from_score(stor: Store, pat: NBTPath, score: Objective, ent: Entity);
+
+// Equality
+
+#[cmd("execute store success storage dpscript:core/funcs return_value int 1 run execute if score %% %% = %% %%")]
+pub facade fn eq(score: Objective, ent: Entity, other: Objective, other_ent: Entity);
+
+#[cmd("execute store success storage dpscript:core/funcs return_value execute unless score %% %% = %% %%")]
+pub facade fn neq(score: Objective, ent: Entity, other: Objective, other_ent: Entity);
+
+#[cmd("execute store success storage dpscript:core/funcs return_value execute if score %% %% matches %%")]
+pub facade fn equal(score: Objective, ent: Entity, val: int);
+
+#[cmd("execute store success storage dpscript:core/funcs return_value execute unless score %% %% matches %%")]
+pub facade fn notEqual(score: Objective, ent: Entity, val: int);
+
+#[cmd("execute store success storage dpscript:core/funcs return_value execute if score %% %% < %% %%")]
+pub facade fn lessThan(score: Objective, ent: Entity, other: Objective, other_ent: Entity);
+
+// Operations
+
+#[cmd("scoreboard players operation %% %% %% %% %%")]
+// Use an NBTPath here because I don't have a "literal" type
+pub facade fn operation(score: Objective, ent: Entity, op: NBTPath, other: Objective, other_ent: Entity);

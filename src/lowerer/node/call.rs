@@ -6,6 +6,7 @@ use crate::{
 };
 use once_cell::sync::Lazy;
 use regex::Regex;
+use serde_json::json;
 
 pub const SELECTOR_REGEX: Lazy<Regex> =
     Lazy::new(|| Regex::new(r#"(?m)\{"selector": "([^"]+)"\}"#).unwrap());
@@ -88,6 +89,23 @@ impl Call {
                                 continue;
                             }
                         }
+                    }
+                }
+
+                if let IRNode::Reference(it) = &value {
+                    if !it.starts_with('"') && self.function.0 == "tellraw" {
+                        // NBT interpret, yadda yadda
+                        let data = json!({
+                            "storage": "dpscript:core/vars",
+                            "nbt": it,
+                            "interpret": true,
+                        });
+
+                        args.push(IRNode::Literal(IRLiteral::String(serde_json::to_string(
+                            &data,
+                        )?)));
+
+                        continue;
                     }
                 }
 

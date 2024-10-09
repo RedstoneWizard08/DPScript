@@ -102,6 +102,9 @@ pub enum Token {
     Inline,
 
     // ========================================
+    /// "sub"
+    Sub,
+
     /// "store"
     Store,
 
@@ -169,6 +172,9 @@ pub enum Token {
 
     /// "nbt"
     Nbt,
+
+    /// "goto"
+    Goto,
 }
 
 impl fmt::Display for Token {
@@ -205,6 +211,7 @@ impl fmt::Display for Token {
             Self::Id => write!(f, "id"),
             Self::Import => write!(f, "import"),
             Self::Inline => write!(f, "inline"),
+            Self::Sub => write!(f, "sub"),
             Self::Store => write!(f, "store"),
             Self::Selector => write!(f, "selector"),
             Self::Export => write!(f, "export"),
@@ -226,6 +233,7 @@ impl fmt::Display for Token {
             Self::Tick => write!(f, "tick"),
             Self::Init => write!(f, "init"),
             Self::Nbt => write!(f, "nbt"),
+            Self::Goto => write!(f, "goto"),
         }
     }
 }

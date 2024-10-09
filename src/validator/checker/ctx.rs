@@ -1,6 +1,6 @@
 use crate::{
     fake_span, Block, Conditional, Enum, Export, ExportNode, Function, Import, Loop, Module,
-    Objective, Reference, Result, Type, TypeKind, ValidatorError, Variable,
+    Objective, Reference, Result, Subroutine, Type, TypeKind, ValidatorError, Variable,
 };
 use miette::{NamedSource, SourceOffset, SourceSpan};
 use serde::Serialize;
@@ -24,6 +24,7 @@ pub struct CheckerContext {
     pub cur_elses: Vec<Conditional>, // These have to be separate
     pub cur_loops: Vec<Loop>,
     pub cur_modules: Vec<Module>,
+    pub cur_subroutines: Vec<Subroutine>,
 }
 
 impl CheckerContext {
@@ -33,6 +34,36 @@ impl CheckerContext {
 
     pub fn get_source(&self) -> NamedSource<String> {
         self.cur_modules.clone().last().unwrap().source.clone()
+    }
+
+    pub fn get_subroutines(&self) -> HashMap<String, Subroutine> {
+        let mut map = HashMap::new();
+
+        if let Some(it) = &self.cur_fn {
+            map.extend(it.get_subroutines());
+        }
+
+        if let Some(it) = &self.cur_block {
+            map.extend(it.get_subroutines());
+        }
+
+        for it in &self.cur_conds {
+            map.extend(it.get_if_subroutines());
+        }
+
+        for it in &self.cur_elses {
+            map.extend(it.get_if_subroutines());
+        }
+
+        for it in &self.cur_loops {
+            map.extend(it.get_subroutines());
+        }
+
+        for it in &self.cur_subroutines {
+            map.extend(it.get_subroutines());
+        }
+
+        map
     }
 
     // TODO: Stop at a node, so we only get variables defined **before** the node
@@ -120,13 +151,13 @@ impl CheckerContext {
         }
 
         for it in &mut self.cur_conds {
-            for item in it.get_locals() {
+            for item in it.get_if_locals() {
                 locals.insert(item.name.0.clone(), item);
             }
         }
 
         for it in &mut self.cur_elses {
-            for item in it.get_locals() {
+            for item in it.get_else_locals() {
                 locals.insert(item.name.0.clone(), item);
             }
         }

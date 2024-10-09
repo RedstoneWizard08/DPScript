@@ -1,28 +1,26 @@
 use std::collections::HashMap;
 
-use super::{Node, Subroutine, Variable};
+use super::{Node, Variable};
+use crate::Spanned;
 use miette::SourceSpan;
 use serde::Serialize;
 
 #[derive(Debug, Clone, Serialize)]
-pub struct Block {
-    /// Is this an init block?
-    pub is_init: bool,
-
-    /// Is this a tick block?
-    pub is_tick: bool,
+pub struct Subroutine {
+    /// The name of the subroutine
+    pub name: Spanned<String>,
 
     /// The span
     pub span: SourceSpan,
 
-    /// The block body
+    /// The subroutine body
     pub body: Vec<Node>,
 
-    /// A cache of local variables defined in the block.
+    /// A cache of local variables defined in the subroutine.
     pub locals: Option<Vec<Variable>>,
 }
 
-impl Block {
+impl Subroutine {
     fn cache_vars(&mut self) -> &mut Self {
         let mut vars = Vec::new();
 

@@ -64,6 +64,7 @@ impl AST {
             cur_elses: Vec::new(),
             cur_loops: Vec::new(),
             cur_modules: Vec::new(),
+            cur_subroutines: Vec::new(),
         })
     }
 

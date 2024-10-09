@@ -12,6 +12,7 @@ mod module;
 mod objective;
 mod ops;
 mod ret;
+mod sub;
 mod ty;
 mod var;
 
@@ -29,6 +30,7 @@ pub use module::*;
 pub use objective::*;
 pub use ops::*;
 pub use ret::*;
+pub use sub::*;
 pub use ty::*;
 pub use var::*;
 
@@ -54,6 +56,8 @@ pub enum Node {
     Objective(Objective),
     Conditional(Conditional),
     Export(Export),
+    Subroutine(Subroutine),
+    Goto(Spanned<String>),
 }
 
 #[derive(Debug, Clone, Serialize)]
@@ -86,6 +90,8 @@ impl Node {
             Self::Objective(o) => o.span,
             Self::Conditional(c) => c.span,
             Self::Export(e) => e.span,
+            Self::Subroutine(s) => s.span,
+            Self::Goto(g) => g.1,
         }
     }
 }
@@ -108,6 +114,8 @@ impl fmt::Display for Node {
             Self::Objective(_) => write!(f, "Objective"),
             Self::Conditional(_) => write!(f, "Conditional"),
             Self::Export(_) => write!(f, "Export"),
+            Self::Subroutine(_) => write!(f, "Subroutine"),
+            Self::Goto(_) => write!(f, "Goto"),
         }
     }
 }

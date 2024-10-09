@@ -71,7 +71,7 @@ impl Valued for Operation {
         }));
 
         let rhs = IRNode::Argument(IRArgumentOperation::Set(IRSetArgument {
-            index: 0,
+            index: 1,
             value: Box::new(self.rhs.get_value(cx, lcx, nodes)?),
         }));
 

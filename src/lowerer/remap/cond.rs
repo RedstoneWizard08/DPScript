@@ -6,12 +6,14 @@ impl Remap for Conditional {
         let mut me = Self {
             condition: Box::new(self.condition.remap_name(orig, new)),
             span: self.span,
-            locals: None,
+            if_locals: None,
+            else_locals: None,
             body: self.body.remap_name(orig, new),
             else_body: self.else_body.remap_name(orig, new),
         };
 
-        me.get_locals();
+        me.get_if_locals();
+        me.get_else_locals();
 
         me
     }

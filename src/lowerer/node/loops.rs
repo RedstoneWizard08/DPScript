@@ -41,7 +41,6 @@ impl Lowerable for Loop {
                     body.push(IRNode::Goto(join_block.clone()));
 
                     let id = format!("block{}", lcx.blocks);
-
                     lcx.blocks += 1;
 
                     lcx.block_nodes.push(IRBlock {

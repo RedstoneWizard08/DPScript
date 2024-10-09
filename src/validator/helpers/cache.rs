@@ -1,4 +1,4 @@
-use crate::{Block, CheckerContext, Conditional, Function, Loop, Module, Node, Result};
+use crate::{Block, CheckerContext, Conditional, Function, Loop, Module, Node, Result, Subroutine};
 
 impl Module {
     pub fn cache(&mut self, cx: &CheckerContext) -> Result<()> {
@@ -41,8 +41,10 @@ impl Block {
 
 impl Conditional {
     pub fn cache(&mut self, cx: &CheckerContext) -> Result<()> {
-        self.locals = None;
-        self.get_locals();
+        self.if_locals = None;
+        self.get_if_locals();
+        self.else_locals = None;
+        self.get_else_locals();
 
         for node in &mut self.body {
             node.cache(cx)?;
@@ -65,6 +67,19 @@ impl Loop {
     }
 }
 
+impl Subroutine {
+    pub fn cache(&mut self, cx: &CheckerContext) -> Result<()> {
+        self.locals = None;
+        self.get_locals();
+
+        for node in &mut self.body {
+            node.cache(cx)?;
+        }
+
+        Ok(())
+    }
+}
+
 impl Node {
     pub fn cache(&mut self, cx: &CheckerContext) -> Result<()> {
         match self {
@@ -73,6 +88,7 @@ impl Node {
             Self::Block(it) => it.cache(cx)?,
             Self::Conditional(it) => it.cache(cx)?,
             Self::Loop(it) => it.cache(cx)?,
+            Self::Subroutine(it) => it.cache(cx)?,
             _ => {}
         }
 

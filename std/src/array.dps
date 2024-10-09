@@ -1,14 +1,19 @@
 module std/array;
 
-import std/core/{
+import std/data/{
     set_data,
     get_data,
-    keyof,
-    storeof,
+    append_data,
+    append_data_from_index,
+    remove_data_index,
+    clone,
 };
 
+import std/core/{keyof, storeof};
 import std/core/stores/arrayLength;
+import std/core/stores/tempStorage;
 import std/core/players/temp;
+import std/scoreboard/{add_score, reset_score, set_data_from_score, set_score_from_data, set_score, operation, lessThan};
 
 objective tempArrayLength: dummy = "__dpscript_tmp_array_add_length";
 objective tempArrayPos: dummy = "__dpscript_tmp_array_add_pos";
@@ -18,59 +23,49 @@ objective tempOutputLen: dummy = "__dpscript_tmp_array_output_len";
 pub fn array_add(arr: Any[], add: Any) {
     const stor = storeof(arr);
     const key = keyof(arr);
-    const pat = path: "{store}/{key}";
-    
-    tempArrayLength.set(temp, arrayLength.get(pat));
 
-    stor.append(key, add);
-    
-    tempArrayLength.add(temp, 1);
-
-    arrayLength.set(pat, tempArrayLength.get(temp));
+    set_score_from_data(tempArrayLength, temp, arrayLength, key);
+    append_data(stor, key, storeof(add), keyof(add));
+    add_score(tempArrayLength, temp, 1);
+    set_data_from_score(stor, key, tempArrayLength, temp);
+    reset_score(tempArrayLength, temp);
 }
 
 pub fn array_add_all(arr: Any[], add: Any[]) {
     const stor = storeof(arr);
     const key = keyof(arr);
-    const pat = path: "{stor}/{key}";
-
     const addStore = storeof(add);
     const addKey = keyof(add);
-    const addPath = path: "{addStore}/{addKey}";
     
-    tempArrayLength.set(temp, arrayLength.get(pat));
-    tempOutputLen.set(temp, arrayLength.get(pat));
-    tempInputLen.set(temp, arrayLength.get(addPath));
-    tempArrayPos.set(temp, 0);
+    set_score_from_data(tempArrayLength, temp, arrayLength, key);
+    set_score_from_data(tempOutputLen, temp, arrayLength, key);
+    set_score_from_data(tempInputLen, temp, arrayLength, addKey);
+    set_score(tempArrayPos, temp, 0);
 
-    let arrCopy = arr.cloneToTemp();
-    let addCopy = add.cloneToTemp();
+    clone(stor, key, tempStorage, path: "arr_copy");
+    clone(addStore, addKey, tempStorage, path: "add_copy");
 
-    array_add_all_sub(arrCopy, addCopy);
-    stor.set(key, arrCopy);
+    let arrCopy = get_data(tempStorage, path: "arr_copy");
+    let addCopy = get_data(tempStorage, path: "add_copy");
 
-    tempArrayLength.reset(temp);
-    tempArrayPos.reset(temp);
+    goto appender;
 
-    tempOutputLen.operation(ScoreboardOps::Add, temp, tempInputLen, temp);
+    set_data(stor, key, arrCopy);
+    reset_score(tempArrayLength, temp);
+    reset_score(tempArrayPos, temp);
+    operation(tempOutputLen, temp, path: "+=", tempInputLen, temp);
+    set_data_from_score(arrayLength, key, tempOutputLen, temp);
+    reset_score(tempOutputLen, temp);
+    reset_score(tempInputLen, temp);
 
-    arrayLength.set(pat, tempOutputLen.get(temp));
+    sub appender {
+        append_data_from_index(tempStorage, path: "arr_copy", tempStorage, path: "add_copy", 0);
+        remove_data_index(tempStorage, path: "add_copy", 0);
+        add_score(tempArrayPos, temp, 1);
 
-    tempOutputLen.reset(temp);
-    tempInputLen.reset(temp);
-}
-
-fn array_add_all_sub(arr: Any[], add: Any[]) {
-    let addKey = keyof(add);
-    let s1 = storeof(arr);
-    let s2 = storeof(add);
-    
-    s1.append(keyof(arr), add.get(0));
-    s2.remove(path: "{addKey}[0]");
-
-    tempArrayPos.add(temp, 1);
-
-    if tempArrayPos.lt(temp, tempArrayLength, temp) {
-        array_add_all_sub(arr, add);
+        if lessThan(tempArrayPos, temp, tempArrayLength, temp) {
+            goto appender;
+        }
     }
 }
+
