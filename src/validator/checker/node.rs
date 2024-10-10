@@ -23,6 +23,22 @@ impl Checker<Node> for Node {
             Node::Operation(op) => Operation::check(op, cx),
             Node::Subroutine(sub) => Subroutine::check(sub, cx),
 
+            Node::Ident(id) => {
+                let refs = cx.get_refs()?;
+                let subs = cx.get_subroutines();
+
+                if !refs.contains_key(&id.0) && !subs.contains_key(&id.0) {
+                    return Err(ValidatorError {
+                        src: module.source.clone(),
+                        at: id.1,
+                        err: format!("Could not resolve reference: {}", id.0),
+                    }
+                    .into());
+                }
+
+                Ok(())
+            }
+
             Node::Goto(it) => {
                 if !cx.get_subroutines().contains_key(&it.0) {
                     return Err(ValidatorError {
@@ -36,8 +52,8 @@ impl Checker<Node> for Node {
                 Ok(())
             }
 
-            // Literals and idents on their own are always valid and exports are taken care of during `Module::get_exports()`
-            Node::Export(_) | Node::Literal(_) | Node::Ident(_) => Ok(()),
+            // Literals on their own are always valid and exports are taken care of during `Module::get_exports()`
+            Node::Export(_) | Node::Literal(_) => Ok(()),
 
             _ => Err(ValidatorError {
                 src: module.source.clone(),
