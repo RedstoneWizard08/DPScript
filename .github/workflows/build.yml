@@ -42,7 +42,7 @@ jobs:
           mkdir -p ~/.zig
 
           curl -fsSL \
-            "https://ziglang.org/builds/zig-linux-$(uname -m)-0.13.0-dev.46+3648d7df1.tar.xz" | \
+            "https://ziglang.org/builds/zig-linux-$(uname -m)-0.13.0.tar.xz" | \
             tar -xJ -C ~/.zig --strip-components 1
 
           chmod a+rx ~/.zig/zig
