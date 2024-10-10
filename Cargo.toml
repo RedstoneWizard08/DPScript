@@ -2,6 +2,8 @@
 name = "dpscript"
 version = "0.2.0"
 edition = "2021"
+description = "A transpiled programming language to aid in Datapack development."
+license = "MIT"
 repository = "https://github.com/RedstoneWizard08/DPScript"
 
 [[bin]]
