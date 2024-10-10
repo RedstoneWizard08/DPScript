@@ -69,7 +69,7 @@
                         }
                     },
                     "contentName": "string.dpscript_ir",
-                    "end": "(')",
+                    "end": "([^\\x{005c}]')",
                     "endCaptures": {
                         "1": {
                             "name": "string.dpscript_ir"
@@ -84,7 +84,7 @@
                         }
                     },
                     "contentName": "string.dpscript_ir",
-                    "end": "(\\\")",
+                    "end": "([^\\x{005c}]\\\")",
                     "endCaptures": {
                         "1": {
                             "name": "string.dpscript_ir"

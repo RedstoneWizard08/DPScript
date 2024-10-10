@@ -138,7 +138,7 @@
           <key>contentName</key>
           <string>string.dpscript</string>
           <key>end</key>
-          <string>(\&quot;)</string>
+          <string>([^\x{005c}]\&quot;)</string>
           <key>endCaptures</key>
           <dict>
             <key>1</key>
@@ -150,7 +150,7 @@
         </dict>
         <dict>
           <key>match</key>
-          <string>(\(|\)|\{|\}|\[|\]|\.|#|\/|\*)</string>
+          <string>(\(|\)|\{|\}|\[|\]|\.|#|\+|\*|\-|\/[^\/])</string>
           <key>name</key>
           <string>punctuation.dpscript</string>
         </dict>

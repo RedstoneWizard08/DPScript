@@ -4,6 +4,7 @@
     "description": "Language support for DPScript",
     "version": "0.0.1",
     "license": "MIT",
+    "main": "dist/extension.js",
     "repository": {
         "type": "git",
         "url": "https://github.com/RedstoneWizard08/DPScript"
@@ -16,6 +17,10 @@
     },
     "categories": [
         "Programming Languages"
+    ],
+    "enabledApiProposals": [],
+    "activationEvents": [
+        "onLanguage:dps"
     ],
     "contributes": {
         "languages": [
@@ -40,6 +45,13 @@
                     ".dpir"
                 ],
                 "configuration": "./language-configuration.json"
+            },
+            {
+                "id": "iro",
+                "extensions": [
+                    ".iro"
+                ],
+                "configuration": "./language-configuration.json"
             }
         ],
         "grammars": [
@@ -52,15 +64,50 @@
                 "language": "dpscript_ir",
                 "scopeName": "source.dpscript_ir",
                 "path": "./syntaxes/dpscript_ir.tmLanguage.json"
+            },
+            {
+                "language": "iro",
+                "scopeName": "source.iro",
+                "path": "./syntaxes/iro.tmLanguage.json"
             }
-        ]
+        ],
+        "configuration": {
+            "type": "object",
+            "title": "dscls",
+            "properties": {
+                "dscls.trace.server": {
+                    "type": "string",
+                    "scope": "window",
+                    "enum": [
+                        "off",
+                        "messages",
+                        "verbose"
+                    ],
+                    "enumDescriptions": [
+                        "No traces",
+                        "Error only",
+                        "Full log"
+                    ],
+                    "default": "off",
+                    "description": "Traces the communication between VSCode and the language server."
+                }
+            }
+        }
     },
     "scripts": {
         "fmt": "prettier --write .",
-        "vspack": "vsce package"
+        "vspack": "vsce package",
+        "vscode:prepublish": "npm run compile",
+        "compile": "tsc -b",
+        "watch": "tsc -b -w",
+        "postinstall": "cd client && pnpm i"
     },
     "devDependencies": {
+        "@types/node": "^22.7.5",
+        "@vscode/test-cli": "^0.0.10",
         "@vscode/vsce": "^3.1.1",
-        "prettier": "^3.3.3"
+        "prettier": "^3.3.3",
+        "typescript": "^5.6.3",
+        "vscode-test": "^1.6.1"
     }
 }

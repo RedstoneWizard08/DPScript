@@ -6,3 +6,5 @@ node_modules
 *.tokens.ron
 std/out
 example/out
+tsconfig.tsbuildinfo
+dist

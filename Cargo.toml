@@ -9,7 +9,7 @@ name = "dsc"
 path = "src/bin/dsc.rs"
 
 [[bin]]
-name = "dpscript-lsp"
+name = "dscls"
 path = "src/bin/lsp.rs"
 
 [dependencies]

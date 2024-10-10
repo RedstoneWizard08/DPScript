@@ -5,10 +5,10 @@
 <dict>
   <key>fileTypes</key>
   <array> 
-    <string>dpir</string>
+    <string>iro</string>
    </array>
   <key>name</key>
-  <string>dpscript_ir</string>
+  <string>iro</string>
   <key>patterns</key>
   <array> 
     <dict>
@@ -17,9 +17,9 @@
     </dict>
    </array>
   <key>scopeName</key>
-  <string>source.dpscript_ir</string>
+  <string>source.iro</string>
   <key>uuid</key>
-  <string>ae8328da-80d6-42c8-b2a2-03468f3b0819</string>
+  <string>e0fbbdae-90c3-466f-a089-6436289cb493</string>
   <key>repository</key>
   <dict>
     <key>main</key>
@@ -28,39 +28,69 @@
       <array> 
         <dict>
           <key>match</key>
-          <string>(//.*)</string>
+          <string>\b(styles|contexts)</string>
           <key>name</key>
-          <string>comment.dpscript_ir</string>
+          <string>keyword.iro</string>
         </dict>
         <dict>
           <key>match</key>
-          <string>\b(func|define|command|argument|call|tag|entry|goto|condition|if|else|join)</string>
+          <string>\b(name|file_extensions|textmate_uuid|regex|color|ace_scope|textmate_scope|pygments_scope|include|pattern|style|context)</string>
           <key>name</key>
-          <string>keyword.dpscript_ir</string>
+          <string>support.function.iro</string>
         </dict>
         <dict>
           <key>match</key>
-          <string>(^(\s+)?data)</string>
+          <string>\b([a-z_\x{0024}][\w\x{0024}]*)</string>
           <key>name</key>
-          <string>keyword.dpscript_ir</string>
+          <string>entity.name.iro</string>
         </dict>
         <dict>
-          <key>match</key>
-          <string>\b(copy|append|set|get|variable_alias)\b</string>
-          <key>name</key>
-          <string>entity.name.tag.dpscript_ir</string>
+          <key>begin</key>
+          <string>((\\)?=)</string>
+          <key>beginCaptures</key>
+          <dict>
+            <key>1</key>
+            <dict>
+              <key>name</key>
+              <string>punctuation.iro</string>
+            </dict>
+          </dict>
+          <key>contentName</key>
+          <string>string.iro</string>
+          <key>end</key>
+          <string>(^(?=.{0,1})(?:|))</string>
+          <key>endCaptures</key>
+          <dict>
+            <key>1</key>
+            <dict>
+              <key>name</key>
+              <string>comment.iro</string>
+            </dict>
+          </dict>
         </dict>
         <dict>
-          <key>match</key>
-          <string>(\$\b([A-Za-z_\x{0024}][\w\x{0024}]*))</string>
-          <key>name</key>
-          <string>entity.name.other.dpscript_ir</string>
-        </dict>
-        <dict>
-          <key>match</key>
-          <string>\b([A-Za-z_\x{0024}][\w\x{0024}]*)</string>
-          <key>name</key>
-          <string>entity.name.dpscript_ir</string>
+          <key>begin</key>
+          <string>(\&quot;)</string>
+          <key>beginCaptures</key>
+          <dict>
+            <key>1</key>
+            <dict>
+              <key>name</key>
+              <string>string.iro</string>
+            </dict>
+          </dict>
+          <key>contentName</key>
+          <string>string.iro</string>
+          <key>end</key>
+          <string>(\&quot;)</string>
+          <key>endCaptures</key>
+          <dict>
+            <key>1</key>
+            <dict>
+              <key>name</key>
+              <string>string.iro</string>
+            </dict>
+          </dict>
         </dict>
         <dict>
           <key>include</key>
@@ -74,14 +104,14 @@
             <key>1</key>
             <dict>
               <key>name</key>
-              <string>punctuation.dpscript_ir</string>
+              <string>punctuation.iro</string>
             </dict>
           </dict>
           <key>patterns</key>
           <array> 
             <dict>
               <key>include</key>
-              <string>#main__1</string>
+              <string>#main__3</string>
             </dict>
            </array>
           <key>end</key>
@@ -91,75 +121,39 @@
             <key>1</key>
             <dict>
               <key>name</key>
-              <string>punctuation.dpscript_ir</string>
+              <string>punctuation.iro</string>
             </dict>
           </dict>
         </dict>
         <dict>
           <key>match</key>
-          <string>(&amp;|=|;|,|@|\+|\!|:|%)</string>
+          <string>\b([\x{003b}.\x{002c}\x{003a}\x{0026}-\x{003e}\x{003c}\x{0023}]+)</string>
           <key>name</key>
-          <string>punctuation.dpscript_ir</string>
-        </dict>
-        <dict>
-          <key>begin</key>
-          <string>(&apos;)</string>
-          <key>beginCaptures</key>
-          <dict>
-            <key>1</key>
-            <dict>
-              <key>name</key>
-              <string>string.dpscript_ir</string>
-            </dict>
-          </dict>
-          <key>contentName</key>
-          <string>string.dpscript_ir</string>
-          <key>end</key>
-          <string>([^\x{005c}]&apos;)</string>
-          <key>endCaptures</key>
-          <dict>
-            <key>1</key>
-            <dict>
-              <key>name</key>
-              <string>string.dpscript_ir</string>
-            </dict>
-          </dict>
-        </dict>
-        <dict>
-          <key>begin</key>
-          <string>(\&quot;)</string>
-          <key>beginCaptures</key>
-          <dict>
-            <key>1</key>
-            <dict>
-              <key>name</key>
-              <string>string.dpscript_ir</string>
-            </dict>
-          </dict>
-          <key>contentName</key>
-          <string>string.dpscript_ir</string>
-          <key>end</key>
-          <string>([^\x{005c}]\&quot;)</string>
-          <key>endCaptures</key>
-          <dict>
-            <key>1</key>
-            <dict>
-              <key>name</key>
-              <string>string.dpscript_ir</string>
-            </dict>
-          </dict>
+          <string>punctuation.iro</string>
         </dict>
         <dict>
           <key>match</key>
-          <string>(\(|\)|\{|\}|\[|\])</string>
+          <string>(&amp;|=|;|,)</string>
           <key>name</key>
-          <string>punctuation.dpscript_ir</string>
+          <string>punctuation.iro</string>
+        </dict>
+        <dict>
+          <key>match</key>
+          <string>(\(|\)|\{|\}|\[|\]|\.|\+|\*|\-|\\|\||:)</string>
+          <key>name</key>
+          <string>punctuation.iro</string>
+        </dict>
+        <dict>
+          <key>match</key>
+          <string>(^(\s+)?#.*)</string>
+          <key>name</key>
+          <string>comment.iro</string>
         </dict>
         <dict>
           <key>match</key>
           <string>([^\s])</string>
           <key>name</key>
-          <string>invalid.dpscript_ir</string>
+          <string>invalid.iro</string>
         </dict>
        </array>
     </dict>
@@ -167,10 +161,6 @@
     <dict>
       <key>patterns</key>
       <array> 
-        <dict>
-          <key>include</key>
-          <string>#main</string>
-        </dict>
        </array>
     </dict>
     <key>main__2</key>
@@ -183,6 +173,10 @@
     <dict>
       <key>patterns</key>
       <array> 
+        <dict>
+          <key>include</key>
+          <string>#main</string>
+        </dict>
        </array>
     </dict>
     <key>numeric</key>
@@ -193,7 +187,7 @@
           <key>match</key>
           <string>(\b\d+)</string>
           <key>name</key>
-          <string>constant.numeric.dpscript_ir</string>
+          <string>constant.numeric.iro</string>
         </dict>
        </array>
     </dict>

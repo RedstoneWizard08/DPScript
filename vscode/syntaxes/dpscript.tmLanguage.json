@@ -84,7 +84,7 @@
                         }
                     },
                     "contentName": "string.dpscript",
-                    "end": "(\\\")",
+                    "end": "([^\\x{005c}]\\\")",
                     "endCaptures": {
                         "1": {
                             "name": "string.dpscript"
@@ -92,7 +92,7 @@
                     }
                 },
                 {
-                    "match": "(\\(|\\)|\\{|\\}|\\[|\\]|\\.|#|\\/|\\*)",
+                    "match": "(\\(|\\)|\\{|\\}|\\[|\\]|\\.|#|\\+|\\*|\\-|\\/[^\\/])",
                     "name": "punctuation.dpscript"
                 },
                 {
