@@ -1,7 +1,7 @@
 use super::Analyzer;
 use crate::{
-    check_ir_token, IRArgumentOperation, IRGetArgument, IRNode, IRParserError, IRSetArgument,
-    IRToken, IRTokenCursor, Result, Spanned,
+    check_ir_token, IRArgumentOperation, IRGetArgument, IRNode, IRSetArgument, IRToken,
+    IRTokenCursor, Result, Spanned, UnnamedLexerError,
 };
 
 impl Analyzer<IRArgumentOperation> for IRArgumentOperation {
@@ -23,7 +23,7 @@ impl Analyzer<IRArgumentOperation> for IRArgumentOperation {
                         IRToken::Int(it) => it as usize,
 
                         _ => {
-                            return Err(IRParserError {
+                            return Err(UnnamedLexerError {
                                 src: cursor.source(),
                                 at: it.1,
                                 err: format!("Unexpected token: {}", it.0),
@@ -40,7 +40,7 @@ impl Analyzer<IRArgumentOperation> for IRArgumentOperation {
                         IRToken::Ident(it) => it,
 
                         _ => {
-                            return Err(IRParserError {
+                            return Err(UnnamedLexerError {
                                 src: cursor.source(),
                                 at: it.1,
                                 err: format!("Unexpected token: {}", it.0),
@@ -63,7 +63,7 @@ impl Analyzer<IRArgumentOperation> for IRArgumentOperation {
                         IRToken::Int(it) => it as usize,
 
                         _ => {
-                            return Err(IRParserError {
+                            return Err(UnnamedLexerError {
                                 src: cursor.source(),
                                 at: it.1,
                                 err: format!("Unexpected token: {}", it.0),
@@ -77,7 +77,7 @@ impl Analyzer<IRArgumentOperation> for IRArgumentOperation {
                     let it = cursor.next_or_die()?;
 
                     let Some(val) = IRNode::analyze(it.clone(), cursor, &mut Vec::new())? else {
-                        return Err(IRParserError {
+                        return Err(UnnamedLexerError {
                             src: cursor.source(),
                             at: it.1,
                             err: "Could not parse a node for a value!".into(),
@@ -100,7 +100,7 @@ impl Analyzer<IRArgumentOperation> for IRArgumentOperation {
                 }
 
                 _ => {
-                    return Err(IRParserError {
+                    return Err(UnnamedLexerError {
                         src: cursor.source(),
                         at: it.1,
                         err: format!("Unexpected token: {}", it.0),

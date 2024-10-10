@@ -1,8 +1,8 @@
 use super::Analyzer;
 use crate::{
     add_ir_return, check_ir_token, IRArgumentOperation, IRBlock, IRCall, IRCommand, IRConcat,
-    IRCondition, IRDataOperation, IRDefinition, IRExecute, IRFunction, IRLiteral, IRNode,
-    IRParserError, IRTag, IRToken, IRTokenCursor, Result, Spanned,
+    IRCondition, IRDataOperation, IRDefinition, IRExecute, IRFunction, IRLiteral, IRNode, IRTag,
+    IRToken, IRTokenCursor, Result, Spanned, UnnamedLexerError,
 };
 
 impl Analyzer<IRNode> for IRNode {
@@ -85,7 +85,7 @@ impl Analyzer<IRNode> for IRNode {
                 IRToken::Ident(it) => it,
 
                 _ => {
-                    return Err(IRParserError {
+                    return Err(UnnamedLexerError {
                         src: cursor.source(),
                         at: it.1,
                         err: format!("Unexpected token: {}", it.0),
@@ -101,7 +101,7 @@ impl Analyzer<IRNode> for IRNode {
         if let IRToken::Ident(id) = item.0 {
             Ok(Some(IRNode::Reference(id)))
         } else {
-            Err(IRParserError {
+            Err(UnnamedLexerError {
                 src: cursor.source(),
                 at: item.1,
                 err: format!("Unexpected token while parsing an IRNode: {}", item.0),

@@ -8,7 +8,7 @@ impl SerializeNode for IRBlock {
             self.id,
             self.body
                 .iter()
-                .map(|v| v.serialize_node())
+                .filter_map(|v| v.serialize_node())
                 .indented(1)
                 .join("\n")
         )

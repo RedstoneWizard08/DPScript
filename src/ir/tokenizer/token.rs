@@ -14,6 +14,9 @@ pub enum IRToken {
     /// n
     Int(i64),
 
+    /// n.n
+    Float(f64),
+
     // =============== SYMBOLS ===============
     /// ":"
     Colon,
@@ -132,6 +135,7 @@ impl fmt::Display for IRToken {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self.clone() {
             Self::Int(it) => write!(f, "{}", it),
+            Self::Float(it) => write!(f, "{}", it),
             Self::Literal(it) => write!(f, "'{}'", it),
             Self::Ident(it) => write!(f, "{}", it),
             Self::Colon => write!(f, ":"),

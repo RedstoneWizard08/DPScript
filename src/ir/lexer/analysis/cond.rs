@@ -1,6 +1,6 @@
 use super::Analyzer;
 use crate::{
-    check_ir_token, IRCondition, IRNode, IRParserError, IRToken, IRTokenCursor, Result, Spanned,
+    check_ir_token, IRCondition, IRNode, IRToken, IRTokenCursor, Result, Spanned, UnnamedLexerError,
 };
 
 impl Analyzer<IRCondition> for IRCondition {
@@ -18,7 +18,7 @@ impl Analyzer<IRCondition> for IRCondition {
                 IRToken::Literal(it) => it,
 
                 _ => {
-                    return Err(IRParserError {
+                    return Err(UnnamedLexerError {
                         src: cursor.source(),
                         at: it.1,
                         err: format!("Unexpected token: {}", it.0),
@@ -38,7 +38,7 @@ impl Analyzer<IRCondition> for IRCondition {
                 IRToken::Ident(it) => it,
 
                 _ => {
-                    return Err(IRParserError {
+                    return Err(UnnamedLexerError {
                         src: cursor.source(),
                         at: it.1,
                         err: format!("Unexpected token: {}", it.0),
@@ -58,7 +58,7 @@ impl Analyzer<IRCondition> for IRCondition {
                 IRToken::Ident(it) => it,
 
                 _ => {
-                    return Err(IRParserError {
+                    return Err(UnnamedLexerError {
                         src: cursor.source(),
                         at: it.1,
                         err: format!("Unexpected token: {}", it.0),
@@ -78,7 +78,7 @@ impl Analyzer<IRCondition> for IRCondition {
                 IRToken::Ident(it) => it,
 
                 _ => {
-                    return Err(IRParserError {
+                    return Err(UnnamedLexerError {
                         src: cursor.source(),
                         at: it.1,
                         err: format!("Unexpected token: {}", it.0),

@@ -1,7 +1,7 @@
 use super::Analyzer;
 use crate::{
     check_ir_token, AddDataOperation, CopyDataOperation, IRConcat, IRDataOperation, IRNode,
-    IRParserError, IRToken, IRTokenCursor, Result, Spanned,
+    IRToken, IRTokenCursor, Result, Spanned, UnnamedLexerError,
 };
 
 impl Analyzer<IRDataOperation> for IRDataOperation {
@@ -23,7 +23,7 @@ impl Analyzer<IRDataOperation> for IRDataOperation {
                         IRToken::Ident(id) => id,
 
                         _ => {
-                            return Err(IRParserError {
+                            return Err(UnnamedLexerError {
                                 src: cursor.source(),
                                 at: it.1,
                                 err: format!("Unexpected token: {}", it.0),
@@ -72,7 +72,7 @@ impl Analyzer<IRDataOperation> for IRDataOperation {
                         IRToken::Ident(id) => id,
 
                         _ => {
-                            return Err(IRParserError {
+                            return Err(UnnamedLexerError {
                                 src: cursor.source(),
                                 at: it.1,
                                 err: format!("Unexpected token: {}", it.0),
@@ -121,7 +121,7 @@ impl Analyzer<IRDataOperation> for IRDataOperation {
                         IRToken::Ident(id) => id,
 
                         _ => {
-                            return Err(IRParserError {
+                            return Err(UnnamedLexerError {
                                 src: cursor.source(),
                                 at: it.1,
                                 err: format!("Unexpected token: {}", it.0),
@@ -138,7 +138,7 @@ impl Analyzer<IRDataOperation> for IRDataOperation {
                         IRToken::Ident(id) => id,
 
                         _ => {
-                            return Err(IRParserError {
+                            return Err(UnnamedLexerError {
                                 src: cursor.source(),
                                 at: it.1,
                                 err: format!("Unexpected token: {}", it.0),
@@ -151,7 +151,7 @@ impl Analyzer<IRDataOperation> for IRDataOperation {
                 }
 
                 _ => {
-                    return Err(IRParserError {
+                    return Err(UnnamedLexerError {
                         src: cursor.source(),
                         at: it.1,
                         err: format!("Unexpected token: {}", it.0),

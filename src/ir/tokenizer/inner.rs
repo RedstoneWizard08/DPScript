@@ -1,5 +1,5 @@
 use super::{IRToken, IRTokenizer};
-use crate::{IRParserError, IsNotIdent, Result};
+use crate::{IsNotIdent, Result, UnnamedTokenizerError};
 
 impl IRTokenizer {
     pub(super) fn tokenize_inner(&mut self, ch: char) -> Result<()> {
@@ -311,7 +311,7 @@ impl IRTokenizer {
             buf.push(ch);
 
             while let Some(tkn) = self.cursor.peek() {
-                if tkn.is_ascii_digit() {
+                if tkn.is_ascii_digit() || (tkn == '.' && !buf.contains(&'.')) {
                     buf.push(tkn);
                     self.cursor.skip(1);
                 } else {
@@ -321,18 +321,31 @@ impl IRTokenizer {
 
             let span = c2.span(buf.len());
 
-            if let Ok(it) = buf.iter().collect::<String>().parse() {
-                self.tokens.push((IRToken::Int(it), span));
-            } else {
-                return Err(IRParserError {
-                    src: self.cursor.source(),
-                    at: span,
-                    err: format!(
-                        "Could not parse as an int: {}",
-                        buf.iter().collect::<String>()
-                    ),
+            if buf.contains(&'.') {
+                if let Ok(it) = buf.iter().collect::<String>().parse() {
+                    self.tokens.push((IRToken::Float(it), span));
+                } else {
+                    return Err(UnnamedTokenizerError {
+                        src: self.cursor.source(),
+                        at: span,
+                        err: format!(
+                            "Could not parse a float: {}",
+                            buf.iter().collect::<String>()
+                        ),
+                    }
+                    .into());
                 }
-                .into());
+            } else {
+                if let Ok(it) = buf.iter().collect::<String>().parse() {
+                    self.tokens.push((IRToken::Int(it), span));
+                } else {
+                    return Err(UnnamedTokenizerError {
+                        src: self.cursor.source(),
+                        at: span,
+                        err: format!("Could not parse an int: {}", buf.iter().collect::<String>()),
+                    }
+                    .into());
+                }
             }
 
             return Ok(());
@@ -359,7 +372,7 @@ impl IRTokenizer {
             return Ok(());
         }
 
-        Err(IRParserError {
+        Err(UnnamedTokenizerError {
             src: self.cursor.source(),
             at: self.cursor.span(1),
             err: format!("Unexpected character during tokenization: {}", ch),

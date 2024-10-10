@@ -1,6 +1,6 @@
 use super::Analyzer;
 use crate::{
-    check_ir_token, IRLiteral, IRNode, IRParserError, IRToken, IRTokenCursor, Result, Spanned,
+    check_ir_token, IRLiteral, IRNode, IRToken, IRTokenCursor, Result, Spanned, UnnamedLexerError,
 };
 
 impl Analyzer<IRLiteral> for IRLiteral {
@@ -25,7 +25,7 @@ impl Analyzer<IRLiteral> for IRLiteral {
                     let tkn = cursor.next_or_die()?;
 
                     let IRToken::Ident(id) = tkn.0 else {
-                        return Err(IRParserError {
+                        return Err(UnnamedLexerError {
                             src: cursor.source(),
                             at: tkn.1,
                             err: format!("Unexpected token: {}", tkn.0),
@@ -54,7 +54,7 @@ impl Analyzer<IRLiteral> for IRLiteral {
                     let tkn = cursor.next_or_die()?;
 
                     let IRToken::Ident(id) = tkn.0 else {
-                        return Err(IRParserError {
+                        return Err(UnnamedLexerError {
                             src: cursor.source(),
                             at: tkn.1,
                             err: format!("Unexpected token: {}", tkn.0),

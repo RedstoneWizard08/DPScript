@@ -1,9 +1,9 @@
 use super::SerializeNode;
 use crate::IRNode;
 
-impl SerializeNode for IRNode {
-    fn serialize_node(&self) -> String {
-        match self {
+impl IRNode {
+    pub fn serialize_node(&self) -> Option<String> {
+        Some(match self {
             Self::Argument(it) => it.serialize_node(),
             Self::Block(it) => it.serialize_node(),
             Self::Call(it) => it.serialize_node(),
@@ -18,6 +18,13 @@ impl SerializeNode for IRNode {
             Self::Condition(it) => it.serialize_node(),
             Self::Reference(it) => it.clone(),
             Self::Goto(it) => format!("goto: ${};", it),
-        }
+            Self::None => return None,
+
+            Self::Group(it) => it
+                .iter()
+                .filter_map(|v| v.serialize_node())
+                .collect::<Vec<_>>()
+                .join("\n"),
+        })
     }
 }

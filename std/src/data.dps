@@ -17,9 +17,8 @@ pub facade fn remove_data_index(stor: Store, pat: NBTPath, index: int);
 #[cmd("data modify storage %% %% set from storage %% %%")]
 pub facade fn clone(src: Store, src_path: NBTPath, dest: Store, dest_path: NBTPath);
 
-#[cmd("data modify storage %% %% set value %%")]
-pub facade fn set_data(storage: Store, pat: NBTPath, value: Any);
+pub compiler fn set_data(storage: Store, pat: NBTPath, value: Any);
 
 pub inline fn get_data(storage: Store, pat: NBTPath) -> Any {
-    clone(storage, pat, storeof(__RETURN_VAL__), keyof(__RETURN_VAL__));
+    clone(storeof(__RETURN_VAL__), keyof(__RETURN_VAL__), storage, pat);
 }

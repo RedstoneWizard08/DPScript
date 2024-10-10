@@ -1,6 +1,6 @@
 use super::Analyzer;
 use crate::{
-    check_ir_token, IRNode, IRParserError, IRTag, IRToken, IRTokenCursor, Result, Spanned,
+    check_ir_token, IRNode, IRTag, IRToken, IRTokenCursor, Result, Spanned, UnnamedLexerError,
 };
 
 impl Analyzer<IRTag> for IRTag {
@@ -16,7 +16,7 @@ impl Analyzer<IRTag> for IRTag {
                 IRToken::Literal(it) => it,
 
                 tkn => {
-                    return Err(IRParserError {
+                    return Err(UnnamedLexerError {
                         src: cursor.source(),
                         at: it.1,
                         err: format!("Unexpected token: {}", tkn),
@@ -48,7 +48,7 @@ impl Analyzer<IRTag> for IRTag {
                     entries.push(it);
                     check_ir_token!(remove buf_cursor == Semi);
                 } else {
-                    return Err(IRParserError {
+                    return Err(UnnamedLexerError {
                         src: cursor.source(),
                         at: item.1,
                         err: format!("Unexpected token: {}", item.0),

@@ -1,6 +1,6 @@
 use super::Analyzer;
 use crate::{
-    check_ir_token, IRCall, IRNode, IRParserError, IRToken, IRTokenCursor, Result, Spanned,
+    check_ir_token, IRCall, IRNode, IRToken, IRTokenCursor, Result, Spanned, UnnamedLexerError,
 };
 
 impl Analyzer<IRCall> for IRCall {
@@ -18,7 +18,7 @@ impl Analyzer<IRCall> for IRCall {
                 IRToken::Literal(it) => it,
 
                 _ => {
-                    return Err(IRParserError {
+                    return Err(UnnamedLexerError {
                         src: cursor.source(),
                         at: it.1,
                         err: format!("Unexpected token: {}", it.0),

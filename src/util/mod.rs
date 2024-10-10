@@ -3,12 +3,14 @@ mod cursor;
 mod ident;
 mod map;
 mod span;
+mod versions;
 
 pub use bits::*;
 pub use cursor::*;
 pub use ident::*;
 pub use map::*;
 pub use span::*;
+pub use versions::*;
 
 use miette::{SourceOffset, SourceSpan};
 

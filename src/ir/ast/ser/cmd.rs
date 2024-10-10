@@ -7,7 +7,7 @@ impl SerializeNode for IRCommand {
             "command: {};",
             self.cmd
                 .iter()
-                .map(|v| v.serialize_node())
+                .filter_map(|v| v.serialize_node())
                 .collect::<Vec<_>>()
                 .join(", ")
         )

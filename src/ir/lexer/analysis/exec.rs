@@ -1,6 +1,6 @@
 use super::Analyzer;
 use crate::{
-    check_ir_token, IRExecute, IRNode, IRParserError, IRToken, IRTokenCursor, Result, Spanned,
+    check_ir_token, IRExecute, IRNode, IRToken, IRTokenCursor, Result, Spanned, UnnamedLexerError,
 };
 
 impl Analyzer<IRExecute> for IRExecute {
@@ -18,7 +18,7 @@ impl Analyzer<IRExecute> for IRExecute {
                 IRToken::Literal(it) => it,
 
                 _ => {
-                    return Err(IRParserError {
+                    return Err(UnnamedLexerError {
                         src: cursor.source(),
                         at: it.1,
                         err: format!("Unexpected token: {}", it.0),
@@ -36,7 +36,7 @@ impl Analyzer<IRExecute> for IRExecute {
                 IRToken::Ident(it) => it,
 
                 _ => {
-                    return Err(IRParserError {
+                    return Err(UnnamedLexerError {
                         src: cursor.source(),
                         at: it.1,
                         err: format!("Unexpected token: {}", it.0),

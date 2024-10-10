@@ -24,11 +24,11 @@ pub fn array_add(arr: Any[], add: Any) {
     const stor = storeof(arr);
     const key = keyof(arr);
 
-    set_score_from_data(tempArrayLength, temp, arrayLength, key);
+    set_score_from_data(temp, tempArrayLength, arrayLength, key);
     append_data(stor, key, storeof(add), keyof(add));
-    add_score(tempArrayLength, temp, 1);
-    set_data_from_score(stor, key, tempArrayLength, temp);
-    reset_score(tempArrayLength, temp);
+    add_score(temp, tempArrayLength, 1);
+    set_data_from_score(stor, key, temp, tempArrayLength);
+    reset_score(temp, tempArrayLength);
 }
 
 pub fn array_add_all(arr: Any[], add: Any[]) {
@@ -37,33 +37,36 @@ pub fn array_add_all(arr: Any[], add: Any[]) {
     const addStore = storeof(add);
     const addKey = keyof(add);
     
-    set_score_from_data(tempArrayLength, temp, arrayLength, key);
-    set_score_from_data(tempOutputLen, temp, arrayLength, key);
-    set_score_from_data(tempInputLen, temp, arrayLength, addKey);
-    set_score(tempArrayPos, temp, 0);
+    set_score_from_data(temp, tempArrayLength, arrayLength, key);
+    set_score_from_data(temp, tempOutputLen, arrayLength, key);
+    set_score_from_data(temp, tempInputLen, arrayLength, addKey);
+    set_score(temp, tempArrayPos, 0);
 
     clone(stor, key, tempStorage, path: "arr_copy");
     clone(addStore, addKey, tempStorage, path: "add_copy");
 
-    let arrCopy = get_data(tempStorage, path: "arr_copy");
-    let addCopy = get_data(tempStorage, path: "add_copy");
+    const arrCopyPath = path: "arr_copy";
+    const addCopyPath = path: "add_copy";
+
+    let arrCopy = get_data(tempStorage, arrCopyPath);
+    let addCopy = get_data(tempStorage, addCopyPath);
 
     goto appender;
 
     set_data(stor, key, arrCopy);
-    reset_score(tempArrayLength, temp);
-    reset_score(tempArrayPos, temp);
-    operation(tempOutputLen, temp, path: "+=", tempInputLen, temp);
-    set_data_from_score(arrayLength, key, tempOutputLen, temp);
-    reset_score(tempOutputLen, temp);
-    reset_score(tempInputLen, temp);
+    reset_score(temp, tempArrayLength);
+    reset_score(temp, tempArrayPos);
+    operation(temp, tempOutputLen, path: "+=", temp, tempInputLen);
+    set_data_from_score(arrayLength, key, temp, tempOutputLen);
+    reset_score(temp, tempOutputLen);
+    reset_score(temp, tempInputLen);
 
     sub appender {
         append_data_from_index(tempStorage, path: "arr_copy", tempStorage, path: "add_copy", 0);
         remove_data_index(tempStorage, path: "add_copy", 0);
-        add_score(tempArrayPos, temp, 1);
+        add_score(temp, tempArrayPos, 1);
 
-        if lessThan(tempArrayPos, temp, tempArrayLength, temp) {
+        if lessThan(temp, tempArrayPos, temp, tempArrayLength) {
             goto appender;
         }
     }

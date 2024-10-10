@@ -1,7 +1,7 @@
 use super::IRNode;
 use serde::{Deserialize, Serialize};
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Serialize, Deserialize)]
 pub enum IRArgumentOperation {
     /// Set an argument.
     Set(IRSetArgument),
@@ -13,7 +13,7 @@ pub enum IRArgumentOperation {
     Clear,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Serialize, Deserialize)]
 pub struct IRSetArgument {
     /// The index of the argument.
     pub index: usize,
@@ -22,7 +22,7 @@ pub struct IRSetArgument {
     pub value: Box<IRNode>,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Serialize, Deserialize)]
 pub struct IRGetArgument {
     /// The index of the argument.
     pub index: usize,

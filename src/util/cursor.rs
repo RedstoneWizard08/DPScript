@@ -1,5 +1,5 @@
 use super::{bits::HasBits, HasSpan};
-use crate::{IRParserError, ParserError, Result};
+use crate::{Result, TokenizerError, UnnamedTokenizerError};
 use miette::{NamedSource, SourceOffset, SourceSpan};
 
 #[derive(Debug, Clone)]
@@ -102,7 +102,7 @@ impl<B: Clone + HasSpan, T: HasBits<Bit = B> + Clone> Cursor<T, String> {
 
         match self.inner.get(self.pos - 1).cloned() {
             Some(v) => Ok(v),
-            None => Err(IRParserError {
+            None => Err(UnnamedTokenizerError {
                 src: self.source(),
                 at: self.inner.get(self.pos - 2).clone().unwrap().get_span(),
                 err: "Unexpected end of file!".into(),
@@ -122,7 +122,7 @@ impl<T: HasBits + Clone> Cursor<T, NamedSource<String>> {
 
         match self.inner.get(self.pos - 1).cloned() {
             Some(v) => Ok(v),
-            None => Err(ParserError {
+            None => Err(TokenizerError {
                 src: self.source(),
                 at: span,
                 err: "Unexpected end of file!".into(),

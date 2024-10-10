@@ -39,11 +39,11 @@ init {
     
     const hint = [hint_base, disable, cmd, click];
 
-    if notEqual(enableMessage, config, 0) {
-        set_score(enableMessage, config, 0);
+    if notEqual(config, enableMessage, 0) {
+        set_score(config, enableMessage, 0);
     }
 
-    if notEqual(enableMessage, config, 1) {
+    if notEqual(config, enableMessage, 1) {
         tellraw(ALL_PLAYERS, welcome);
         tellraw(ALL_PLAYERS, hint);
     }

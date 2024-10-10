@@ -35,6 +35,12 @@ impl IRLexer {
     }
 
     pub fn ast(self) -> IRAst {
-        IRAst { nodes: self.nodes }
+        IRAst {
+            nodes: self.nodes,
+            indexed: false,
+            funcs: None,
+            tags: None,
+            vars: None,
+        }
     }
 }

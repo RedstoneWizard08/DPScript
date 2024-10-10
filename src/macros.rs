@@ -5,7 +5,7 @@ macro_rules! check_token {
 
         if let Some((token, span)) = it {
             if token.clone() != $crate::Token::$tkn {
-                return Err($crate::ParserError {
+                return Err($crate::LexerError {
                     src: $cursor.source(),
                     at: span.clone(),
                     err: format!(
@@ -27,7 +27,7 @@ macro_rules! check_token {
         if let Some((token, span)) = it {
             if let $crate::Token::$tkn(_) = token {
             } else {
-                return Err($crate::ParserError {
+                return Err($crate::LexerError {
                     src: $cursor.source(),
                     at: span.clone(),
                     err: format!("Unexpected token: {}", token),
@@ -44,7 +44,7 @@ macro_rules! check_token {
 
         if let Some((token, span)) = it {
             if token.clone() != $crate::Token::$tkn {
-                return Err($crate::ParserError {
+                return Err($crate::LexerError {
                     src: $cursor.source(),
                     at: span.clone(),
                     err: format!(
@@ -62,7 +62,7 @@ macro_rules! check_token {
 
     ($cursor: ident => $tkn: ident == $expected: ident) => {{
         if $tkn.0 != $crate::Token::$expected {
-            return Err($crate::ParserError {
+            return Err($crate::LexerError {
                 src: $cursor.source(),
                 at: $tkn.1.clone(),
                 err: format!(
@@ -81,7 +81,7 @@ macro_rules! check_token {
         if let Some((token, span)) = it {
             if let $crate::Token::$tkn(_) = token {
             } else {
-                return Err($crate::ParserError {
+                return Err($crate::LexerError {
                     src: $cursor.source(),
                     at: span.clone(),
                     err: format!("Unexpected token: {}", token),
@@ -98,7 +98,7 @@ macro_rules! check_token {
 
         if let Some((token, span)) = it.clone() {
             if token != $crate::Token::$tkn {
-                return Err($crate::ParserError {
+                return Err($crate::LexerError {
                     src: $cursor.source(),
                     at: span.clone(),
                     err: format!(
@@ -119,7 +119,7 @@ macro_rules! check_token {
 
         if let Some((token, span)) = it.clone() {
             if token != $crate::Token::$tkn {
-                return Err($crate::ParserError {
+                return Err($crate::LexerError {
                     src: $cursor.source(),
                     at: span.clone(),
                     err: format!(
@@ -138,7 +138,7 @@ macro_rules! check_token {
     (data $cursor: ident => $tkn: ident == $expected: ident) => {{
         if let $crate::Token::$expected(_) = $tkn.0 {
         } else {
-            return Err($crate::ParserError {
+            return Err($crate::LexerError {
                 src: $cursor.source(),
                 at: $tkn.1.clone(),
                 err: format!("Unexpected token: {}", $tkn.0),
@@ -155,7 +155,7 @@ macro_rules! check_ir_token {
 
         if let Some((token, span)) = it {
             if token.clone() != $crate::IRToken::$tkn {
-                return Err($crate::IRParserError {
+                return Err($crate::IRLexerError {
                     src: $cursor.source(),
                     at: span.clone(),
                     err: format!(
@@ -177,7 +177,7 @@ macro_rules! check_ir_token {
         if let Some((token, span)) = it {
             if let $crate::IRToken::$tkn(_) = token {
             } else {
-                return Err($crate::IRParserError {
+                return Err($crate::IRLexerError {
                     src: $cursor.source(),
                     at: span.clone(),
                     err: format!("Unexpected token: {}", token),
@@ -194,7 +194,7 @@ macro_rules! check_ir_token {
 
         if let Some((token, span)) = it {
             if token.clone() != $crate::IRToken::$tkn {
-                return Err($crate::IRParserError {
+                return Err($crate::IRLexerError {
                     src: $cursor.source(),
                     at: span.clone(),
                     err: format!(
@@ -212,7 +212,7 @@ macro_rules! check_ir_token {
 
     ($cursor: ident => $tkn: ident == $expected: ident) => {{
         if $tkn.0 != $crate::IRToken::$expected {
-            return Err($crate::IRParserError {
+            return Err($crate::IRLexerError {
                 src: $cursor.source(),
                 at: $tkn.1.clone(),
                 err: format!(
@@ -231,7 +231,7 @@ macro_rules! check_ir_token {
         if let Some((token, span)) = it {
             if let $crate::IRToken::$tkn(_) = token {
             } else {
-                return Err($crate::IRParserError {
+                return Err($crate::IRLexerError {
                     src: $cursor.source(),
                     at: span.clone(),
                     err: format!("Unexpected token: {}", token),
@@ -248,7 +248,7 @@ macro_rules! check_ir_token {
 
         if let Some((token, span)) = it.clone() {
             if token != $crate::IRToken::$tkn {
-                return Err($crate::IRParserError {
+                return Err($crate::IRLexerError {
                     src: $cursor.source(),
                     at: span.clone(),
                     err: format!(
@@ -269,7 +269,7 @@ macro_rules! check_ir_token {
 
         if let Some((token, span)) = it.clone() {
             if token != $crate::IRToken::$tkn {
-                return Err($crate::IRParserError {
+                return Err($crate::UnnamedLexerError {
                     src: $cursor.source(),
                     at: span.clone(),
                     err: format!(
@@ -288,7 +288,7 @@ macro_rules! check_ir_token {
     (data $cursor: ident => $tkn: ident == $expected: ident) => {{
         if let $crate::IRToken::$expected(_) = $tkn.0 {
         } else {
-            return Err($crate::IRParserError {
+            return Err($crate::IRLexerError {
                 src: $cursor.source(),
                 at: $tkn.1.clone(),
                 err: format!("Unexpected token: {}", $tkn.0),
