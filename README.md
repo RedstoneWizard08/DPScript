@@ -37,7 +37,7 @@ error detection and validation possible. Don't worry anymore about strange issue
 - [x] Lexer
 - [x] AST Validator
 - [x] IR (DPIR)
-- [ ] Codegen
+- [x] Codegen
 - [x] Build System
 
 ### Language Features
