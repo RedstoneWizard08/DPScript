@@ -4,7 +4,7 @@ textmate_uuid = dbaa50d5-d092-4812-8401-2a0cf1f55e99
 
 # ============== Constants ==============
 
-__KEYWORDS \= \b(fn|module|import|const|let|for|if|objective|facade|id|path|return|init|tick|in|pub|compiler|enum)
+__KEYWORDS \= \b(fn|module|import|const|let|for|if|objective|facade|id|path|return|init|tick|in|pub|compiler|enum|sub|goto)
 __IDENTIFIER \= \b([a-z_$][\w$]*)
 __TYPE_IDENT \= \b([A-Z][\w\$]*)
 __PUNCT \= \b([;.,:&-><#]+)

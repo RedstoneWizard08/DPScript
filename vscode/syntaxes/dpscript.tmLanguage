@@ -28,7 +28,7 @@
       <array> 
         <dict>
           <key>match</key>
-          <string>\b(fn|module|import|const|let|for|if|objective|facade|id|path|return|init|tick|in|pub|compiler|enum)</string>
+          <string>\b(fn|module|import|const|let|for|if|objective|facade|id|path|return|init|tick|in|pub|compiler|enum|sub|goto)</string>
           <key>name</key>
           <string>keyword.dpscript</string>
         </dict>

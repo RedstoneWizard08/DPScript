@@ -16,7 +16,7 @@
                     "name": "comment.dpscript_ir"
                 },
                 {
-                    "match": "\\b(func|define|command|argument|call|tag|entry)",
+                    "match": "\\b(func|define|command|argument|call|tag|entry|goto|condition|if|else|join)",
                     "name": "keyword.dpscript_ir"
                 },
                 {

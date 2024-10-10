@@ -12,7 +12,7 @@
         "main": {
             "patterns": [
                 {
-                    "match": "\\b(fn|module|import|const|let|for|if|objective|facade|id|path|return|init|tick|in|pub|compiler|enum)",
+                    "match": "\\b(fn|module|import|const|let|for|if|objective|facade|id|path|return|init|tick|in|pub|compiler|enum|sub|goto)",
                     "name": "keyword.dpscript"
                 },
                 {

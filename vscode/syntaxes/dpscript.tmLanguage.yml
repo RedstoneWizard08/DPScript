@@ -8,7 +8,7 @@ uuid: dbaa50d5-d092-4812-8401-2a0cf1f55e99
 repository:
     main:
         patterns:
-            - match: \b(fn|module|import|const|let|for|if|objective|facade|id|path|return|init|tick|in|pub|compiler|enum)
+            - match: \b(fn|module|import|const|let|for|if|objective|facade|id|path|return|init|tick|in|pub|compiler|enum|sub|goto)
               name: keyword.dpscript
             - match: \b(storeof|keyof)
               name: support.function.dpscript
