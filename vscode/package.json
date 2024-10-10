@@ -4,7 +4,6 @@
     "description": "Language support for DPScript",
     "version": "0.0.1",
     "license": "MIT",
-    "main": "dist/extension.js",
     "repository": {
         "type": "git",
         "url": "https://github.com/RedstoneWizard08/DPScript"
@@ -17,10 +16,6 @@
     },
     "categories": [
         "Programming Languages"
-    ],
-    "enabledApiProposals": [],
-    "activationEvents": [
-        "onLanguage:dps"
     ],
     "contributes": {
         "languages": [
